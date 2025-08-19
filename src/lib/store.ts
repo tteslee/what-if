@@ -3,7 +3,6 @@ import { Scenario, Result, City, Intervention } from './schemas';
 import { sampleCities, sampleInterventions } from '../data/sample-data';
 import { runScenario, runComparison } from './simulate';
 import { storageService } from './storage-service';
-import { aiService } from './ai-service';
 
 interface WhatIfStore {
   // Data
@@ -198,6 +197,7 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   generateCustomCity: async (description: string) => {
     try {
+      const { aiService } = await import('./ai-service');
       const city = await aiService.generateCityProfile(description);
       const state = get();
       state.addCustomCity(city);
@@ -210,6 +210,7 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   generateCustomIntervention: async (description: string) => {
     try {
+      const { aiService } = await import('./ai-service');
       const intervention = await aiService.generateInterventionProfile(description);
       const state = get();
       state.addCustomIntervention(intervention);

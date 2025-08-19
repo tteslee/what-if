@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWhatIfStore } from '../src/lib/store';
+import { useWhatIfStore } from '@/lib/store';
 
 export default function HomePage() {
   const router = useRouter();
@@ -39,14 +39,14 @@ export default function HomePage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-xl font-medium text-slate-500">What if we</span>
+                    <span className="text-2xl font-medium text-slate-500">What if we</span>
                   </div>
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="introduced congestion pricing?"
-                    className="block w-full pl-36 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     autoFocus
                   />
                 </div>

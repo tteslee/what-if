@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { sampleCities, sampleInterventions } from '../../../src/data/sample-data';
+import AIChatInterface from '../../../src/components/AIChatInterface';
 
 const STEPS = [
   { id: 0, title: 'Your Question', description: 'What are you curious about?' },
@@ -28,9 +28,20 @@ export default function NewScenarioPage() {
     removeAssumption,
     createScenario,
     runScenario,
+    cities,
+    interventions,
+    generateCustomCity,
+    generateCustomIntervention,
+    loadSampleData,
   } = useWhatIfStore();
 
+  useEffect(() => {
+    loadSampleData();
+  }, [loadSampleData]);
+
   const [assumptionInput, setAssumptionInput] = useState('');
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [aiChatContext, setAiChatContext] = useState<'city' | 'intervention'>('city');
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -52,6 +63,31 @@ export default function NewScenarioPage() {
         router.push(`/scenarios/${scenario.id}`);
       }
     }
+  };
+
+  const handleAIChatGenerate = async (description: string) => {
+    try {
+      if (aiChatContext === 'city') {
+        const city = await generateCustomCity(description);
+        if (city) {
+          setSelectedCity(city.id);
+          setShowAIChat(false);
+        }
+      } else {
+        const intervention = await generateCustomIntervention(description);
+        if (intervention) {
+          setSelectedIntervention(intervention.id);
+          setShowAIChat(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error generating profile:', error);
+    }
+  };
+
+  const handleStartAIChat = (context: 'city' | 'intervention') => {
+    setAiChatContext(context);
+    setShowAIChat(true);
   };
 
   const canProceed = () => {
@@ -102,8 +138,25 @@ export default function NewScenarioPage() {
               <label className="block text-lg font-medium text-slate-700 mb-3">
                 Select a city to test your intervention
               </label>
+              
+              {/* AI Chat Option */}
+              <div className="mb-6">
+                <button
+                  onClick={() => handleStartAIChat('city')}
+                  className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span className="text-blue-600 font-medium">Create Custom City with AI</span>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-1">Describe your urban context and let AI generate a city profile</p>
+                </button>
+              </div>
+
               <div className="grid gap-4">
-                {sampleCities.map((city) => (
+                {cities.map((city) => (
                   <button
                     key={city.id}
                     onClick={() => setSelectedCity(city.id)}
@@ -120,6 +173,13 @@ export default function NewScenarioPage() {
                       <div>Health Index: {city.baselineHealthIndex}</div>
                       <div>Trust Index: {city.trustIndex}</div>
                     </div>
+                    {city.id.startsWith('custom-') && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          AI Generated
+                        </span>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -134,8 +194,25 @@ export default function NewScenarioPage() {
               <label className="block text-lg font-medium text-slate-700 mb-3">
                 Choose an intervention type
               </label>
+              
+              {/* AI Chat Option */}
+              <div className="mb-6">
+                <button
+                  onClick={() => handleStartAIChat('intervention')}
+                  className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span className="text-blue-600 font-medium">Create Custom Intervention with AI</span>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-1">Describe your intervention idea and let AI generate a detailed profile</p>
+                </button>
+              </div>
+
               <div className="grid gap-4">
-                {sampleInterventions.map((intervention) => (
+                {interventions.map((intervention) => (
                   <button
                     key={intervention.id}
                     onClick={() => setSelectedIntervention(intervention.id)}
@@ -155,6 +232,13 @@ export default function NewScenarioPage() {
                         {intervention.rollout.scope}
                       </span>
                     </div>
+                    {intervention.id.startsWith('custom-') && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          AI Generated
+                        </span>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -163,8 +247,8 @@ export default function NewScenarioPage() {
         );
 
       case 3:
-        const selectedCity = sampleCities.find(c => c.id === selectedCityId);
-        const selectedIntervention = sampleInterventions.find(i => i.id === selectedInterventionId);
+        const selectedCity = cities.find(c => c.id === selectedCityId);
+        const selectedIntervention = interventions.find(i => i.id === selectedInterventionId);
         
         return (
           <div className="space-y-6">
@@ -321,6 +405,19 @@ export default function NewScenarioPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Chat Modal */}
+      {showAIChat && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <AIChatInterface
+              context={aiChatContext}
+              onGenerate={handleAIChatGenerate}
+              onCancel={() => setShowAIChat(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

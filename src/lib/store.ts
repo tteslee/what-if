@@ -197,8 +197,20 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   generateCustomCity: async (description: string) => {
     try {
-      const { aiService } = await import('./ai-service');
-      const city = await aiService.generateCityProfile(description);
+      const response = await fetch('/api/ai/generate-city', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate city');
+      }
+
+      const city = await response.json();
       const state = get();
       state.addCustomCity(city);
       return city;
@@ -210,8 +222,20 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   generateCustomIntervention: async (description: string) => {
     try {
-      const { aiService } = await import('./ai-service');
-      const intervention = await aiService.generateInterventionProfile(description);
+      const response = await fetch('/api/ai/generate-intervention', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate intervention');
+      }
+
+      const intervention = await response.json();
       const state = get();
       state.addCustomIntervention(intervention);
       return intervention;

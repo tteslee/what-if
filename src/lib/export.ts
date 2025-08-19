@@ -1,4 +1,4 @@
-import { Scenario, Result, City } from './schemas';
+import { Scenario, Result } from './schemas';
 import { sampleCities } from '../data/sample-data';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';

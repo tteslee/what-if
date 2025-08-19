@@ -6,7 +6,7 @@ import { useWhatIfStore } from '../src/lib/store';
 
 export default function HomePage() {
   const router = useRouter();
-  const { loadSampleData, setWhatIfQuestion, whatIfQuestion } = useWhatIfStore();
+  const { loadSampleData, setWhatIfQuestion } = useWhatIfStore();
   const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">Ask Questions</h3>
-            <p className="text-slate-600">Start with "What if we..." and explore urban interventions</p>
+            <p className="text-slate-600">Start with &ldquo;What if we...&rdquo; and explore urban interventions</p>
           </div>
 
           <div className="text-center">

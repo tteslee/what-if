@@ -1,4 +1,4 @@
-import { City, Intervention } from '@/lib/schemas';
+import { City, Intervention } from '../lib/schemas';
 
 export const sampleCities: City[] = [
   {

@@ -8,9 +8,35 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function CompareScenariosPage() {
   const router = useRouter();
-  const { scenarios, results, loadSampleData, runComparison } = useWhatIfStore();
+  const { scenarios, loadSampleData, runComparison } = useWhatIfStore();
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
-  const [comparisonResults, setComparisonResults] = useState<any[]>([]);
+  const [comparisonResults, setComparisonResults] = useState<Array<{
+    scenarioId: string;
+    kpis: {
+      emissionsDeltaPct: number;
+      congestionDeltaPct: number;
+      avgCommuteDeltaMin: number;
+      modalShift: {
+        car: number;
+        transit: number;
+        walk: number;
+        cycle: number;
+      };
+      fiscalImpactMGBP: number;
+      healthIndexDelta: number;
+      trustIndexDelta: number;
+      equityScore: number;
+    };
+    narrativeFindings: string[];
+    risks: string[];
+    confidence: number;
+    stakeholderSentiment: {
+      citizens: number;
+      businesses: number;
+      ngo: number;
+      council: number;
+    };
+  }>>([]);
 
   useEffect(() => {
     loadSampleData();
@@ -42,13 +68,7 @@ export default function CompareScenariosPage() {
     return sampleCities.find(c => c.id === cityId)?.name || 'Unknown';
   };
 
-  const getScenarioTitle = (scenarioId: string) => {
-    return scenarios.find(s => s.id === scenarioId)?.title || 'Unknown';
-  };
 
-  const getInterventionName = (scenarioId: string) => {
-    return scenarios.find(s => s.id === scenarioId)?.intervention.name || 'Unknown';
-  };
 
   // Chart data for comparison
   const getComparisonChartData = () => {

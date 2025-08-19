@@ -1,4 +1,4 @@
-import { City, Intervention, Scenario, Result } from './schemas';
+import { City, Scenario, Result } from './schemas';
 
 // Simple coefficient-based simulation rules
 const SIMULATION_RULES = {
@@ -164,18 +164,27 @@ function addVariation(base: number, variance: number, seed: number): number {
 }
 
 // Helper function to generate narratives with dynamic values
-function generateNarratives(domain: string, kpis: any): string[] {
+function generateNarratives(domain: string, kpis: {
+  congestionDeltaPct: number;
+  emissionsDeltaPct: number;
+  avgCommuteDeltaMin: number;
+  fiscalImpactMGBP: number;
+  energyPriceReduction?: number;
+  affordabilityImprovement?: number;
+  healthIndexDelta: number;
+  trustIndexDelta: number;
+}): string[] {
   const templates = NARRATIVE_TEMPLATES[domain as keyof typeof NARRATIVE_TEMPLATES] || [];
   return templates.map(template => {
     return template
-      .replace('{congestion}', Math.abs(Math.round(kpis.congestionDeltaPct * 100)))
-      .replace('{emissions}', Math.abs(Math.round(kpis.emissionsDeltaPct * 100)))
-      .replace('{commute}', Math.abs(Math.round(kpis.avgCommuteDeltaMin)))
-      .replace('{fiscal}', Math.abs(Math.round(kpis.fiscalImpactMGBP)))
-      .replace('{energy}', Math.abs(Math.round(kpis.energyPriceReduction * 100)))
-      .replace('{affordability}', Math.abs(Math.round(kpis.affordabilityImprovement * 100)))
-      .replace('{health}', Math.abs(Math.round(kpis.healthIndexDelta)))
-      .replace('{trust}', Math.abs(Math.round(kpis.trustIndexDelta)));
+      .replace('{congestion}', Math.abs(Math.round(kpis.congestionDeltaPct * 100)).toString())
+      .replace('{emissions}', Math.abs(Math.round(kpis.emissionsDeltaPct * 100)).toString())
+      .replace('{commute}', Math.abs(Math.round(kpis.avgCommuteDeltaMin)).toString())
+      .replace('{fiscal}', Math.abs(Math.round(kpis.fiscalImpactMGBP)).toString())
+      .replace('{energy}', Math.abs(Math.round((kpis.energyPriceReduction || 0) * 100)).toString())
+      .replace('{affordability}', Math.abs(Math.round((kpis.affordabilityImprovement || 0) * 100)).toString())
+      .replace('{health}', Math.abs(Math.round(kpis.healthIndexDelta)).toString())
+      .replace('{trust}', Math.abs(Math.round(kpis.trustIndexDelta)).toString());
   });
 }
 

@@ -3,12 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { sampleCities } from '../../../src/data/sample-data';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 export default function CompareScenariosPage() {
   const router = useRouter();
-  const { scenarios, loadSampleData, runComparison } = useWhatIfStore();
+  const { scenarios, cities, loadSampleData, runComparison } = useWhatIfStore();
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
   const [comparisonResults, setComparisonResults] = useState<Array<{
     scenarioId: string;
@@ -65,7 +64,7 @@ export default function CompareScenariosPage() {
   const formatCurrency = (value: number) => `£${Math.abs(Math.round(value * 100) / 100)}M`;
 
   const getCityName = (cityId: string) => {
-    return sampleCities.find(c => c.id === cityId)?.name || 'Unknown';
+    return cities.find((c: { id: string; name: string }) => c.id === cityId)?.name || 'Unknown';
   };
 
 

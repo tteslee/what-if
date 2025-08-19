@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Scenario, Result, City, Intervention } from './schemas';
 import { sampleCities, sampleInterventions } from '../data/sample-data';
 import { runScenario, runComparison } from './simulate';
+import { storageService } from './storage-service';
+import { aiService } from './ai-service';
 
 interface WhatIfStore {
   // Data
@@ -33,6 +35,14 @@ interface WhatIfStore {
   
   // Data Loading
   loadSampleData: () => void;
+  
+  // Custom Profile Management
+  addCustomCity: (city: City) => void;
+  addCustomIntervention: (intervention: Intervention) => void;
+  deleteCustomCity: (cityId: string) => void;
+  deleteCustomIntervention: (interventionId: string) => void;
+  generateCustomCity: (description: string) => Promise<City | null>;
+  generateCustomIntervention: (description: string) => Promise<Intervention | null>;
   
   // Reset
   reset: () => void;
@@ -148,10 +158,66 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   // Data Loading
   loadSampleData: () => {
+    const customCities = storageService.getCustomCities();
+    const customInterventions = storageService.getCustomInterventions();
+    
     set({
-      cities: sampleCities,
-      interventions: sampleInterventions,
+      cities: [...sampleCities, ...customCities],
+      interventions: [...sampleInterventions, ...customInterventions],
     });
+  },
+  
+  // Custom Profile Management
+  addCustomCity: (city: City) => {
+    storageService.saveCustomCity(city);
+    set((state) => ({
+      cities: [...state.cities, city]
+    }));
+  },
+  
+  addCustomIntervention: (intervention: Intervention) => {
+    storageService.saveCustomIntervention(intervention);
+    set((state) => ({
+      interventions: [...state.interventions, intervention]
+    }));
+  },
+  
+  deleteCustomCity: (cityId: string) => {
+    storageService.deleteCustomCity(cityId);
+    set((state) => ({
+      cities: state.cities.filter(c => c.id !== cityId)
+    }));
+  },
+  
+  deleteCustomIntervention: (interventionId: string) => {
+    storageService.deleteCustomIntervention(interventionId);
+    set((state) => ({
+      interventions: state.interventions.filter(i => i.id !== interventionId)
+    }));
+  },
+  
+  generateCustomCity: async (description: string) => {
+    try {
+      const city = await aiService.generateCityProfile(description);
+      const state = get();
+      state.addCustomCity(city);
+      return city;
+    } catch (error) {
+      console.error('Error generating custom city:', error);
+      return null;
+    }
+  },
+  
+  generateCustomIntervention: async (description: string) => {
+    try {
+      const intervention = await aiService.generateInterventionProfile(description);
+      const state = get();
+      state.addCustomIntervention(intervention);
+      return intervention;
+    } catch (error) {
+      console.error('Error generating custom intervention:', error);
+      return null;
+    }
   },
   
   // Reset

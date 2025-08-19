@@ -3,20 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { sampleCities } from '../../../src/data/sample-data';
 import { exportToPDF } from '../../../src/lib/export';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 export default function ScenarioResultsPage() {
   const params = useParams();
   const router = useRouter();
-  const { scenarios, results, loadSampleData } = useWhatIfStore();
+  const { scenarios, results, cities, loadSampleData } = useWhatIfStore();
   const [showAssumptions, setShowAssumptions] = useState(false);
   
   const scenarioId = params.id as string;
   const scenario = scenarios.find(s => s.id === scenarioId);
   const result = results[scenarioId];
-  const city = scenario ? sampleCities.find(c => c.id === scenario.cityId) : null;
+  const city = scenario ? cities.find(c => c.id === scenario.cityId) : null;
 
   useEffect(() => {
     loadSampleData();

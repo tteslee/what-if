@@ -35,9 +35,21 @@ export default function NewScenarioPage() {
     loadSampleData,
   } = useWhatIfStore();
 
+  console.log('NewScenarioPage render:', { currentStep, citiesLength: cities?.length, interventionsLength: interventions?.length, cities, interventions });
+
   useEffect(() => {
-    loadSampleData();
-  }, [loadSampleData]);
+    // Only load sample data when user reaches step 1 (city selection)
+    // No need to load data on the landing page
+  }, []);
+
+  // Ensure data is loaded if we're already on a step that needs it
+  useEffect(() => {
+    console.log('Data loading effect triggered:', { currentStep, citiesLength: cities?.length, interventionsLength: interventions?.length });
+    if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
+      console.log('Loading sample data due to missing data for current step');
+      loadSampleData();
+    }
+  }, [currentStep, cities?.length, interventions?.length, loadSampleData]);
 
   const [assumptionInput, setAssumptionInput] = useState('');
   const [showAIChat, setShowAIChat] = useState(false);
@@ -45,7 +57,13 @@ export default function NewScenarioPage() {
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      
+      // Load sample data when user reaches city selection step (step 1) or intervention selection step (step 2)
+      if (nextStep === 1 || nextStep === 2) {
+        loadSampleData();
+      }
     }
   };
 
@@ -132,6 +150,19 @@ export default function NewScenarioPage() {
         );
 
       case 1:
+        // Ensure data is loaded before rendering
+        if (!cities || cities.length === 0) {
+          loadSampleData();
+          return (
+            <div className="space-y-6">
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+                <p className="text-slate-600">Loading cities...</p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div className="space-y-6">
             <div>
@@ -156,38 +187,60 @@ export default function NewScenarioPage() {
               </div>
 
               <div className="grid gap-4">
-                {cities.map((city) => (
-                  <button
-                    key={city.id}
-                    onClick={() => setSelectedCity(city.id)}
-                    className={`p-6 text-left border-2 rounded-lg transition-all ${
-                      selectedCityId === city.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name}</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                      <div>Population: {city.population.toLocaleString()}</div>
-                      <div>Households: {city.households.toLocaleString()}</div>
-                      <div>Health Index: {city.baselineHealthIndex}</div>
-                      <div>Trust Index: {city.trustIndex}</div>
-                    </div>
-                    {city.id.startsWith('custom-') && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          AI Generated
-                        </span>
+                {cities && cities.length > 0 ? (
+                  cities.map((city) => (
+                    <button
+                      key={city.id}
+                      onClick={() => setSelectedCity(city.id)}
+                      className={`p-6 text-left border-2 rounded-lg transition-all ${
+                        selectedCityId === city.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name || 'Unnamed City'}</h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
+                        <div>Population: {city.demographics?.population?.toLocaleString() || 'N/A'}</div>
+                        <div>Households: {city.demographics?.households?.toLocaleString() || 'N/A'}</div>
+                        <div>Health Index: {city.health?.baselineHealthIndex_0_100 || 'N/A'}</div>
+                        <div>Trust Index: {city.socialGovernance?.trustIndex_0_100 || 'N/A'}</div>
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {city.id && city.id.startsWith('custom-') && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            AI Generated
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+                    <p className="text-slate-600">Loading cities...</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         );
 
       case 2:
+        console.log('Rendering step 2 (intervention selection):', { interventionsLength: interventions?.length, interventions });
+        // Ensure data is loaded before rendering
+        if (!interventions || interventions.length === 0) {
+          console.log('No interventions found, loading sample data');
+          loadSampleData();
+          return (
+            <div className="space-y-6">
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+                <p className="text-slate-600">Loading interventions...</p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div className="space-y-6">
             <div>
@@ -212,35 +265,56 @@ export default function NewScenarioPage() {
               </div>
 
               <div className="grid gap-4">
-                {interventions.map((intervention) => (
-                  <button
-                    key={intervention.id}
-                    onClick={() => setSelectedIntervention(intervention.id)}
-                    className={`p-6 text-left border-2 rounded-lg transition-all ${
-                      selectedInterventionId === intervention.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{intervention.name}</h3>
-                    <p className="text-slate-600 mb-3">{intervention.description}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                        {intervention.domain}
-                      </span>
-                      <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                        {intervention.rollout.scope}
-                      </span>
-                    </div>
-                    {intervention.id.startsWith('custom-') && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          AI Generated
-                        </span>
+                {interventions && interventions.length > 0 ? (
+                  interventions.map((intervention) => (
+                    <button
+                      key={intervention.id}
+                      onClick={() => setSelectedIntervention(intervention.id)}
+                      className={`p-6 text-left border-2 rounded-lg transition-all ${
+                        selectedInterventionId === intervention.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{intervention.title || 'Untitled Intervention'}</h3>
+                      <p className="text-slate-600 mb-3">{intervention.description || 'No description available'}</p>
+                      <div className="flex items-center gap-2">
+                        {intervention.categories && intervention.categories.length > 0 ? (
+                          intervention.categories.map((category, index) => (
+                            <span key={index} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                              {category}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                            No categories
+                          </span>
+                        )}
+                        {intervention.implementation && intervention.implementation.scope ? (
+                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                            {intervention.implementation.scope}
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                            No scope
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </button>
-                ))}
+                        {intervention.id && intervention.id.startsWith('custom-') && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              AI Generated
+                            </span>
+                          </div>
+                        )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+                    <p className="text-slate-600">Loading interventions...</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -267,7 +341,7 @@ export default function NewScenarioPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900">Intervention:</h3>
-                  <p className="text-slate-700">{selectedIntervention?.name}</p>
+                  <p className="text-slate-700">{selectedIntervention?.title}</p>
                 </div>
               </div>
             </div>

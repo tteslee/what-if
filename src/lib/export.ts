@@ -1,12 +1,15 @@
-import { Scenario, Result } from './schemas';
+import { Scenario, Result, CityProfile, Intervention } from './schemas';
 import { sampleCities } from '../data/sample-data';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export function exportToPDF(scenario: Scenario, result: Result): void {
-  const city = sampleCities.find(c => c.id === scenario.cityId);
+export function exportToPDF(scenario: Scenario, result: Result, city: CityProfile, intervention: Intervention): void {
   if (!city) {
     throw new Error(`City not found: ${scenario.cityId}`);
+  }
+
+  if (!intervention) {
+    throw new Error(`Intervention not found for scenario: ${scenario.id}`);
   }
 
   const formatPercentage = (value: number) => `${Math.round(Math.abs(value * 100))}%`;
@@ -31,22 +34,22 @@ export function exportToPDF(scenario: Scenario, result: Result): void {
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">City Context</h3>
-      <p style="margin: 5px 0;"><strong>${city.name}</strong> - Population: ${city.population.toLocaleString()}, Households: ${city.households.toLocaleString()}</p>
+      <p style="margin: 5px 0;"><strong>${city.name}</strong> - Population: ${city.demographics.population.toLocaleString()}, Households: ${city.demographics.households?.toLocaleString() || 'N/A'}</p>
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Intervention</h3>
-      <p style="margin: 5px 0;"><strong>${scenario.intervention.name}</strong> (${scenario.intervention.domain})</p>
-      <p style="margin: 5px 0; color: #6b7280;">${scenario.intervention.description || ''}</p>
-      <p style="margin: 5px 0;"><strong>Rollout:</strong> ${scenario.intervention.rollout.scope} over ${scenario.intervention.rollout.durationMonths} months</p>
-      <p style="margin: 5px 0;"><strong>Governance:</strong> ${scenario.intervention.governanceModel || 'Not specified'}</p>
+      <p style="margin: 5px 0;"><strong>${intervention.title}</strong> (${intervention.categories.join(', ')})</p>
+      <p style="margin: 5px 0; color: #6b7280;">${intervention.description || ''}</p>
+      <p style="margin: 5px 0;"><strong>Scope:</strong> ${intervention.implementation.scope} over ${intervention.implementation.durationMonths} months</p>
+      <p style="margin: 5px 0;"><strong>Funding Model:</strong> ${intervention.implementation.fundingModel || 'Not specified'}</p>
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Key Assumptions</h3>
-      ${scenario.assumptions.length > 0 
-        ? scenario.assumptions.map(assumption => `<p style="margin: 5px 0;">• ${assumption}</p>`).join('')
-        : '<p style="margin: 5px 0; color: #6b7280; font-style: italic;">No specific assumptions were added to this scenario.</p>'
+      ${intervention.assumptions && intervention.assumptions.length > 0 
+        ? intervention.assumptions.map((assumption: string) => `<p style="margin: 5px 0;">• ${assumption}</p>`).join('')
+        : '<p style="margin: 5px 0; color: #6b7280; font-style: italic;">No specific assumptions were added to this intervention.</p>'
       }
     </div>
 
@@ -55,56 +58,65 @@ export function exportToPDF(scenario: Scenario, result: Result): void {
       
       <div style="margin-bottom: 20px;">
         <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Environmental Impact</h4>
-        <p style="margin: 5px 0;">• <strong>Emissions Change:</strong> ${formatPercentage(result.kpis.emissionsDeltaPct)} ${result.kpis.emissionsDeltaPct > 0 ? 'increase' : 'decrease'}</p>
-        <p style="margin: 5px 0;">• <strong>Congestion Change:</strong> ${formatPercentage(result.kpis.congestionDeltaPct)} ${result.kpis.congestionDeltaPct > 0 ? 'increase' : 'decrease'}</p>
+        <p style="margin: 5px 0;">• <strong>Emissions Change:</strong> ${formatPercentage(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0)} ${(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0) > 0 ? 'increase' : 'decrease'}</p>
+        <p style="margin: 5px 0;">• <strong>Congestion Change:</strong> ${formatPercentage(result.kpis.CongestionIndex?.deltaPct || 0)} ${(result.kpis.CongestionIndex?.deltaPct || 0) > 0 ? 'increase' : 'decrease'}</p>
       </div>
 
       <div style="margin-bottom: 20px;">
         <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Mobility & Transport</h4>
-        <p style="margin: 5px 0;">• <strong>Commute Time Change:</strong> ${formatNumber(result.kpis.avgCommuteDeltaMin)} minutes ${result.kpis.avgCommuteDeltaMin > 0 ? 'increase' : 'decrease'}</p>
+        <p style="margin: 5px 0;">• <strong>Commute Time Change:</strong> ${formatNumber(result.kpis.AvgCommuteMin?.delta || 0)} minutes ${(result.kpis.AvgCommuteMin?.delta || 0) > 0 ? 'increase' : 'decrease'}</p>
         <p style="margin: 5px 0;">• <strong>Modal Shift:</strong></p>
         <div style="margin-left: 20px;">
-          <p style="margin: 3px 0;">- Car: ${formatPercentage(result.kpis.modalShift.car)}</p>
-          <p style="margin: 3px 0;">- Transit: ${formatPercentage(result.kpis.modalShift.transit)}</p>
-          <p style="margin: 3px 0;">- Walk: ${formatPercentage(result.kpis.modalShift.walk)}</p>
-          <p style="margin: 3px 0;">- Cycle: ${formatPercentage(result.kpis.modalShift.cycle)}</p>
+          <p style="margin: 3px 0;">- Car: ${formatPercentage(result.kpis.ModalShareCarPct?.deltaPct || 0)}</p>
+          <p style="margin: 3px 0;">- Transit: ${formatPercentage(result.kpis.ModalShareTransitPct?.deltaPct || 0)}</p>
+          <p style="margin: 3px 0;">- Walk: ${formatPercentage(result.kpis.ModalShareWalkPct?.deltaPct || 0)}</p>
+          <p style="margin: 3px 0;">- Cycle: ${formatPercentage(result.kpis.ModalShareCyclePct?.deltaPct || 0)}</p>
         </div>
       </div>
 
       <div style="margin-bottom: 20px;">
         <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Economic & Social</h4>
-        <p style="margin: 5px 0;">• <strong>Fiscal Impact:</strong> ${formatCurrency(result.kpis.fiscalImpactMGBP)} annually</p>
-        <p style="margin: 5px 0;">• <strong>Health Index Change:</strong> ${formatNumber(result.kpis.healthIndexDelta)} points ${result.kpis.healthIndexDelta > 0 ? 'improvement' : 'decline'}</p>
-        <p style="margin: 5px 0;">• <strong>Trust Index Change:</strong> ${formatNumber(result.kpis.trustIndexDelta)} points ${result.kpis.trustIndexDelta > 0 ? 'improvement' : 'decline'}</p>
-        <p style="margin: 5px 0;">• <strong>Equity Score:</strong> ${formatPercentage(result.kpis.equityScore)} (weights impacts for vulnerable groups)</p>
+        <p style="margin: 5px 0;">• <strong>Fiscal Impact:</strong> ${formatCurrency(result.fiscalImpactM || 0)} annually</p>
+        <p style="margin: 5px 0;">• <strong>Health Index Change:</strong> ${formatPercentage(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0)} points ${(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0) > 0 ? 'improvement' : 'decline'}</p>
+        <p style="margin: 5px 0;">• <strong>Trust Index Change:</strong> ${formatPercentage(result.kpis.TrustIndex_0_100?.deltaPct || 0)} points ${(result.kpis.TrustIndex_0_100?.deltaPct || 0) > 0 ? 'improvement' : 'decline'}</p>
+        <p style="margin: 5px 0;">• <strong>Equity Score:</strong> ${result.equityScore_0_100 ? `${Math.round(result.equityScore_0_100)}%` : 'N/A'} (weights impacts for vulnerable groups)</p>
       </div>
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Three Key Insights</h3>
-      ${result.narrativeFindings.slice(0, 3).map((finding, index) => 
-        `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${finding}</p>`
-      ).join('')}
+      ${result.qualitativeFindings && Array.isArray(result.qualitativeFindings) && result.qualitativeFindings.length > 0
+        ? result.qualitativeFindings.slice(0, 3).map((finding: string, index: number) => 
+            `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${finding}</p>`
+          ).join('')
+        : '<p style="margin: 8px 0; color: #6b7280; font-style: italic;">No qualitative findings available for this scenario.</p>'
+      }
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Three Key Risks</h3>
-      ${result.risks.slice(0, 3).map((risk, index) => 
-        `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${risk}</p>`
-      ).join('')}
+      ${result.risksMaterialised && Array.isArray(result.risksMaterialised) && result.risksMaterialised.length > 0
+        ? result.risksMaterialised.slice(0, 3).map((risk: string, index: number) => 
+            `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${risk}</p>`
+          ).join('')
+        : '<p style="margin: 8px 0; color: #6b7280; font-style: italic;">No risks identified for this scenario.</p>'
+      }
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Stakeholder Sentiment</h3>
-      <p style="margin: 5px 0;">• <strong>Citizens:</strong> ${formatSentiment(result.stakeholderSentiment.citizens)}</p>
-      <p style="margin: 5px 0;">• <strong>Businesses:</strong> ${formatSentiment(result.stakeholderSentiment.businesses)}</p>
-      <p style="margin: 5px 0;">• <strong>NGOs:</strong> ${formatSentiment(result.stakeholderSentiment.ngo)}</p>
-      <p style="margin: 5px 0;">• <strong>Local Council:</strong> ${formatSentiment(result.stakeholderSentiment.council)}</p>
+      ${result.stakeholderSentiment
+        ? `<p style="margin: 5px 0;">• <strong>Citizens:</strong> ${formatSentiment(result.stakeholderSentiment.citizens)}</p>
+           <p style="margin: 5px 0;">• <strong>Businesses:</strong> ${formatSentiment(result.stakeholderSentiment.businesses)}</p>
+           <p style="margin: 5px 0;">• <strong>NGOs:</strong> ${formatSentiment(result.stakeholderSentiment.ngo)}</p>
+           <p style="margin: 5px 0;">• <strong>Local Council:</strong> ${formatSentiment(result.stakeholderSentiment.council)}</p>`
+        : '<p style="margin: 5px 0; color: #6b7280; font-style: italic;">Stakeholder sentiment data not available for this scenario.</p>'
+      }
     </div>
 
     <div style="margin-bottom: 30px;">
       <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Confidence Level</h3>
-      <p style="margin: 5px 0;"><strong>${Math.round(result.confidence * 100)}%</strong> - Based on data quality and intervention complexity</p>
+      <p style="margin: 5px 0;"><strong>${result.confidence_0_1 ? Math.round(result.confidence_0_1 * 100) : 'N/A'}%</strong> - Based on data quality and intervention complexity</p>
     </div>
 
     <div style="margin-top: 40px; padding: 20px; background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;">

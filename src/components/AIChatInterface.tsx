@@ -26,7 +26,64 @@ export default function AIChatInterface({ context, onGenerate, onCancel }: AICha
     setMessages([
       {
         role: 'assistant',
-        content: `Hello! I'm here to help you create a ${contextTitle.toLowerCase()}. ${contextDescription}`
+        content: context === 'city' 
+          ? `Hello! I'm here to help you create a city profile for urban intervention simulation.
+
+This stage is crucial because it sets the baseline conditions that will determine how different interventions perform. I need to gather specific data about your city's current state to enable realistic simulation.
+
+## WHAT I NEED TO KNOW
+
+### 🏙️ **City Basics**
+- **Population size** and **city type** (dense urban, suburban, industrial, etc.)
+- **Geographic context** (climate, topography, regional role)
+
+### 🚗 **Mobility & Transport** (Critical for most interventions)
+- How do people get around? What are the biggest transport challenges?
+- Traffic congestion levels, public transport coverage, walking/cycling infrastructure
+
+### 🌿 **Environment & Health**
+- Air quality, emissions, green space coverage
+- Health baseline, respiratory issues, mental health indicators
+
+### 🏠 **Housing & Economy**
+- Housing affordability, vacancy rates, income levels
+- Economic activity, business formation, fiscal health
+
+### 🏛️ **Implementation Context**
+- Political climate, institutional capacity
+- Community engagement, funding availability
+
+## LET'S START
+Tell me about your city - what makes it unique? What are the biggest urban challenges you're facing?
+
+*Tip: Be specific about numbers when you can (e.g., "about 200,000 people" rather than "medium-sized city")*`
+          : `Hello! I'm here to help you design an intervention for urban simulation.
+
+This stage is crucial because I need to understand exactly how your intervention will work and what outcomes to expect. The goal is to create something that can be realistically simulated with measurable impacts.
+
+## WHAT I NEED TO KNOW
+
+### 🎯 **The Problem**
+- What specific urban challenge are you trying to solve?
+- Where is this happening? (single street, district, citywide?)
+
+### ⚙️ **The Solution**
+- How exactly will your intervention work? What's the core mechanism?
+- What specific changes do you expect to see?
+
+### 📊 **Expected Outcomes**
+- Which urban indicators will improve? (air quality, congestion, health, etc.)
+- How much change do you expect? (be realistic, 5-20% is typical)
+- What evidence supports your expectations?
+
+### 🚀 **Implementation**
+- Who needs to be involved? (departments, community groups, private sector?)
+- Timeline, resources needed, policy tools to use
+
+## LET'S START
+What urban challenge are you trying to solve? How do you think your intervention would work?
+
+*Tip: Think about the causal chain - how does your solution lead to specific improvements?*`
       }
     ]);
   }, [context, contextTitle, contextDescription]);
@@ -51,13 +108,20 @@ export default function AIChatInterface({ context, onGenerate, onCancel }: AICha
     setInputValue('');
     setIsLoading(true);
 
+    // Add user message to AI service conversation history
+    aiService.addMessage(userMessage);
+
     try {
       const response = await aiService.chat(userMessage.content, context);
       const assistantMessage: AIChatMessage = {
         role: 'assistant',
         content: response
       };
+      
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Add assistant message to AI service conversation history
+      aiService.addMessage(assistantMessage);
     } catch (error) {
       const errorMessage: AIChatMessage = {
         role: 'assistant',
@@ -80,12 +144,20 @@ export default function AIChatInterface({ context, onGenerate, onCancel }: AICha
         .map(msg => msg.content)
         .join('. ');
       
+      // If no user messages, generate a generic profile
       if (!userMessages.trim()) {
-        const errorMessage: AIChatMessage = {
+        const genericDescription = context === 'city' 
+          ? "A generic mid-sized metropolitan city with balanced urban-suburban development, moderate density, and diverse economic activities"
+          : "A generic urban innovation intervention focused on improving community well-being and sustainability";
+        
+        // Add a message explaining what we're doing
+        const infoMessage: AIChatMessage = {
           role: 'assistant',
-          content: 'Please provide some description before generating a profile.'
+          content: `Since you haven't provided specific details yet, I'll generate a ${context === 'city' ? 'generic city profile' : 'generic intervention profile'} based on current urban development patterns. You can always customize it later!`
         };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => [...prev, infoMessage]);
+        
+        onGenerate(genericDescription);
         return;
       }
       
@@ -182,10 +254,10 @@ export default function AIChatInterface({ context, onGenerate, onCancel }: AICha
         <div className="flex justify-between items-center">
           <button
             onClick={handleGenerateProfile}
-            disabled={isGenerating || messages.filter(m => m.role === 'user').length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+            disabled={isGenerating}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium"
           >
-            {isGenerating ? 'Generating...' : 'Generate Profile'}
+            {isGenerating ? 'Generating...' : context === 'city' ? 'Generate City Profile' : 'Generate Intervention Profile'}
           </button>
           
           <button
@@ -194,7 +266,64 @@ export default function AIChatInterface({ context, onGenerate, onCancel }: AICha
               setMessages([
                 {
                   role: 'assistant',
-                  content: `Hello! I'm here to help you create a ${contextTitle.toLowerCase()}. ${contextDescription}`
+                  content: context === 'city' 
+                    ? `Hello! I'm here to help you create a city profile for urban intervention simulation.
+
+This stage is crucial because it sets the baseline conditions that will determine how different interventions perform. I need to gather specific data about your city's current state to enable realistic simulation.
+
+## WHAT I NEED TO KNOW
+
+### 🏙️ **City Basics**
+- **Population size** and **city type** (dense urban, suburban, industrial, etc.)
+- **Geographic context** (climate, topography, regional role)
+
+### 🚗 **Mobility & Transport** (Critical for most interventions)
+- How do people get around? What are the biggest transport challenges?
+- Traffic congestion levels, public transport coverage, walking/cycling infrastructure
+
+### 🌿 **Environment & Health**
+- Air quality, emissions, green space coverage
+- Health baseline, respiratory issues, mental health indicators
+
+### 🏠 **Housing & Economy**
+- Housing affordability, vacancy rates, income levels
+- Economic activity, business formation, fiscal health
+
+### 🏛️ **Implementation Context**
+- Political climate, institutional capacity
+- Community engagement, funding availability
+
+## LET'S START
+Tell me about your city - what makes it unique? What are the biggest urban challenges you're facing?
+
+*Tip: Be specific about numbers when you can (e.g., "about 200,000 people" rather than "medium-sized city")*`
+                    : `Hello! I'm here to help you design an intervention for urban simulation.
+
+This stage is crucial because I need to understand exactly how your intervention will work and what outcomes to expect. The goal is to create something that can be realistically simulated with measurable impacts.
+
+## WHAT I NEED TO KNOW
+
+### 🎯 **The Problem**
+- What specific urban challenge are you trying to solve?
+- Where is this happening? (single street, district, citywide?)
+
+### ⚙️ **The Solution**
+- How exactly will your intervention work? What's the core mechanism?
+- What specific changes do you expect to see?
+
+### 📊 **Expected Outcomes**
+- Which urban indicators will improve? (air quality, congestion, health, etc.)
+- How much change do you expect? (be realistic, 5-20% is typical)
+- What evidence supports your expectations?
+
+### 🚀 **Implementation**
+- Who needs to be involved? (departments, community groups, private sector?)
+- Timeline, resources needed, policy tools to use
+
+## LET'S START
+What urban challenge are you trying to solve? How do you think your intervention would work?
+
+*Tip: Think about the causal chain - how does your solution lead to specific improvements?*`
                 }
               ]);
             }}

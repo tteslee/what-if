@@ -127,7 +127,7 @@ export default function NewScenarioPage() {
                   value={whatIfQuestion}
                   onChange={(e) => setWhatIfQuestion(e.target.value)}
                   placeholder="could enhance the collective intelligence of our city?"
-                  className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 placeholder-slate-500"
                   autoFocus
                 />
               </div>
@@ -230,8 +230,8 @@ export default function NewScenarioPage() {
 
                     {city.id && city.id.startsWith('custom-') && (
                       <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          AI Generated
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          User Generated
                         </span>
                       </div>
                     )}
@@ -358,8 +358,8 @@ export default function NewScenarioPage() {
 
                       {intervention.id && intervention.id.startsWith('custom-') && (
                         <div className="mt-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            AI Generated
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            User Generated
                           </span>
                         </div>
                       )}

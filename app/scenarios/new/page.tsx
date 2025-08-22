@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import AIChatInterface from '../../../src/components/AIChatInterface';
+import CityForm from '../../../src/components/CityForm';
+import InterventionForm from '../../../src/components/InterventionForm';
 
 const STEPS = [
   { id: 0, title: 'Your Question', description: 'What are you curious about?' },
@@ -32,16 +33,15 @@ export default function NewScenarioPage() {
     generateScenario,
     cities,
     interventions,
-    generateCustomCity,
-    generateCustomIntervention,
+    addCustomCity,
+    addCustomIntervention,
     loadSampleData,
     reset,
   } = useWhatIfStore();
 
   const [assumptionInput, setAssumptionInput] = useState('');
-  const [showAIChat, setShowAIChat] = useState(false);
-  const [aiChatContext, setAiChatContext] = useState<'city' | 'intervention'>('city');
-  const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [showCityForm, setShowCityForm] = useState(false);
+  const [showInterventionForm, setShowInterventionForm] = useState(false);
   const [selectedInterventionDetails, setSelectedInterventionDetails] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,29 +77,16 @@ export default function NewScenarioPage() {
     }
   };
 
-  const handleAIChatGenerate = async (description: string) => {
-    try {
-      if (aiChatContext === 'city') {
-        const city = await generateCustomCity(description);
-        if (city) {
-          setSelectedCity(city.id);
-          setShowAIChat(false);
-        }
-      } else {
-        const intervention = await generateCustomIntervention(description);
-        if (intervention) {
-          addSelectedIntervention(intervention.id);
-          setShowAIChat(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error generating profile:', error);
-    }
+  const handleCityFormSubmit = (cityData: any) => {
+    addCustomCity(cityData);
+    setSelectedCity(cityData.id);
+    setShowCityForm(false);
   };
 
-  const handleStartAIChat = (context: 'city' | 'intervention') => {
-    setAiChatContext(context);
-    setShowAIChat(true);
+  const handleInterventionFormSubmit = (interventionData: any) => {
+    addCustomIntervention(interventionData);
+    addSelectedIntervention(interventionData.id);
+    setShowInterventionForm(false);
   };
 
   const canProceed = () => {
@@ -165,19 +152,19 @@ export default function NewScenarioPage() {
                 Select a city context
               </label>
               
-              {/* AI Chat Option */}
+              {/* Create Custom City Form */}
               <div className="mb-6">
                 <button
-                  onClick={() => handleStartAIChat('city')}
+                  onClick={() => setShowCityForm(true)}
                   className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span className="text-blue-600 font-medium">Create Custom City with AI</span>
+                    <span className="text-blue-600 font-medium">Create Custom City</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">Describe your urban context and let AI generate a city profile</p>
+                  <p className="text-sm text-slate-600 mt-1">Fill out a form to create your own city profile</p>
                 </button>
               </div>
 
@@ -254,19 +241,19 @@ export default function NewScenarioPage() {
                 Choose interventions (select multiple for portfolio approach)
               </label>
               
-              {/* AI Chat Option */}
+              {/* Create Custom Intervention Form */}
               <div className="mb-6">
                 <button
-                  onClick={() => handleStartAIChat('intervention')}
+                  onClick={() => setShowInterventionForm(true)}
                   className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span className="text-blue-600 font-medium">Create Custom Intervention with AI</span>
+                    <span className="text-blue-600 font-medium">Create Custom Intervention</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">Describe your intervention idea and let AI generate a detailed profile</p>
+                  <p className="text-sm text-slate-600 mt-1">Fill out a form to create your own intervention profile</p>
                 </button>
               </div>
 
@@ -540,15 +527,20 @@ export default function NewScenarioPage() {
         </div>
       </div>
 
-      {/* AI Chat Modal */}
-      {showAIChat && (
+      {/* City Form Modal */}
+      {showCityForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
-            <AIChatInterface
-              context={aiChatContext}
-              onGenerate={handleAIChatGenerate}
-              onCancel={() => setShowAIChat(false)}
-            />
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <CityForm onSubmit={handleCityFormSubmit} onCancel={() => setShowCityForm(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Intervention Form Modal */}
+      {showInterventionForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <InterventionForm onSubmit={handleInterventionFormSubmit} onCancel={() => setShowInterventionForm(false)} />
           </div>
         </div>
       )}

@@ -29,8 +29,6 @@ interface WhatIfState {
   createScenario: () => Scenario | null;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: () => void;
-  generateCustomCity: (description: string) => Promise<CityProfile | null>;
-  generateCustomIntervention: (description: string) => Promise<Intervention | null>;
   addCustomCity: (city: CityProfile) => void;
   addCustomIntervention: (intervention: Intervention) => void;
   deleteCustomCity: (cityId: string) => void;
@@ -222,110 +220,6 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     set((state) => ({
       interventions: state.interventions.filter(i => i.id !== interventionId)
     }));
-  },
-  
-  generateCustomCity: async (description: string) => {
-    try {
-      console.log('Calling generate city API with description:', description);
-      
-      const response = await fetch('/api/ai/generate-city', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ description }),
-      });
-
-      console.log('API response status:', response.status);
-      console.log('API response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const responseText = await response.text();
-        console.error('API error response text:', responseText);
-        
-        let errorMessage = 'Failed to generate city';
-        try {
-          const errorData = JSON.parse(responseText);
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.error('Failed to parse error response as JSON:', parseError);
-          errorMessage = `HTTP ${response.status}: ${responseText.substring(0, 100)}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const responseText = await response.text();
-      console.log('API success response text:', responseText);
-      
-      let cityData;
-      try {
-        cityData = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse success response as JSON:', parseError);
-        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
-      }
-
-      console.log('Parsed city data:', cityData);
-      const state = get();
-      state.addCustomCity(cityData);
-      return cityData;
-    } catch (error) {
-      console.error('Error generating custom city:', error);
-      throw error; // Re-throw the error so the UI can handle it
-    }
-  },
-  
-  generateCustomIntervention: async (description: string) => {
-    try {
-      console.log('Calling generate intervention API with description:', description);
-      
-      const response = await fetch('/api/ai/generate-intervention', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ description }),
-      });
-
-      console.log('API response status:', response.status);
-      console.log('API response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const responseText = await response.text();
-        console.error('API error response text:', responseText);
-        
-        let errorMessage = 'Failed to generate intervention';
-        try {
-          const errorData = JSON.parse(responseText);
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.error('Failed to parse error response as JSON:', parseError);
-          errorMessage = `HTTP ${response.status}: ${responseText.substring(0, 100)}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const responseText = await response.text();
-      console.log('API success response text:', responseText);
-      
-      let interventionData;
-      try {
-        interventionData = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse success response as JSON:', parseError);
-        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
-      }
-
-      console.log('Parsed intervention data:', interventionData);
-      const state = get();
-      state.addCustomIntervention(interventionData);
-      return interventionData;
-    } catch (error) {
-      console.error('Error generating custom intervention:', error);
-      throw error; // Re-throw the error so the UI can handle it
-    }
   },
   
   clearLegacyData: () => {

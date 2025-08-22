@@ -124,36 +124,36 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Create Custom City</h2>
-        <p className="text-slate-600 mb-6">Fill in the required fields to create a new city profile.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Create Custom City</h2>
+        <p className="text-slate-600 text-base">Fill in the required fields to create a new city profile.</p>
       </div>
 
       {/* Required Fields */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             City Name *
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             placeholder="e.g., Helsinki, Madrid, Singapore"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Scale *
           </label>
           <select
             value={formData.scale}
             onChange={(e) => setFormData(prev => ({ ...prev, scale: e.target.value as CityScale }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             required
           >
             <option value="Citywide">Citywide</option>
@@ -164,17 +164,17 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Main Urban Challenges / Drivers *
           </label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {formData.mainChallenges.map((challenge, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex gap-3">
                 <input
                   type="text"
                   value={challenge}
                   onChange={(e) => updateChallenge(index, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   placeholder="e.g., air quality, congestion, housing affordability"
                   required
                 />
@@ -182,9 +182,11 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   <button
                     type="button"
                     onClick={() => removeChallenge(index)}
-                    className="px-3 py-2 text-red-600 hover:text-red-700"
+                    className="px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    ×
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 )}
               </div>
@@ -192,22 +194,25 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
             <button
               type="button"
               onClick={addChallenge}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
             >
-              + Add another challenge
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Add another challenge
             </button>
           </div>
         </div>
       </div>
 
       {/* Optional Fields Toggle */}
-      <div className="border-t border-slate-200 pt-4">
+      <div className="border-t border-slate-200 pt-6">
         <button
           type="button"
           onClick={() => setShowOptionalFields(!showOptionalFields)}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="flex items-center gap-3 text-blue-600 hover:text-blue-700 font-medium text-base"
         >
-          <svg className={`w-4 h-4 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
           {showOptionalFields ? 'Hide' : 'Show'} optional details
@@ -216,10 +221,10 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
 
       {/* Optional Fields */}
       {showOptionalFields && (
-        <div className="space-y-4 border-t border-slate-200 pt-4">
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-6 border-t border-slate-200 pt-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-semibold text-slate-700 mb-3">
                 Population Size
               </label>
               <input
@@ -229,12 +234,12 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, size: e.target.value }
                 }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="e.g., 656920"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-semibold text-slate-700 mb-3">
                 Demographics
               </label>
               <input
@@ -244,127 +249,137 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, demographics: e.target.value }
                 }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="e.g., aging population with growing tech sector"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-semibold text-slate-700 mb-3">
               Neighbourhood Characteristics / Land Use Mix
             </label>
             <input
               type="text"
               value={formData.neighbourhoodCharacteristics}
               onChange={(e) => setFormData(prev => ({ ...prev, neighbourhoodCharacteristics: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               placeholder="e.g., mixed-use with strong public transport"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-semibold text-slate-700 mb-3">
               Vulnerable or Priority Groups
             </label>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {formData.vulnerableGroups.map((group, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex gap-3">
                   <input
                     type="text"
                     value={group}
                     onChange={(e) => updateVulnerableGroup(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                     placeholder="e.g., elderly, low-income, children"
                   />
                   <button
                     type="button"
                     onClick={() => removeVulnerableGroup(index)}
-                    className="px-3 py-2 text-red-600 hover:text-red-700"
+                    className="px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    ×
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               ))}
               <button
                 type="button"
                 onClick={addVulnerableGroup}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
               >
-                + Add vulnerable group
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add vulnerable group
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-semibold text-slate-700 mb-3">
               Regulatory or Political Context
             </label>
             <input
               type="text"
               value={formData.regulatoryContext}
               onChange={(e) => setFormData(prev => ({ ...prev, regulatoryContext: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               placeholder="e.g., Bus lane reallocation is contentious"
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-semibold text-slate-700 mb-3">
                 Timeline
               </label>
               <input
                 type="text"
                 value={formData.timeline}
                 onChange={(e) => setFormData(prev => ({ ...prev, timeline: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="e.g., 2-year implementation window"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-base font-semibold text-slate-700 mb-3">
                 Budget Constraints
               </label>
               <input
                 type="text"
                 value={formData.budgetConstraints}
                 onChange={(e) => setFormData(prev => ({ ...prev, budgetConstraints: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="e.g., €5M available for pilot"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-base font-semibold text-slate-700 mb-3">
               Existing Assets / Infrastructure
             </label>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {formData.existingAssets.map((asset, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex gap-3">
                   <input
                     type="text"
                     value={asset}
                     onChange={(e) => updateAsset(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                     placeholder="e.g., schools, bus line 12, public housing blocks"
                   />
                   <button
                     type="button"
                     onClick={() => removeAsset(index)}
-                    className="px-3 py-2 text-red-600 hover:text-red-700"
+                    className="px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    ×
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               ))}
               <button
                 type="button"
                 onClick={addAsset}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
               >
-                + Add existing asset
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add existing asset
               </button>
             </div>
           </div>
@@ -372,17 +387,17 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
       )}
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
+      <div className="flex justify-end gap-4 pt-8 border-t border-slate-200">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+          className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
           Create City
         </button>

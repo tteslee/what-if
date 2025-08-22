@@ -61,7 +61,7 @@ export default function HomePage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="could enhance the collective intelligence of our city?"
-                    className="block w-full pl-36 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="block w-full pl-36 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-900 placeholder-slate-500"
                     autoFocus
                   />
                 </div>

@@ -43,6 +43,8 @@ export default function NewScenarioPage() {
   const [showCityForm, setShowCityForm] = useState(false);
   const [showInterventionForm, setShowInterventionForm] = useState(false);
   const [selectedInterventionDetails, setSelectedInterventionDetails] = useState<string | null>(null);
+  const [selectedCityDetails, setSelectedCityDetails] = useState<string | null>(null);
+  const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
 
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
@@ -65,6 +67,7 @@ export default function NewScenarioPage() {
   const handleCreateAndGenerate = async () => {
     const scenario = createScenario();
     if (scenario) {
+      setIsGeneratingScenario(true);
       try {
         const result = await generateScenario(scenario.id);
         if (result) {
@@ -73,6 +76,8 @@ export default function NewScenarioPage() {
       } catch (error) {
         console.error('Failed to generate scenario:', error);
         // In a real app, you'd show an error message to the user
+      } finally {
+        setIsGeneratingScenario(false);
       }
     }
   };
@@ -170,16 +175,31 @@ export default function NewScenarioPage() {
 
               <div className="grid gap-4">
                 {cities.map((city) => (
-                  <button
+                  <div
                     key={city.id}
-                    onClick={() => setSelectedCity(city.id)}
                     className={`p-6 text-left border-2 rounded-lg transition-all ${
                       selectedCityId === city.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name}</h3>
+                    <div className="flex justify-between items-start mb-4">
+                      <button
+                        onClick={() => setSelectedCity(city.id)}
+                        className="flex-1 text-left"
+                      >
+                        <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name}</h3>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCityDetails(city.id);
+                        }}
+                        className="ml-4 px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        Details
+                      </button>
+                    </div>
                     
                     {/* Required fields */}
                     <div className="mb-3">
@@ -215,7 +235,7 @@ export default function NewScenarioPage() {
                         </span>
                       </div>
                     )}
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -510,9 +530,20 @@ export default function NewScenarioPage() {
             {currentStep === STEPS.length - 1 ? (
               <button
                 onClick={handleCreateAndGenerate}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={isGeneratingScenario}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Generate Scenario Analysis
+                {isGeneratingScenario ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating Scenario...
+                  </>
+                ) : (
+                  'Generate Scenario Analysis'
+                )}
               </button>
             ) : (
               <button
@@ -642,6 +673,130 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Implementation Notes</h3>
                         <p className="text-slate-700">{intervention.implementationNotes}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* City Details Modal */}
+      {selectedCityDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold text-slate-900">
+                  {cities.find(c => c.id === selectedCityDetails)?.name}
+                </h2>
+                <button
+                  onClick={() => setSelectedCityDetails(null)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {(() => {
+                const city = cities.find(c => c.id === selectedCityDetails);
+                if (!city) return null;
+                
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Scale & Context</h3>
+                      <div className="flex gap-2 mb-2">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          {city.scale}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Main Challenges</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {city.mainChallenges.map((challenge, index) => (
+                          <span key={index} className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
+                            {challenge}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {city.populationContext && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Population Context</h3>
+                        <div className="space-y-2">
+                          {city.populationContext.size && (
+                            <p className="text-slate-700">
+                              <strong>Size:</strong> {city.populationContext.size.toLocaleString()}
+                            </p>
+                          )}
+                          {city.populationContext.demographics && (
+                            <p className="text-slate-700">
+                              <strong>Demographics:</strong> {city.populationContext.demographics}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {city.neighbourhoodCharacteristics && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Neighbourhood Characteristics</h3>
+                        <p className="text-slate-700">{city.neighbourhoodCharacteristics}</p>
+                      </div>
+                    )}
+
+                    {city.vulnerableGroups && city.vulnerableGroups.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Vulnerable Groups</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {city.vulnerableGroups.map((group, index) => (
+                            <span key={index} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm">
+                              {group}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {city.regulatoryContext && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Regulatory Context</h3>
+                        <p className="text-slate-700">{city.regulatoryContext}</p>
+                      </div>
+                    )}
+
+                    {city.timeline && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Timeline</h3>
+                        <p className="text-slate-700">{city.timeline}</p>
+                      </div>
+                    )}
+
+                    {city.budgetConstraints && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Budget Constraints</h3>
+                        <p className="text-slate-700">{city.budgetConstraints}</p>
+                      </div>
+                    )}
+
+                    {city.existingAssets && city.existingAssets.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Existing Assets</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {city.existingAssets.map((asset, index) => (
+                            <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                              {asset}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

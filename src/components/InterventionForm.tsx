@@ -167,50 +167,50 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Create Custom Intervention</h2>
-        <p className="text-slate-600 mb-6">Fill in the required fields to create a new intervention profile.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Create Custom Intervention</h2>
+        <p className="text-slate-600 text-base">Fill in the required fields to create a new intervention profile.</p>
       </div>
 
       {/* Required Fields */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Title / Name *
           </label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             placeholder="e.g., School Air Quality Sensors, Congestion Pricing"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Summary / One-liner *
           </label>
           <input
             type="text"
             value={formData.summary}
             onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             placeholder="e.g., Install low-cost sensors in schools to monitor air quality"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Category *
           </label>
           <select
             value={formData.category}
             onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as InterventionCategory }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             required
           >
             <option value="BehaviourChange">Behaviour Change</option>
@@ -225,14 +225,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-base font-semibold text-slate-700 mb-3">
             Scope of Application *
           </label>
           <input
             type="text"
             value={formData.scopeOfApplication}
             onChange={(e) => setFormData(prev => ({ ...prev, scopeOfApplication: e.target.value }))}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             placeholder="e.g., Primary schools in urban areas"
             required
           />
@@ -240,13 +240,13 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
       </div>
 
       {/* Optional Fields Toggle */}
-      <div className="border-t border-slate-200 pt-4">
+      <div className="border-t border-slate-200 pt-6">
         <button
           type="button"
           onClick={() => setShowOptionalFields(!showOptionalFields)}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="flex items-center gap-3 text-blue-600 hover:text-blue-700 font-medium text-base"
         >
-          <svg className={`w-4 h-4 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
           {showOptionalFields ? 'Hide' : 'Show'} optional details
@@ -457,17 +457,17 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
       )}
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
+      <div className="flex justify-end gap-4 pt-8 border-t border-slate-200">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+          className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
           Create Intervention
         </button>

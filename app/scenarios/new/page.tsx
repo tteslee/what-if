@@ -8,8 +8,8 @@ import AIChatInterface from '../../../src/components/AIChatInterface';
 const STEPS = [
   { id: 0, title: 'Your Question', description: 'What are you curious about?' },
   { id: 1, title: 'Choose a City', description: 'Where would this happen?' },
-  { id: 2, title: 'Pick an Intervention', description: 'What would you like to test?' },
-  { id: 3, title: 'Review & Run', description: 'Ready to simulate?' },
+  { id: 2, title: 'Pick Interventions', description: 'What would you like to test?' },
+  { id: 3, title: 'Review & Generate', description: 'Ready to analyze?' },
 ];
 
 export default function NewScenarioPage() {
@@ -21,49 +21,38 @@ export default function NewScenarioPage() {
     setWhatIfQuestion,
     selectedCityId,
     setSelectedCity,
-    selectedInterventionId,
-    setSelectedIntervention,
+    selectedInterventionIds,
+    addSelectedIntervention,
+    removeSelectedIntervention,
+    clearSelectedInterventions,
     assumptions,
     addAssumption,
     removeAssumption,
     createScenario,
-    runScenario,
+    generateScenario,
     cities,
     interventions,
     generateCustomCity,
     generateCustomIntervention,
     loadSampleData,
+    reset,
   } = useWhatIfStore();
-
-  console.log('NewScenarioPage render:', { currentStep, citiesLength: cities?.length, interventionsLength: interventions?.length, cities, interventions });
-
-  useEffect(() => {
-    // Only load sample data when user reaches step 1 (city selection)
-    // No need to load data on the landing page
-  }, []);
-
-  // Ensure data is loaded if we're already on a step that needs it
-  useEffect(() => {
-    console.log('Data loading effect triggered:', { currentStep, citiesLength: cities?.length, interventionsLength: interventions?.length });
-    if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
-      console.log('Loading sample data due to missing data for current step');
-      loadSampleData();
-    }
-  }, [currentStep, cities?.length, interventions?.length, loadSampleData]);
 
   const [assumptionInput, setAssumptionInput] = useState('');
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiChatContext, setAiChatContext] = useState<'city' | 'intervention'>('city');
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [selectedInterventionDetails, setSelectedInterventionDetails] = useState<string | null>(null);
+
+  useEffect(() => {
+    if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
+      loadSampleData();
+    }
+  }, [currentStep, cities, interventions, loadSampleData]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      
-      // Load sample data when user reaches city selection step (step 1) or intervention selection step (step 2)
-      if (nextStep === 1 || nextStep === 2) {
-        loadSampleData();
-      }
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -73,12 +62,17 @@ export default function NewScenarioPage() {
     }
   };
 
-  const handleCreateAndRun = () => {
+  const handleCreateAndGenerate = async () => {
     const scenario = createScenario();
     if (scenario) {
-      const result = runScenario(scenario.id);
-      if (result) {
-        router.push(`/scenarios/${scenario.id}`);
+      try {
+        const result = await generateScenario(scenario.id);
+        if (result) {
+          router.push(`/scenarios/${scenario.id}`);
+        }
+      } catch (error) {
+        console.error('Failed to generate scenario:', error);
+        // In a real app, you'd show an error message to the user
       }
     }
   };
@@ -94,7 +88,7 @@ export default function NewScenarioPage() {
       } else {
         const intervention = await generateCustomIntervention(description);
         if (intervention) {
-          setSelectedIntervention(intervention.id);
+          addSelectedIntervention(intervention.id);
           setShowAIChat(false);
         }
       }
@@ -115,7 +109,7 @@ export default function NewScenarioPage() {
       case 1:
         return selectedCityId !== null;
       case 2:
-        return selectedInterventionId !== null;
+        return selectedInterventionIds.length > 0;
       case 3:
         return true;
       default:
@@ -140,19 +134,20 @@ export default function NewScenarioPage() {
                   type="text"
                   value={whatIfQuestion}
                   onChange={(e) => setWhatIfQuestion(e.target.value)}
-                  placeholder="introduced congestion pricing?"
+                  placeholder="could enhance the collective intelligence of our city?"
                   className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   autoFocus
                 />
               </div>
+              <p className="mt-2 text-sm text-slate-600">
+                Think about outcomes: What would success look like? Who would benefit?
+              </p>
             </div>
           </div>
         );
 
       case 1:
-        // Ensure data is loaded before rendering
         if (!cities || cities.length === 0) {
-          loadSampleData();
           return (
             <div className="space-y-6">
               <div className="text-center py-8">
@@ -167,7 +162,7 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Select a city to test your intervention
+                Select a city context
               </label>
               
               {/* AI Chat Option */}
@@ -187,50 +182,61 @@ export default function NewScenarioPage() {
               </div>
 
               <div className="grid gap-4">
-                {cities && cities.length > 0 ? (
-                  cities.map((city) => (
-                    <button
-                      key={city.id}
-                      onClick={() => setSelectedCity(city.id)}
-                      className={`p-6 text-left border-2 rounded-lg transition-all ${
-                        selectedCityId === city.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name || 'Unnamed City'}</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                        <div>Population: {city.demographics?.population?.toLocaleString() || 'N/A'}</div>
-                        <div>Households: {city.demographics?.households?.toLocaleString() || 'N/A'}</div>
-                        <div>Health Index: {city.health?.baselineHealthIndex_0_100 || 'N/A'}</div>
-                        <div>Trust Index: {city.socialGovernance?.trustIndex_0_100 || 'N/A'}</div>
+                {cities.map((city) => (
+                  <button
+                    key={city.id}
+                    onClick={() => setSelectedCity(city.id)}
+                    className={`p-6 text-left border-2 rounded-lg transition-all ${
+                      selectedCityId === city.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{city.name}</h3>
+                    
+                    {/* Required fields */}
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                          {city.scale}
+                        </span>
                       </div>
-                      {city.id && city.id.startsWith('custom-') && (
-                        <div className="mt-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            AI Generated
-                          </span>
-                        </div>
-                      )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading cities...</p>
-                  </div>
-                )}
+                      <div className="text-sm text-slate-600">
+                        <strong>Main Challenges:</strong> {city.mainChallenges?.join(', ')}
+                      </div>
+                    </div>
+
+                    {/* Optional fields (progressive disclosure) */}
+                    {city.populationContext && (
+                      <div className="text-sm text-slate-600 mb-2">
+                        <strong>Population:</strong> {city.populationContext.size?.toLocaleString()} 
+                        {city.populationContext.demographics && ` (${city.populationContext.demographics})`}
+                      </div>
+                    )}
+                    
+                    {city.existingAssets && city.existingAssets.length > 0 && (
+                      <div className="text-sm text-slate-600">
+                        <strong>Assets:</strong> {city.existingAssets.slice(0, 3).join(', ')}
+                        {city.existingAssets.length > 3 && ` +${city.existingAssets.length - 3} more`}
+                      </div>
+                    )}
+
+                    {city.id && city.id.startsWith('custom-') && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          AI Generated
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         );
 
       case 2:
-        console.log('Rendering step 2 (intervention selection):', { interventionsLength: interventions?.length, interventions });
-        // Ensure data is loaded before rendering
         if (!interventions || interventions.length === 0) {
-          console.log('No interventions found, loading sample data');
-          loadSampleData();
           return (
             <div className="space-y-6">
               <div className="text-center py-8">
@@ -245,7 +251,7 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Choose an intervention type
+                Choose interventions (select multiple for portfolio approach)
               </label>
               
               {/* AI Chat Option */}
@@ -264,57 +270,94 @@ export default function NewScenarioPage() {
                 </button>
               </div>
 
+              {/* Selected Interventions */}
+              {selectedInterventionIds.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium text-slate-700 mb-3">Selected Interventions ({selectedInterventionIds.length})</h4>
+                  <div className="space-y-2">
+                    {selectedInterventionIds.map((id) => {
+                      const intervention = interventions.find(i => i.id === id);
+                      return intervention ? (
+                        <div key={id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div>
+                            <div className="font-medium text-slate-900">{intervention.title}</div>
+                            <div className="text-sm text-slate-600">{intervention.summary}</div>
+                          </div>
+                          <button
+                            onClick={() => removeSelectedIntervention(id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Available Interventions */}
               <div className="grid gap-4">
-                {interventions && interventions.length > 0 ? (
-                  interventions.map((intervention) => (
-                    <button
-                      key={intervention.id}
-                      onClick={() => setSelectedIntervention(intervention.id)}
-                      className={`p-6 text-left border-2 rounded-lg transition-all ${
-                        selectedInterventionId === intervention.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{intervention.title || 'Untitled Intervention'}</h3>
-                      <p className="text-slate-600 mb-3">{intervention.description || 'No description available'}</p>
-                      <div className="flex items-center gap-2">
-                        {intervention.categories && intervention.categories.length > 0 ? (
-                          intervention.categories.map((category, index) => (
-                            <span key={index} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                              {category}
+                {interventions
+                  .filter(i => !selectedInterventionIds.includes(i.id))
+                  .map((intervention) => (
+                    <div key={intervention.id} className="p-6 border-2 border-slate-200 rounded-lg hover:border-slate-300 transition-all">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-slate-900 mb-2">{intervention.title}</h3>
+                          <p className="text-slate-600 mb-3">{intervention.summary}</p>
+                          
+                          {/* Required fields */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                              {intervention.category}
                             </span>
-                          ))
-                        ) : (
-                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                            No categories
-                          </span>
-                        )}
-                        {intervention.implementation && intervention.implementation.scope ? (
-                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                            {intervention.implementation.scope}
-                          </span>
-                        ) : (
-                          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
-                            No scope
-                          </span>
-                        )}
-                      </div>
-                        {intervention.id && intervention.id.startsWith('custom-') && (
-                          <div className="mt-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              AI Generated
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                              {intervention.scopeOfApplication}
                             </span>
                           </div>
-                        )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading interventions...</p>
-                  </div>
-                )}
+
+                          {/* Optional fields (progressive disclosure) */}
+                          {intervention.stakeholderFocus && intervention.stakeholderFocus.length > 0 && (
+                            <div className="text-sm text-slate-600 mb-2">
+                              <strong>Focus:</strong> {intervention.stakeholderFocus.join(', ')}
+                            </div>
+                          )}
+
+                          {intervention.synergies && intervention.synergies.length > 0 && (
+                            <div className="text-sm text-slate-600">
+                              <strong>Synergies:</strong> {intervention.synergies.join(', ')}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => addSelectedIntervention(intervention.id)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          >
+                            Add
+                          </button>
+                          <button
+                            onClick={() => setSelectedInterventionDetails(intervention.id)}
+                            className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 text-sm"
+                          >
+                            Details
+                          </button>
+                        </div>
+                      </div>
+
+                      {intervention.id && intervention.id.startsWith('custom-') && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            AI Generated
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -322,7 +365,7 @@ export default function NewScenarioPage() {
 
       case 3:
         const selectedCity = cities.find(c => c.id === selectedCityId);
-        const selectedIntervention = interventions.find(i => i.id === selectedInterventionId);
+        const selectedInterventions = interventions.filter(i => selectedInterventionIds.includes(i.id));
         
         return (
           <div className="space-y-6">
@@ -340,8 +383,14 @@ export default function NewScenarioPage() {
                   <p className="text-slate-700">{selectedCity?.name}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">Intervention:</h3>
-                  <p className="text-slate-700">{selectedIntervention?.title}</p>
+                  <h3 className="font-semibold text-slate-900">Interventions ({selectedInterventions.length}):</h3>
+                  <div className="space-y-2">
+                    {selectedInterventions.map((intervention) => (
+                      <div key={intervention.id} className="text-slate-700">
+                        • {intervention.title} ({intervention.category})
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -409,9 +458,20 @@ export default function NewScenarioPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Create New Scenario</h1>
-          <p className="text-slate-600">Walk through the steps to set up your urban intervention simulation</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Create New Scenario</h1>
+            <p className="text-slate-600">Walk through the steps to set up your urban intervention analysis</p>
+          </div>
+          <button
+            onClick={() => {
+              reset();
+              setCurrentStep(0);
+            }}
+            className="px-4 py-2 text-sm border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50"
+          >
+            Start Over
+          </button>
         </div>
 
         {/* Progress Steps */}
@@ -462,10 +522,10 @@ export default function NewScenarioPage() {
           <div className="flex gap-3">
             {currentStep === STEPS.length - 1 ? (
               <button
-                onClick={handleCreateAndRun}
+                onClick={handleCreateAndGenerate}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Create & Run Simulation
+                Generate Scenario Analysis
               </button>
             ) : (
               <button
@@ -489,6 +549,113 @@ export default function NewScenarioPage() {
               onGenerate={handleAIChatGenerate}
               onCancel={() => setShowAIChat(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Intervention Details Modal */}
+      {selectedInterventionDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold text-slate-900">
+                  {interventions.find(i => i.id === selectedInterventionDetails)?.title}
+                </h2>
+                <button
+                  onClick={() => setSelectedInterventionDetails(null)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {(() => {
+                const intervention = interventions.find(i => i.id === selectedInterventionDetails);
+                if (!intervention) return null;
+                
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Summary</h3>
+                      <p className="text-slate-700">{intervention.summary}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Category & Scope</h3>
+                      <div className="flex gap-2 mb-2">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          {intervention.category}
+                        </span>
+                      </div>
+                      <p className="text-slate-700">{intervention.scopeOfApplication}</p>
+                    </div>
+
+                    {intervention.detailedDescription && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Detailed Description</h3>
+                        <p className="text-slate-700">{intervention.detailedDescription}</p>
+                      </div>
+                    )}
+
+                    {intervention.stakeholderFocus && intervention.stakeholderFocus.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Stakeholder Focus</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {intervention.stakeholderFocus.map((stakeholder, index) => (
+                            <span key={index} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                              {stakeholder}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {intervention.intendedOutcomes && intervention.intendedOutcomes.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Intended Outcomes</h3>
+                        <ul className="list-disc list-inside space-y-1 text-slate-700">
+                          {intervention.intendedOutcomes.map((outcome, index) => (
+                            <li key={index}>{outcome}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {intervention.synergies && intervention.synergies.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Synergies</h3>
+                        <ul className="list-disc list-inside space-y-1 text-slate-700">
+                          {intervention.synergies.map((synergy, index) => (
+                            <li key={index}>{synergy}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {intervention.risks && intervention.risks.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Risks</h3>
+                        <ul className="list-disc list-inside space-y-1 text-slate-700">
+                          {intervention.risks.map((risk, index) => (
+                            <li key={index}>{risk}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {intervention.implementationNotes && (
+                      <div>
+                        <h3 className="font-semibold text-slate-900 mb-2">Implementation Notes</h3>
+                        <p className="text-slate-700">{intervention.implementationNotes}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
       )}

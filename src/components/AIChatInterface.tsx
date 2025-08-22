@@ -122,7 +122,7 @@ What urban challenge are you trying to solve? How do you think your intervention
       
       // Add assistant message to AI service conversation history
       aiService.addMessage(assistantMessage);
-    } catch (error) {
+    } catch {
       const errorMessage: AIChatMessage = {
         role: 'assistant',
         content: 'I apologize, but I encountered an error. Please try again.'

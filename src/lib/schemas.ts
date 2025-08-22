@@ -5,275 +5,312 @@ import { z } from "zod";
  *  ───────────────────────────────────────────────────────────── */
 export const InterventionCategory = z.enum([
   "BehaviourChange",
-  "Participation",
+  "CivicParticipation", 
   "SkillsAndIndustry",
-  "BusinessModels",
-  "UrbanDesign",
+  "PhysicalInfrastructure",
   "Governance",
   "PolicyAndRegulation",
   "Finance",
   "Technology",
 ]);
 
-export const Indicator = z.enum([
-  // Mobility & Access
-  "AvgCommuteMin",
-  "CongestionIndex",
-  "ModalShareCarPct",
-  "ModalShareTransitPct",
-  "ModalShareWalkPct",
-  "ModalShareCyclePct",
-
-  // Housing
-  "HousingVacancyRatePct",
-  "RentBurdenedHouseholdsPct",
-  "AffordableUnitsCount",
-
-  // Environment
-  "GHGEmissionsMtCO2e",
-  "PM25µgPerM3",
-  "NO2µgPerM3",
-  "UrbanCanopyCoverPct",
-
-  // Health & Wellbeing
-  "BaselineHealthIndex_0_100",
-  "RespiratoryAdmissionsPer100k",
-  "MentalHealthIndex_0_100",
-
-  // Economy
-  "UnemploymentRatePct",
-  "MedianHouseholdIncome",
-  "LocalBusinessFormationRate",
-
-  // Social & Governance
-  "TrustIndex_0_100",
-  "CivicParticipationRatePct",
-  "PerceivedSafetyIndex_0_100",
-
-  // Poverty & Equity
-  "PovertyRatePct",
-  "InequalityGini_0_1",
-
-  // Fiscal
-  "MunicipalBudgetBalanceM",
-  "ProgrammeCostM",
-
-  // You can extend at runtime via CustomIndicators
+export const CityScale = z.enum([
+  "Citywide",
+  "DistrictNeighbourhood", 
+  "CorridorStreet",
+  "SpecificSite",
 ]);
 
-/** Directional expectation for an indicator change */
-export const EffectDirection = z.enum(["Increase", "Decrease", "Target"]);
-export const EvidenceStrength = z.enum(["Low", "Medium", "High"]);
+export const EffectDirection = z.enum(["Positive", "Negative", "Neutral", "Mixed"]);
+export const ConfidenceLevel = z.enum(["High", "Medium", "Low"]);
 
 /** ─────────────────────────────────────────────────────────────
- *  City Profile (baseline & readiness)
+ *  City Profile (simplified with required/optional fields)
  *  ───────────────────────────────────────────────────────────── */
 export const CityProfileSchema = z.object({
   id: z.string(),
   name: z.string(),
-  // Essential baselines (only those commonly used by interventions)
+  
+  // Required fields
+  scale: CityScale,
+  mainChallenges: z.array(z.string()).min(1), // e.g. ["air quality", "congestion", "housing affordability"]
+  
+  // Optional fields
+  populationContext: z.object({
+    size: z.number().optional(),
+    demographics: z.string().optional(), // e.g. "aging population", "young professionals"
+  }).optional(),
+  
+  neighbourhoodCharacteristics: z.string().optional(), // e.g. "mixed-use", "residential", "industrial"
+  
+  vulnerableGroups: z.array(z.string()).optional(), // e.g. ["elderly", "low-income", "children"]
+  
+  regulatoryContext: z.string().optional(), // e.g. "Bus lane reallocation is contentious"
+  
+  timeline: z.string().optional(), // e.g. "2-year implementation window"
+  
+  budgetConstraints: z.string().optional(), // e.g. "€5M available for pilot"
+  
+  existingAssets: z.array(z.string()).optional(), // e.g. ["schools", "bus line 12", "public housing blocks"]
+  
+  // Legacy fields for backward compatibility (can be removed later)
   demographics: z.object({
     population: z.number(),
     households: z.number().optional(),
     medianAge: z.number().optional(),
     povertyRatePct: z.number().optional(),
     inequalityGini_0_1: z.number().optional(),
-  }),
+  }).optional(),
+  
   mobility: z.object({
     avgCommuteMin: z.number().optional(),
     congestionIndex: z.number().optional(),
-    modalShare: z
-      .object({
-        carPct: z.number().optional(),
-        transitPct: z.number().optional(),
-        walkPct: z.number().optional(),
-        cyclePct: z.number().optional(),
-      })
-      .optional(),
+    modalShare: z.object({
+      carPct: z.number().optional(),
+      transitPct: z.number().optional(),
+      walkPct: z.number().optional(),
+      cyclePct: z.number().optional(),
+    }).optional(),
     publicTransportCoveragePct: z.number().optional(),
-  }),
+  }).optional(),
+  
   housing: z.object({
     vacancyRatePct: z.number().optional(),
     rentBurdenedHouseholdsPct: z.number().optional(),
     affordableUnitsCount: z.number().optional(),
-  }),
+  }).optional(),
+  
   environment: z.object({
     ghgEmissionsMtCO2e: z.number().optional(),
     pm25µgPerM3: z.number().optional(),
     no2µgPerM3: z.number().optional(),
     urbanCanopyCoverPct: z.number().optional(),
-  }),
+  }).optional(),
+  
   health: z.object({
     baselineHealthIndex_0_100: z.number().optional(),
     respiratoryAdmissionsPer100k: z.number().optional(),
     mentalHealthIndex_0_100: z.number().optional(),
-  }),
+  }).optional(),
+  
   economy: z.object({
     unemploymentRatePct: z.number().optional(),
     medianHouseholdIncome: z.number().optional(),
     localBusinessFormationRate: z.number().optional(),
-  }),
+  }).optional(),
+  
   socialGovernance: z.object({
     trustIndex_0_100: z.number().optional(),
     civicParticipationRatePct: z.number().optional(),
     perceivedSafetyIndex_0_100: z.number().optional(),
-  }),
+  }).optional(),
+  
   fiscal: z.object({
     municipalBudgetBalanceM: z.number().optional(),
-  }),
-
-  /** Data quality & readiness help the simulator decide confidence */
+  }).optional(),
+  
   dataQuality: z.object({
     coverageScore_0_1: z.number().min(0).max(1).optional(),
     freshnessMonths: z.number().optional(),
     notes: z.string().optional(),
-  }),
+  }).optional(),
+  
   implementationReadiness: z.object({
     politicalWill_0_1: z.number().optional(),
     institutionalCapacity_0_1: z.number().optional(),
     communitySupport_0_1: z.number().optional(),
     fundingAvailability_0_1: z.number().optional(),
   }).optional(),
-
-  /** Extend with city-specific indicators without breaking type-safety elsewhere */
-  customIndicators: z
-    .array(
-      z.object({
-        key: z.string(), // e.g., "SchoolAQSensorsCount"
-        value: z.number(),
-        unit: z.string().optional(),
-      })
-    )
-    .optional(),
+  
+  customIndicators: z.array(
+    z.object({
+      key: z.string(),
+      value: z.number(),
+      unit: z.string().optional(),
+    })
+  ).optional(),
 });
 export type CityProfile = z.infer<typeof CityProfileSchema>;
 
 /** ─────────────────────────────────────────────────────────────
- *  Intervention (typed by broad category + mechanisms → indicators)
+ *  Intervention (simplified with required/optional fields)
  *  ───────────────────────────────────────────────────────────── */
-export const MechanismSchema = z.object({
-  /** Short causal statement: how the intervention acts on the system */
-  description: z.string(), // e.g., "Reduce tailpipe emissions near schools via traffic calming and modal shift"
-  /** Which indicators are influenced and in what direction */
-  expectedEffects: z.array(
-    z.object({
-      indicator: Indicator,
-      direction: EffectDirection,
-      magnitudeHintPct: z.number().optional(), // e.g., -5 to -15% (use negative for decreases)
-      evidence: EvidenceStrength.optional(),
-      equityWeight_0_2: z.number().optional(), // >1 if benefits accrue to vulnerable groups
-    })
-  ),
-});
-
-export const ImplementationPlanSchema = z.object({
-  scope: z.enum(["Pilot", "District", "Citywide"]),
-  durationMonths: z.number().int().positive(),
-  targetPopulations: z.array(z.string()).optional(), // e.g., ["Primary school children", "Low-income households"]
-  targetGeographies: z.array(z.string()).optional(), // e.g., district IDs or names
-  partners: z.array(z.string()).optional(), // org names / departments
-  capexM: z.number().optional(),
-  opexPerYearM: z.number().optional(),
-  fundingModel: z
-    .enum(["Municipal", "PublicPrivate", "CommunityOwned", "Grant", "UserFees"])
-    .optional(),
-  policyInstruments: z
-    .array(
-      z.enum([
-        "Regulation",
-        "Incentive",
-        "Standard",
-        "Procurement",
-        "PublicInvestment",
-        "DataGovernance",
-        "EducationCampaign",
-      ])
-    )
-    .optional(),
-});
-
 export const InterventionSchema = z.object({
   id: z.string(),
-  title: z.string(), // e.g., "School Air Quality Sensors + Green Corridors"
-  categories: z.array(InterventionCategory).min(1),
-  description: z.string(),
-
-  /** Parameter bag for the simulator (simple & extensible) */
-  params: z.record(z.string(), z.number()).optional(),
-
-  mechanisms: z.array(MechanismSchema).min(1),
-  implementation: ImplementationPlanSchema,
-
-  /** Risks & assumptions for narrative and sensitivity */
-  assumptions: z.array(z.string()).optional(),
+  
+  // Required fields
+  title: z.string(), // e.g. "School Air Quality Sensors"
+  summary: z.string(), // One-liner: "Install low-cost sensors in schools to monitor air quality"
+  category: InterventionCategory,
+  scopeOfApplication: z.string(), // e.g. "Primary schools in urban areas"
+  
+  // Optional fields
+  detailedDescription: z.string().optional(),
+  
+  parameters: z.record(z.string(), z.union([z.string(), z.number()])).optional(), // e.g. {sensorsCount: 200, chargeAmount: "£5"}
+  
+  synergies: z.array(z.string()).optional(), // e.g. ["Works best with: School Streets", "Green Corridors"]
+  
+  intendedOutcomes: z.array(z.string()).optional(),
+  
+  stakeholderFocus: z.array(z.string()).optional(), // e.g. ["children", "commuters", "landlords"]
+  
+  implementationNotes: z.string().optional(), // Timeline, budget, regulatory enablers/barriers
+  
   risks: z.array(z.string()).optional(),
-
-  /** Optional bundling: treat a cluster as one intervention or link sub-interventions */
-  subInterventions: z.array(
-    z.object({
-      id: z.string(),
-      title: z.string(),
-      categories: z.array(InterventionCategory).min(1),
+  
+  // Legacy fields for backward compatibility
+  categories: z.array(InterventionCategory).optional(),
+  description: z.string().optional(),
+  params: z.record(z.string(), z.number()).optional(),
+  mechanisms: z.array(z.object({
+    description: z.string(),
+    expectedEffects: z.array(z.object({
+      indicator: z.string(),
+      direction: z.string(),
+      magnitudeHintPct: z.number().optional(),
+      evidence: z.string().optional(),
+      equityWeight_0_2: z.number().optional(),
+    })),
+  })).optional(),
+  implementation: z.object({
+    scope: z.string().optional(),
+    durationMonths: z.number().optional(),
+    targetPopulations: z.array(z.string()).optional(),
+    targetGeographies: z.array(z.string()).optional(),
+    partners: z.array(z.string()).optional(),
+    capexM: z.number().optional(),
+    opexPerYearM: z.number().optional(),
+    fundingModel: z.string().optional(),
+    policyInstruments: z.array(z.string()).optional(),
+  }).optional(),
+  assumptions: z.array(z.string()).optional(),
+  subInterventions: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    categories: z.array(InterventionCategory).optional(),
+    description: z.string().optional(),
+    params: z.record(z.string(), z.number()).optional(),
+    mechanisms: z.array(z.object({
       description: z.string(),
-      params: z.record(z.string(), z.number()).optional(),
-      mechanisms: z.array(MechanismSchema).min(1),
-      implementation: ImplementationPlanSchema,
-    })
-  ).optional(),
+      expectedEffects: z.array(z.object({
+        indicator: z.string(),
+        direction: z.string(),
+        magnitudeHintPct: z.number().optional(),
+        evidence: z.string().optional(),
+        equityWeight_0_2: z.number().optional(),
+      })),
+    })).optional(),
+    implementation: z.object({
+      scope: z.string().optional(),
+      durationMonths: z.number().optional(),
+      targetPopulations: z.array(z.string()).optional(),
+      targetGeographies: z.array(z.string()).optional(),
+      partners: z.array(z.string()).optional(),
+      capexM: z.number().optional(),
+      opexPerYearM: z.number().optional(),
+      fundingModel: z.string().optional(),
+      policyInstruments: z.array(z.string()).optional(),
+    }).optional(),
+  })).optional(),
 });
 export type Intervention = z.infer<typeof InterventionSchema>;
 
 /** ─────────────────────────────────────────────────────────────
- *  Scenario (city + interventions + intended impacts)
+ *  Scenario (what-if question + city + interventions)
  *  ───────────────────────────────────────────────────────────── */
-export const IntendedImpactSchema = z.object({
-  indicator: Indicator,
-  targetDirection: EffectDirection,
-  targetValueOrDelta: z.number().optional(), // e.g., -10 (percent), or absolute depending on indicator
-  priority_1_5: z.number().int().min(1).max(5).default(3),
-});
-export type IntendedImpact = z.infer<typeof IntendedImpactSchema>;
-
 export const ScenarioSchema = z.object({
   id: z.string(),
-  title: z.string(), // e.g., "What if we clean the air around schools?"
+  whatIfQuestion: z.string(), // e.g. "What if we could enhance the collective intelligence of Helsinki?"
   cityId: z.string(),
-  interventionIds: z.array(z.string()).min(1), // support clusters (1..n)
-  intendedImpacts: z.array(IntendedImpactSchema).min(1),
+  interventionIds: z.array(z.string()).min(1), // Support multiple interventions
   notes: z.string().optional(),
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 
 /** ─────────────────────────────────────────────────────────────
- *  Simulation Result (KPI deltas + equity + confidence)
+ *  Scenario Result (structured narrative output)
  *  ───────────────────────────────────────────────────────────── */
-export const ResultSchema = z.object({
-  scenarioId: z.string(),
-  kpis: z.record(
-    Indicator,
-    z.object({
-      baseline: z.number().nullable(),   // null if unknown
-      delta: z.number().nullable(),      // signed change in indicator units
-      deltaPct: z.number().nullable(),   // optional % view where meaningful
-      equityAdjustedDeltaPct: z.number().nullable().optional(),
-    })
-  ),
-  qualitativeFindings: z.array(z.string()), // narrative bullets
-  risksMaterialised: z.array(z.string()).optional(),
-  confidence_0_1: z.number(),             // from data quality + model fit
-  equityScore_0_100: z.number().optional(),
-  fiscalImpactM: z.number().optional(),
-  stakeholderSentiment: z
-    .object({
-      citizens: z.number(),   // −1..+1
-      businesses: z.number(),
-      ngo: z.number(),
-      council: z.number(),
-    })
-    .optional(),
+export const StakeholderImpactSchema = z.object({
+  group: z.string(), // e.g. "citizens", "businesses", "government departments"
+  benefits: z.array(z.string()),
+  concerns: z.array(z.string()),
+  engagementNeeds: z.array(z.string()),
+  stance: z.enum(["Support", "Neutral", "Oppose", "Mixed"]).optional(),
 });
-export type Result = z.infer<typeof ResultSchema>;
 
-// Legacy schemas for backward compatibility (can be removed later)
+export const SystemEffectSchema = z.object({
+  domain: z.string(), // e.g. "Environment", "Health", "Economy"
+  effect: z.string(),
+  polarity: EffectDirection,
+  confidence: ConfidenceLevel,
+});
+
+export const PolicyInteractionSchema = z.object({
+  policy: z.string(),
+  interaction: z.enum(["Enables", "ConstrainedBy", "ConflictsWith", "RequiresChange"]),
+  description: z.string(),
+});
+
+export const RiskSchema = z.object({
+  risk: z.string(),
+  likelihood: ConfidenceLevel,
+  impact: ConfidenceLevel,
+});
+
+export const AssumptionSchema = z.object({
+  assumption: z.string(),
+  confidence: ConfidenceLevel,
+});
+
+export const SignalSchema = z.object({
+  signal: z.string(),
+  description: z.string(),
+});
+
+export const ExperimentSchema = z.object({
+  experiment: z.string(),
+  effort: z.enum(["Low", "Medium", "High"]),
+  timeline: z.string(),
+});
+
+export const ScenarioResultSchema = z.object({
+  scenarioId: z.string(),
+  
+  // Narrative Summary
+  narrativeSummary: z.string(), // 5-8 sentence story
+  
+  // Stakeholder Impacts
+  stakeholderImpacts: z.array(StakeholderImpactSchema),
+  
+  // System Effects
+  systemEffects: z.array(SystemEffectSchema),
+  
+  // Policy & Trend Interactions
+  policyInteractions: z.array(PolicyInteractionSchema),
+  
+  // Risks & Unintended Consequences
+  risks: z.array(RiskSchema),
+  
+  // Assumptions & Gaps
+  assumptions: z.array(AssumptionSchema),
+  
+  // Signals to Watch
+  signals: z.array(SignalSchema),
+  
+  // Next Experiments
+  experiments: z.array(ExperimentSchema),
+  
+  // Portfolio Analysis
+  synergies: z.array(z.string()).optional(),
+  gaps: z.array(z.string()).optional(),
+  
+  // Metadata
+  generatedAt: z.string(),
+  confidence_0_1: z.number(),
+});
+export type ScenarioResult = z.infer<typeof ScenarioResultSchema>;
+
+// Legacy schemas for backward compatibility
 export const CitySchema = CityProfileSchema;
 export type City = z.infer<typeof CityProfileSchema>;

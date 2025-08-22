@@ -7,34 +7,32 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function CompareScenariosPage() {
   const router = useRouter();
-  const { scenarios, cities, loadSampleData, runComparison } = useWhatIfStore();
+  const { scenarios, cities, interventions, loadSampleData } = useWhatIfStore();
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
   const [comparisonResults, setComparisonResults] = useState<Array<{
     scenarioId: string;
     kpis: {
-      emissionsDeltaPct: number;
-      congestionDeltaPct: number;
-      avgCommuteDeltaMin: number;
-      modalShift: {
-        car: number;
-        transit: number;
-        walk: number;
-        cycle: number;
-      };
-      fiscalImpactMGBP: number;
-      healthIndexDelta: number;
-      trustIndexDelta: number;
-      equityScore: number;
+      GHGEmissionsMtCO2e?: { deltaPct: number };
+      CongestionIndex?: { deltaPct: number };
+      AvgCommuteMin?: { delta: number };
+      ModalShareCarPct?: { deltaPct: number };
+      ModalShareTransitPct?: { deltaPct: number };
+      ModalShareWalkPct?: { deltaPct: number };
+      ModalShareCyclePct?: { deltaPct: number };
+      BaselineHealthIndex_0_100?: { deltaPct: number };
+      TrustIndex_0_100?: { deltaPct: number };
     };
-    narrativeFindings: string[];
-    risks: string[];
-    confidence: number;
-    stakeholderSentiment: {
+    qualitativeFindings?: string[];
+    risksMaterialised?: string[];
+    confidence_0_1?: number;
+    stakeholderSentiment?: {
       citizens: number;
       businesses: number;
       ngo: number;
       council: number;
     };
+    equityScore_0_100?: number;
+    fiscalImpactM?: number;
   }>>([]);
 
   useEffect(() => {
@@ -43,10 +41,11 @@ export default function CompareScenariosPage() {
 
   useEffect(() => {
     if (selectedScenarios.length >= 2) {
-      const results = runComparison(selectedScenarios);
-      setComparisonResults(results);
+      // For now, just set empty results since runComparison doesn't exist
+      // TODO: Implement comparison logic
+      setComparisonResults([]);
     }
-  }, [selectedScenarios, runComparison]);
+  }, [selectedScenarios]);
 
   const handleScenarioToggle = (scenarioId: string) => {
     setSelectedScenarios(prev => {
@@ -67,6 +66,11 @@ export default function CompareScenariosPage() {
     return cities.find((c: { id: string; name: string }) => c.id === cityId)?.name || 'Unknown';
   };
 
+  const getInterventionName = (interventionIds: string[]) => {
+    if (interventionIds.length === 0) return 'No Intervention';
+    const intervention = interventions.find((i: { id: string; title: string }) => i.id === interventionIds[0]);
+    return intervention?.title || 'Unknown Intervention';
+  };
 
 
   // Chart data for comparison
@@ -75,11 +79,11 @@ export default function CompareScenariosPage() {
     
     return comparisonResults.map((result, index) => ({
       name: `Scenario ${index + 1}`,
-      emissions: Math.abs(result.kpis.emissionsDeltaPct * 100),
-      congestion: Math.abs(result.kpis.congestionDeltaPct * 100),
-      health: result.kpis.healthIndexDelta,
-      trust: result.kpis.trustIndexDelta,
-      equity: result.kpis.equityScore * 100,
+      emissions: Math.abs(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0 * 100),
+      congestion: Math.abs(result.kpis.CongestionIndex?.deltaPct || 0 * 100),
+      health: result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0,
+      trust: result.kpis.TrustIndex_0_100?.deltaPct || 0,
+      equity: result.equityScore_0_100 || 0,
     }));
   };
 
@@ -88,10 +92,10 @@ export default function CompareScenariosPage() {
     
     return comparisonResults.map((result, index) => ({
       name: `Scenario ${index + 1}`,
-      citizens: result.stakeholderSentiment.citizens,
-      businesses: result.stakeholderSentiment.businesses,
-      ngo: result.stakeholderSentiment.ngo,
-      council: result.stakeholderSentiment.council,
+      citizens: result.stakeholderSentiment?.citizens || 0,
+      businesses: result.stakeholderSentiment?.businesses || 0,
+      ngo: result.stakeholderSentiment?.ngo || 0,
+      council: result.stakeholderSentiment?.council || 0,
     }));
   };
 
@@ -118,10 +122,10 @@ export default function CompareScenariosPage() {
                 />
                 <div className="flex-1">
                   <div className="font-medium text-slate-900">
-                    What if we {scenario.title}
+                    What if we {scenario.whatIfQuestion}
                   </div>
                   <div className="text-sm text-slate-600">
-                    {getCityName(scenario.cityId)} • {scenario.intervention.name}
+                    {getCityName(scenario.cityId)} • {getInterventionName(scenario.interventionIds)}
                   </div>
                 </div>
               </label>
@@ -155,25 +159,25 @@ export default function CompareScenariosPage() {
                       Scenario {index + 1}
                     </h3>
                     <p className="text-sm text-slate-600 mb-4">
-                      What if we {scenario.title}
+                      What if we {scenario.whatIfQuestion}
                     </p>
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-slate-600">Emissions:</span>
-                        <span className={`font-medium ${result.kpis.emissionsDeltaPct > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {formatPercentage(result.kpis.emissionsDeltaPct)} {result.kpis.emissionsDeltaPct > 0 ? '↑' : '↓'}
+                        <span className={`font-medium ${result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0 > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {formatPercentage(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0)} {result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0 > 0 ? '↑' : '↓'}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-600">Health:</span>
-                        <span className={`font-medium ${result.kpis.healthIndexDelta > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {result.kpis.healthIndexDelta > 0 ? '+' : ''}{formatNumber(result.kpis.healthIndexDelta)}
+                        <span className={`font-medium ${result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0 > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0 > 0 ? '+' : ''}{formatNumber(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-600">Equity:</span>
                         <span className="font-medium text-blue-600">
-                          {formatPercentage(result.kpis.equityScore)}
+                          {formatPercentage(result.equityScore_0_100 || 0)}
                         </span>
                       </div>
                     </div>
@@ -244,8 +248,8 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          <span className={`${result.kpis.emissionsDeltaPct > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {formatPercentage(result.kpis.emissionsDeltaPct)} {result.kpis.emissionsDeltaPct > 0 ? '↑' : '↓'}
+                          <span className={`${result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0 > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            {formatPercentage(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0)} {result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0 > 0 ? '↑' : '↓'}
                           </span>
                         </td>
                       ))}
@@ -256,8 +260,8 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          <span className={`${result.kpis.congestionDeltaPct > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {formatPercentage(result.kpis.congestionDeltaPct)} {result.kpis.congestionDeltaPct > 0 ? '↑' : '↓'}
+                          <span className={`${result.kpis.CongestionIndex?.deltaPct || 0 > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            {formatPercentage(result.kpis.CongestionIndex?.deltaPct || 0)} {result.kpis.CongestionIndex?.deltaPct || 0 > 0 ? '↑' : '↓'}
                           </span>
                         </td>
                       ))}
@@ -268,8 +272,8 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          <span className={`${result.kpis.fiscalImpactMGBP > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatCurrency(result.kpis.fiscalImpactMGBP)} {result.kpis.fiscalImpactMGBP > 0 ? '↑' : '↓'}
+                          <span className={`${result.fiscalImpactM || 0 > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(result.fiscalImpactM || 0)} {result.fiscalImpactM || 0 > 0 ? '↑' : '↓'}
                           </span>
                         </td>
                       ))}
@@ -280,8 +284,8 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          <span className={`${result.kpis.healthIndexDelta > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {result.kpis.healthIndexDelta > 0 ? '+' : ''}{formatNumber(result.kpis.healthIndexDelta)}
+                          <span className={`${result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0 > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0 > 0 ? '+' : ''}{formatNumber(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0)}
                           </span>
                         </td>
                       ))}
@@ -292,7 +296,7 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          <span className="text-blue-600">{formatPercentage(result.kpis.equityScore)}</span>
+                          <span className="text-blue-600">{formatPercentage(result.equityScore_0_100 || 0)}</span>
                         </td>
                       ))}
                     </tr>
@@ -302,7 +306,7 @@ export default function CompareScenariosPage() {
                       </td>
                       {comparisonResults.map((result, index) => (
                         <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                          {Math.round(result.confidence * 100)}%
+                          {Math.round(result.confidence_0_1 || 0 * 100)}%
                         </td>
                       ))}
                     </tr>

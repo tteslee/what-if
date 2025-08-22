@@ -1,51 +1,48 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { exportToPDF } from '../../../src/lib/export';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ScenarioResult } from '../../../src/lib/schemas';
 
-export default function ScenarioResultsPage() {
+export default function ScenarioResultPage() {
   const params = useParams();
   const router = useRouter();
-  const { scenarios, results, cities, interventions, loadSampleData } = useWhatIfStore();
-  const [showAssumptions, setShowAssumptions] = useState(false);
-  
-  const scenarioId = params.id as string;
-  const scenario = scenarios.find(s => s.id === scenarioId);
-  const result = results[scenarioId];
-  const city = scenario ? cities.find(c => c.id === scenario.cityId) : null;
-  
-  // Get the first intervention (for now, assuming single intervention)
-  const intervention = scenario && scenario.interventionIds && scenario.interventionIds.length > 0 
-    ? interventions.find(i => i.id === scenario.interventionIds[0])
-    : null;
-
-  // Debug logging
-  console.log('Scenario results page data:', {
-    scenarioId,
-    scenario,
-    result,
-    city,
-    intervention,
-    resultKeys: result ? Object.keys(result) : 'No result',
-    resultKpis: result?.kpis ? Object.keys(result.kpis) : 'No kpis'
-  });
+  const { scenarios, results, cities, interventions } = useWhatIfStore();
+  const [scenario, setScenario] = useState<any>(null);
+  const [result, setResult] = useState<ScenarioResult | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSampleData();
-  }, [loadSampleData]);
+    if (params.id) {
+      const scenarioId = params.id as string;
+      const foundScenario = scenarios.find(s => s.id === scenarioId);
+      const foundResult = results[scenarioId];
+      
+      if (foundScenario) {
+        setScenario(foundScenario);
+        setResult(foundResult || null);
+      }
+      setLoading(false);
+    }
+  }, [params.id, scenarios, results]);
 
-  if (!scenario || !result || !city || !intervention) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-4">
-            {!scenario ? 'Scenario not found' : 
-             !result ? 'Results not found' : 
-             !city ? 'City not found' : 'Intervention not found'}
-          </h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading scenario...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!scenario) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">Scenario not found</h1>
           <button
             onClick={() => router.push('/scenarios/new')}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -57,254 +54,328 @@ export default function ScenarioResultsPage() {
     );
   }
 
-  const handleExport = () => {
-    if (city && intervention) {
-      exportToPDF(scenario, result, city, intervention);
-    } else {
-      console.error('Cannot export: missing city or intervention data');
-      alert('Cannot export PDF: missing data. Please try refreshing the page.');
-    }
-  };
-
-  const formatPercentage = (value: number) => `${Math.round(Math.abs(value * 100))}%`;
-  const formatNumber = (value: number) => Math.abs(Math.round(value * 100) / 100);
-  const formatCurrency = (value: number) => `£${Math.abs(Math.round(value * 100) / 100)}M`;
-
-  // Chart data for modal shift - using new schema structure
-  const modalShiftData = [
-    { 
-      name: 'Car', 
-      before: city?.mobility?.modalShare?.carPct || 0, 
-      after: (city?.mobility?.modalShare?.carPct || 0) + (result?.kpis?.ModalShareCarPct?.deltaPct || 0) 
-    },
-    { 
-      name: 'Transit', 
-      before: city?.mobility?.modalShare?.transitPct || 0, 
-      after: (city?.mobility?.modalShare?.transitPct || 0) + (result?.kpis?.ModalShareTransitPct?.deltaPct || 0) 
-    },
-    { 
-      name: 'Walk', 
-      before: city?.mobility?.modalShare?.walkPct || 0, 
-      after: (city?.mobility?.modalShare?.walkPct || 0) + (result?.kpis?.ModalShareWalkPct?.deltaPct || 0) 
-    },
-    { 
-      name: 'Cycle', 
-      before: city?.mobility?.modalShare?.cyclePct || 0, 
-      after: (city?.mobility?.modalShare?.cyclePct || 0) + (result?.kpis?.ModalShareCyclePct?.deltaPct || 0) 
-    },
-  ];
-
-  // Chart data for stakeholder sentiment - using new schema structure
-  const sentimentData = result?.stakeholderSentiment ? [
-    { subject: 'Citizens', value: result.stakeholderSentiment.citizens },
-    { subject: 'Businesses', value: result.stakeholderSentiment.businesses },
-    { subject: 'NGOs', value: result.stakeholderSentiment.ngo },
-    { subject: 'Council', value: result.stakeholderSentiment.council },
-  ] : [];
+  const city = cities.find(c => c.id === scenario.cityId);
+  const selectedInterventions = interventions.filter(i => scenario.interventionIds.includes(i.id));
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                What if we {scenario.title}
-              </h1>
-              <p className="text-slate-600">
-                {city.name} • {intervention?.title || 'Unknown Intervention'} • {intervention?.categories?.[0] || 'Unknown Category'}
-              </p>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Scenario Analysis</h1>
+              <p className="text-slate-600">What if we {scenario.whatIfQuestion}</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowAssumptions(!showAssumptions)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-              >
-                {showAssumptions ? 'Hide' : 'Show'} Assumptions
-              </button>
-                              <button
-                  onClick={handleExport}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Export PDF
-                </button>
-            </div>
-          </div>
-
-          {/* Caveat Banner */}
-          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-amber-800 text-sm">
-              <span className="font-medium">⚠️ Important:</span> This is an exploratory simulation, not a forecast. 
-              Results are based on simplified models and assumptions. Use for decision support and sensemaking.
-            </p>
-          </div>
-        </div>
-
-        {/* Assumptions Drawer */}
-        {showAssumptions && (
-          <div className="mb-8 p-6 bg-white rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Key Assumptions</h3>
-            <p className="text-slate-500 italic">Assumptions are now stored in the intervention profile rather than the scenario.</p>
-          </div>
-        )}
-
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Emissions Change</h3>
-            <p className={`text-2xl font-bold ${(result?.kpis?.GHGEmissionsMtCO2e?.deltaPct || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatPercentage(result?.kpis?.GHGEmissionsMtCO2e?.deltaPct || 0)} {(result?.kpis?.GHGEmissionsMtCO2e?.deltaPct || 0) > 0 ? '↑' : '↓'}
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Congestion Change</h3>
-            <p className={`text-2xl font-bold ${(result?.kpis?.CongestionIndex?.deltaPct || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatPercentage(result?.kpis?.CongestionIndex?.deltaPct || 0)} {(result?.kpis?.CongestionIndex?.deltaPct || 0) > 0 ? '↑' : '↓'}
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Commute Time</h3>
-            <p className={`text-2xl font-bold ${(result?.kpis?.AvgCommuteMin?.delta || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatNumber(result?.kpis?.AvgCommuteMin?.delta || 0)} min {(result?.kpis?.AvgCommuteMin?.delta || 0) > 0 ? '↑' : '↓'}
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Fiscal Impact</h3>
-            <p className={`text-2xl font-bold ${(result?.fiscalImpactM || 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(result?.fiscalImpactM || 0)} {(result?.fiscalImpactM || 0) > 0 ? '↑' : '↓'}
-            </p>
-          </div>
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Modal Shift Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Modal Shift</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={modalShiftData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="before" fill="#94a3b8" name="Before" />
-                <Bar dataKey="after" fill="#3b82f6" name="After" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Stakeholder Sentiment */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Stakeholder Sentiment</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <RadarChart data={sentimentData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis domain={[-1, 1]} />
-                <Radar dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Equity and Health Impact */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Equity Score</h3>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
-                {result?.equityScore_0_100 ? `${Math.round(result.equityScore_0_100)}%` : 'N/A'}
-              </div>
-              <p className="text-sm text-slate-600">This score weights impacts for vulnerable groups</p>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Health Impact</h3>
-            <div className="text-center">
-              <div className={`text-4xl font-bold mb-2 ${(result?.kpis?.BaselineHealthIndex_0_100?.deltaPct || 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {(result?.kpis?.BaselineHealthIndex_0_100?.deltaPct || 0) > 0 ? '+' : ''}{formatPercentage(result?.kpis?.BaselineHealthIndex_0_100?.deltaPct || 0)}
-              </div>
-              <p className="text-sm text-slate-600">Health index change</p>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Trust Impact</h3>
-            <div className="text-center">
-              <div className={`text-4xl font-bold mb-2 ${(result?.kpis?.TrustIndex_0_100?.deltaPct || 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {(result?.kpis?.TrustIndex_0_100?.deltaPct || 0) > 0 ? '+' : ''}{formatPercentage(result?.kpis?.TrustIndex_0_100?.deltaPct || 0)}
-              </div>
-              <p className="text-sm text-slate-600">Trust index change</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Narrative Findings and Risks */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Key Insights</h3>
-            {result?.qualitativeFindings && Array.isArray(result.qualitativeFindings) && result.qualitativeFindings.length > 0 ? (
-              <ul className="space-y-3">
-                {result.qualitativeFindings.map((finding: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="text-blue-600 font-bold mt-1">{index + 1}.</span>
-                    <span className="text-slate-700">{finding}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-slate-500 italic">No qualitative findings available for this scenario.</p>
-            )}
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Key Risks</h3>
-            {result?.risksMaterialised && Array.isArray(result.risksMaterialised) && result.risksMaterialised.length > 0 ? (
-              <ul className="space-y-3">
-                {result.risksMaterialised.map((risk: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="text-red-600 font-bold mt-1">{index + 1}.</span>
-                    <span className="text-slate-700">{risk}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-slate-500 italic">No risks materialised in this scenario.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Confidence and Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Confidence Level</h3>
-              <p className="text-slate-600">
-                <span className="font-medium">{result?.confidence_0_1 ? `${Math.round(result.confidence_0_1 * 100)}%` : 'N/A'}</span> - 
-                Based on data quality and intervention complexity
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => router.push('/scenarios/compare')}
-                className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-              >
-                Compare Scenarios
-              </button>
               <button
                 onClick={() => router.push('/scenarios/new')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50"
               >
-                Create New Scenario
+                Create New
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Export PDF
               </button>
             </div>
           </div>
+
+          {/* Context Summary */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Context</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium text-slate-900 mb-2">City</h3>
+                <p className="text-slate-700">{city?.name}</p>
+                {city?.mainChallenges && (
+                  <p className="text-sm text-slate-600 mt-1">
+                    Challenges: {city.mainChallenges.join(', ')}
+                  </p>
+                )}
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-900 mb-2">Interventions</h3>
+                <div className="space-y-1">
+                  {selectedInterventions.map((intervention) => (
+                    <div key={intervention.id} className="text-slate-700">
+                      • {intervention.title} ({intervention.category})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {result ? (
+          <div className="space-y-6">
+            {/* Narrative Summary */}
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">Narrative Summary</h2>
+              <p className="text-slate-700 leading-relaxed">{result.narrativeSummary}</p>
+            </div>
+
+            {/* Stakeholder Impacts */}
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">Stakeholder Impacts</h2>
+              <div className="grid gap-4">
+                {result.stakeholderImpacts.map((impact, index) => (
+                  <div key={index} className="border border-slate-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-slate-900 capitalize">{impact.group}</h3>
+                      {impact.stance && (
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          impact.stance === 'Support' ? 'bg-green-100 text-green-800' :
+                          impact.stance === 'Oppose' ? 'bg-red-100 text-red-800' :
+                          impact.stance === 'Mixed' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-slate-100 text-slate-800'
+                        }`}>
+                          {impact.stance}
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div>
+                        <h4 className="font-medium text-slate-900 mb-2">Benefits</h4>
+                        <ul className="space-y-1">
+                          {impact.benefits.map((benefit, i) => (
+                            <li key={i} className="text-sm text-slate-700 flex items-start">
+                              <span className="text-green-500 mr-2">✓</span>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900 mb-2">Concerns</h4>
+                        <ul className="space-y-1">
+                          {impact.concerns.map((concern, i) => (
+                            <li key={i} className="text-sm text-slate-700 flex items-start">
+                              <span className="text-red-500 mr-2">⚠</span>
+                              {concern}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900 mb-2">Engagement Needs</h4>
+                        <ul className="space-y-1">
+                          {impact.engagementNeeds.map((need, i) => (
+                            <li key={i} className="text-sm text-slate-700 flex items-start">
+                              <span className="text-blue-500 mr-2">→</span>
+                              {need}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* System Effects */}
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">System Effects</h2>
+              <div className="grid gap-4">
+                {result.systemEffects.map((effect, index) => (
+                  <div key={index} className="border border-slate-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium text-slate-900">{effect.domain}</h3>
+                      <div className="flex gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          effect.polarity === 'Positive' ? 'bg-green-100 text-green-800' :
+                          effect.polarity === 'Negative' ? 'bg-red-100 text-red-800' :
+                          effect.polarity === 'Mixed' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-slate-100 text-slate-800'
+                        }`}>
+                          {effect.polarity}
+                        </span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          effect.confidence === 'High' ? 'bg-blue-100 text-blue-800' :
+                          effect.confidence === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-slate-100 text-slate-800'
+                        }`}>
+                          {effect.confidence} Confidence
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-slate-700">{effect.effect}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Policy Interactions */}
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">Policy & Trend Interactions</h2>
+              <div className="grid gap-4">
+                {result.policyInteractions.map((interaction, index) => (
+                  <div key={index} className="border border-slate-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium text-slate-900">{interaction.policy}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        interaction.interaction === 'Enables' ? 'bg-green-100 text-green-800' :
+                        interaction.interaction === 'ConstrainedBy' ? 'bg-yellow-100 text-yellow-800' :
+                        interaction.interaction === 'ConflictsWith' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {interaction.interaction}
+                      </span>
+                    </div>
+                    <p className="text-slate-700">{interaction.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Risks & Assumptions */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Risks & Unknowns</h2>
+                <div className="space-y-3">
+                  {result.risks.map((risk, index) => (
+                    <div key={index} className="border border-slate-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-slate-900">{risk.risk}</span>
+                        <div className="flex gap-1">
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            risk.likelihood === 'High' ? 'bg-red-100 text-red-800' :
+                            risk.likelihood === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {risk.likelihood}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            risk.impact === 'High' ? 'bg-red-100 text-red-800' :
+                            risk.impact === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {risk.impact}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Assumptions & Gaps</h2>
+                <div className="space-y-3">
+                  {result.assumptions.map((assumption, index) => (
+                    <div key={index} className="border border-slate-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-slate-900">{assumption.assumption}</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          assumption.confidence === 'High' ? 'bg-green-100 text-green-800' :
+                          assumption.confidence === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {assumption.confidence}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Signals & Experiments */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Signals to Watch</h2>
+                <div className="space-y-3">
+                  {result.signals.map((signal, index) => (
+                    <div key={index} className="border border-slate-200 rounded-lg p-3">
+                      <h3 className="font-medium text-slate-900 mb-1">{signal.signal}</h3>
+                      <p className="text-sm text-slate-700">{signal.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Next Experiments</h2>
+                <div className="space-y-3">
+                  {result.experiments.map((experiment, index) => (
+                    <div key={index} className="border border-slate-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-slate-900">{experiment.experiment}</h3>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          experiment.effort === 'Low' ? 'bg-green-100 text-green-800' :
+                          experiment.effort === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {experiment.effort} Effort
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-700">Timeline: {experiment.timeline}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Portfolio Analysis */}
+            {(result.synergies || result.gaps) && (
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Portfolio Analysis</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {result.synergies && result.synergies.length > 0 && (
+                    <div>
+                      <h3 className="font-medium text-slate-900 mb-3">Synergies</h3>
+                      <ul className="space-y-2">
+                        {result.synergies.map((synergy, index) => (
+                          <li key={index} className="text-slate-700 flex items-start">
+                            <span className="text-green-500 mr-2">✓</span>
+                            {synergy}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {result.gaps && result.gaps.length > 0 && (
+                    <div>
+                      <h3 className="font-medium text-slate-900 mb-3">Gaps</h3>
+                      <ul className="space-y-2">
+                        {result.gaps.map((gap, index) => (
+                          <li key={index} className="text-slate-700 flex items-start">
+                            <span className="text-red-500 mr-2">⚠</span>
+                            {gap}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Metadata */}
+            <div className="bg-slate-50 rounded-lg p-4 text-center">
+              <p className="text-sm text-slate-600">
+                Generated on {result.generatedAt} • Confidence: {Math.round(result.confidence_0_1 * 100)}%
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Scenario Analysis Not Generated</h2>
+            <p className="text-slate-600 mb-6">
+              The scenario analysis hasn't been generated yet. This might be due to an error or the analysis is still in progress.
+            </p>
+            <button
+              onClick={() => router.push('/scenarios/new')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Create New Scenario
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

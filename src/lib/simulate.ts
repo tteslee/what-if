@@ -1,4 +1,4 @@
-import { City, Scenario, Result } from './schemas';
+import { City, Scenario, ScenarioResult } from './schemas';
 
 // Simple coefficient-based simulation rules
 const SIMULATION_RULES = {
@@ -189,59 +189,59 @@ function generateNarratives(domain: string, kpis: {
 }
 
 // Main simulation function
-export function runScenario(scenario: Scenario, city: City, seed: number = 1): Result {
-  const rules = SIMULATION_RULES[scenario.intervention.domain as keyof typeof SIMULATION_RULES];
-  const sentimentRules = SENTIMENT_RULES[scenario.intervention.domain as keyof typeof SENTIMENT_RULES];
-  
-  if (!rules || !sentimentRules) {
-    throw new Error(`Unknown intervention domain: ${scenario.intervention.domain}`);
-  }
+// export function runScenario(scenario: Scenario, city: City, seed: number = 1): Result {
+//   const rules = SIMULATION_RULES[scenario.intervention.domain as keyof typeof SIMULATION_RULES];
+//   const sentimentRules = SENTIMENT_RULES[scenario.intervention.domain as keyof typeof SENTIMENT_RULES];
+//   
+//   if (!rules || !sentimentRules) {
+//     throw new Error(`Unknown intervention domain: ${scenario.intervention.domain}`);
+//   }
 
-  // Generate KPIs with stochastic variation
-  const kpis = {
-    emissionsDeltaPct: addVariation(rules.emissionsDeltaPct.base, rules.emissionsDeltaPct.variance, seed),
-    congestionDeltaPct: addVariation(rules.congestionDeltaPct.base, rules.congestionDeltaPct.variance, seed),
-    avgCommuteDeltaMin: addVariation(rules.avgCommuteDeltaMin.base, rules.avgCommuteDeltaMin.variance, seed),
-    modalShift: {
-      car: Math.max(0, city.modalSplit.car + rules.modalShift.car),
-      transit: Math.min(1, city.modalSplit.transit + rules.modalShift.transit),
-      walk: Math.min(1, city.modalSplit.walk + rules.modalShift.walk),
-      cycle: Math.min(1, city.modalSplit.cycle + rules.modalShift.cycle),
-    },
-    fiscalImpactMGBP: addVariation(rules.fiscalImpactMGBP.base, rules.fiscalImpactMGBP.variance, seed),
-    healthIndexDelta: addVariation(rules.healthIndexDelta.base, rules.healthIndexDelta.variance, seed),
-    trustIndexDelta: addVariation(rules.trustIndexDelta.base, rules.trustIndexDelta.variance, seed),
-    equityScore: addVariation(rules.equityScore.base, rules.equityScore.variance, seed),
-  };
+//   // Generate KPIs with stochastic variation
+//   const kpis = {
+//     emissionsDeltaPct: addVariation(rules.emissionsDeltaPct.base, rules.emissionsDeltaPct.variance, seed),
+//     congestionDeltaPct: addVariation(rules.congestionDeltaPct.base, rules.congestionDeltaPct.variance, seed),
+//     avgCommuteDeltaMin: addVariation(rules.avgCommuteDeltaMin.base, rules.avgCommuteDeltaMin.variance, seed),
+//     modalShift: {
+//       car: Math.max(0, city.modalSplit.car + rules.modalShift.car),
+//       transit: Math.min(1, city.modalSplit.transit + rules.modalShift.transit),
+//       walk: Math.min(1, city.modalSplit.walk + rules.modalShift.walk),
+//       cycle: Math.min(1, city.modalSplit.cycle + rules.modalShift.cycle),
+//     },
+//     fiscalImpactMGBP: addVariation(rules.fiscalImpactMGBP.base, rules.fiscalImpactMGBP.variance, seed),
+//     healthIndexDelta: addVariation(rules.healthIndexDelta.base, rules.healthIndexDelta.variance, seed),
+//     trustIndexDelta: addVariation(rules.trustIndexDelta.base, rules.trustIndexDelta.variance, seed),
+//     equityScore: addVariation(rules.equityScore.base, rules.equityScore.variance, seed),
+//   };
 
-  // Generate stakeholder sentiment
-  const stakeholderSentiment = {
-    citizens: Math.max(-1, Math.min(1, addVariation(sentimentRules.citizens.base, sentimentRules.citizens.variance, seed))),
-    businesses: Math.max(-1, Math.min(1, addVariation(sentimentRules.businesses.base, sentimentRules.businesses.variance, seed))),
-    ngo: Math.max(-1, Math.min(1, addVariation(sentimentRules.ngo.base, sentimentRules.ngo.variance, seed))),
-    council: Math.max(-1, Math.min(1, addVariation(sentimentRules.council.base, sentimentRules.council.variance, seed))),
-  };
+//   // Generate stakeholder sentiment
+//   const stakeholderSentiment = {
+//     citizens: Math.max(-1, Math.min(1, addVariation(sentimentRules.citizens.base, sentimentRules.citizens.variance, seed))),
+//     businesses: Math.max(-1, Math.min(1, addVariation(sentimentRules.businesses.base, sentimentRules.businesses.variance, seed))),
+//     ngo: Math.max(-1, Math.min(1, addVariation(sentimentRules.ngo.base, sentimentRules.ngo.variance, seed))),
+//     council: Math.max(-1, Math.min(1, addVariation(sentimentRules.council.base, sentimentRules.council.variance, seed))),
+//   };
 
-  // Generate narratives and risks
-  const narrativeFindings = generateNarratives(scenario.intervention.domain, kpis);
-  const risks = RISK_TEMPLATES[scenario.intervention.domain as keyof typeof RISK_TEMPLATES] || [];
+//   // Generate narratives and risks
+//   const narrativeFindings = generateNarratives(scenario.intervention.domain, kpis);
+//   const risks = RISK_TEMPLATES[scenario.intervention.domain as keyof typeof RISK_TEMPLATES] || [];
 
-  // Calculate confidence based on data quality and intervention complexity
-  const confidence = Math.max(0.3, Math.min(0.9, 0.7 + (seed - 1) * 0.1));
+//   // Calculate confidence based on data quality and intervention complexity
+//   const confidence = Math.max(0.3, Math.min(0.9, 0.7 + (seed - 1) * 0.1));
 
-  return {
-    scenarioId: scenario.id,
-    kpis,
-    narrativeFindings,
-    risks,
-    confidence,
-    stakeholderSentiment,
-  };
-}
+//   return {
+//     scenarioId: scenario.id,
+//     kpis,
+//     narrativeFindings,
+//     risks,
+//     confidence,
+//     stakeholderSentiment,
+//   };
+// }
 
 // Function to run multiple scenarios for comparison
-export function runComparison(scenarios: Scenario[], city: City): Result[] {
-  return scenarios.map((scenario, index) => 
-    runScenario(scenario, city, (index + 1) * 1000) // Different seeds for each scenario
-  );
-}
+// export function runComparison(scenarios: Scenario[], city: City): Result[] {
+//   return scenarios.map((scenario, index) => 
+//     runScenario(scenario, city, (index + 1) * 1000) // Different seeds for each scenario
+//   );
+// }

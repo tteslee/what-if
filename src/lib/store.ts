@@ -1,31 +1,33 @@
 import { create } from 'zustand';
 import { storageService } from './storage-service';
 import { sampleCities, sampleInterventions } from '../data/sample-data';
-import { CityProfile, Intervention, Scenario, Result } from './schemas';
+import { CityProfile, Intervention, Scenario, ScenarioResult } from './schemas';
 
 interface WhatIfState {
   // Data
   cities: CityProfile[];
   interventions: Intervention[];
   scenarios: Scenario[];
-  results: Record<string, Result>;
+  results: Record<string, ScenarioResult>;
   
   // UI State
   currentStep: number;
   whatIfQuestion: string;
   selectedCityId: string | null;
-  selectedInterventionId: string | null;
+  selectedInterventionIds: string[]; // Support multiple interventions
   assumptions: string[];
   
   // Actions
   setCurrentStep: (step: number) => void;
   setWhatIfQuestion: (question: string) => void;
   setSelectedCity: (cityId: string) => void;
-  setSelectedIntervention: (interventionId: string) => void;
+  addSelectedIntervention: (interventionId: string) => void;
+  removeSelectedIntervention: (interventionId: string) => void;
+  clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
   createScenario: () => Scenario | null;
-  runScenario: (scenarioId: string) => Result | null;
+  generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: () => void;
   generateCustomCity: (description: string) => Promise<CityProfile | null>;
   generateCustomIntervention: (description: string) => Promise<Intervention | null>;
@@ -33,6 +35,7 @@ interface WhatIfState {
   addCustomIntervention: (intervention: Intervention) => void;
   deleteCustomCity: (cityId: string) => void;
   deleteCustomIntervention: (interventionId: string) => void;
+  clearLegacyData: () => void;
   reset: () => void;
 }
 
@@ -44,7 +47,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   results: {},
   currentStep: 0,
   selectedCityId: null,
-  selectedInterventionId: null,
+  selectedInterventionIds: [],
   whatIfQuestion: '',
   assumptions: [],
   
@@ -53,7 +56,19 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   
   setSelectedCity: (cityId: string) => set({ selectedCityId: cityId }),
   
-  setSelectedIntervention: (interventionId: string) => set({ selectedInterventionId: interventionId }),
+  addSelectedIntervention: (interventionId: string) => {
+    set((state) => ({
+      selectedInterventionIds: [...state.selectedInterventionIds, interventionId]
+    }));
+  },
+  
+  removeSelectedIntervention: (interventionId: string) => {
+    set((state) => ({
+      selectedInterventionIds: state.selectedInterventionIds.filter(id => id !== interventionId)
+    }));
+  },
+  
+  clearSelectedInterventions: () => set({ selectedInterventionIds: [] }),
   
   setWhatIfQuestion: (question: string) => set({ whatIfQuestion: question }),
   
@@ -76,27 +91,15 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   // Scenario Management
   createScenario: () => {
     const state = get();
-    if (!state.selectedCityId || !state.selectedInterventionId || !state.whatIfQuestion.trim()) {
+    if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
     }
 
     const scenario: Scenario = {
       id: `scenario-${Date.now()}`,
-      title: state.whatIfQuestion,
+      whatIfQuestion: state.whatIfQuestion,
       cityId: state.selectedCityId,
-      interventionIds: [state.selectedInterventionId],
-      intendedImpacts: [
-        {
-          indicator: 'GHGEmissionsMtCO2e',
-          targetDirection: 'Decrease',
-          priority_1_5: 3,
-        },
-        {
-          indicator: 'CongestionIndex',
-          targetDirection: 'Decrease',
-          priority_1_5: 3,
-        },
-      ],
+      interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
     };
 
@@ -107,60 +110,58 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     return scenario;
   },
 
-  runScenario: (scenarioId: string) => {
+  generateScenario: async (scenarioId: string) => {
     const state = get();
     const scenario = state.scenarios.find(s => s.id === scenarioId);
     if (!scenario) return null;
 
-    // For now, create a mock result
-    // In the future, this will call the actual simulation engine
-    const result: Result = {
-      scenarioId,
-      kpis: {
-        GHGEmissionsMtCO2e: {
-          baseline: 1.2,
-          delta: -0.1,
-          deltaPct: -8.3,
-          equityAdjustedDeltaPct: -8.5,
-        },
-        CongestionIndex: {
-          baseline: 0.4,
-          delta: -0.05,
-          deltaPct: -12.5,
-          equityAdjustedDeltaPct: -12.0,
-        },
-        ModalShareCarPct: {
-          baseline: 60,
-          delta: -3,
-          deltaPct: -5.0,
-          equityAdjustedDeltaPct: -5.0,
-        },
-      },
-      qualitativeFindings: [
-        'Intervention shows promising results in reducing emissions and congestion',
-        'Modal shift from car to active transport observed',
-        'Equity analysis suggests benefits are well distributed',
-      ],
-      confidence_0_1: 0.75,
-      equityScore_0_100: 78,
-      fiscalImpactM: -2.5,
-      stakeholderSentiment: {
-        citizens: 0.6,
-        businesses: 0.3,
-        ngo: 0.8,
-        council: 0.7,
-      },
-    };
+    // Get the actual city and interventions data
+    const city = state.cities.find(c => c.id === scenario.cityId);
+    const interventions = state.interventions.filter(i => scenario.interventionIds.includes(i.id));
 
-    set((state) => ({
-      results: { ...state.results, [scenarioId]: result },
-    }));
+    if (!city || interventions.length === 0) {
+      throw new Error('City or interventions not found');
+    }
 
-    return result;
+    try {
+      const response = await fetch('/api/ai/generate-scenario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          scenarioId,
+          scenarioData: {
+            whatIfQuestion: scenario.whatIfQuestion,
+            city,
+            interventions
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      }
+
+      const result: ScenarioResult = await response.json();
+      
+      set((state) => ({
+        results: { ...state.results, [scenarioId]: result },
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error generating scenario:', error);
+      throw error;
+    }
   },
   
   loadSampleData: () => {
     console.log('Loading sample data...');
+    
+    // Clear any legacy data first
+    storageService.clearLegacyData();
+    
     const customCities = storageService.getCustomCities();
     const customInterventions = storageService.getCustomInterventions();
     
@@ -327,6 +328,18 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     }
   },
   
+  clearLegacyData: () => {
+    storageService.clearLegacyData();
+    // Reload data after clearing legacy data
+    const customCities = storageService.getCustomCities();
+    const customInterventions = storageService.getCustomInterventions();
+    
+    set({
+      cities: [...sampleCities, ...customCities],
+      interventions: [...sampleInterventions, ...customInterventions],
+    });
+  },
+  
   // Reset
   reset: () => {
     set({
@@ -334,7 +347,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       results: {},
       currentStep: 0,
       selectedCityId: null,
-      selectedInterventionId: null,
+      selectedInterventionIds: [],
       whatIfQuestion: '',
       assumptions: [],
     });

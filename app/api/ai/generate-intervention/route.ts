@@ -192,10 +192,10 @@ Your job is to efficiently gather information and generate a complete interventi
       }
       if (interventionData.mechanisms) {
         console.log('Mechanisms count:', interventionData.mechanisms.length);
-        interventionData.mechanisms.forEach((mechanism: any, index: number) => {
+        interventionData.mechanisms.forEach((mechanism: { description: string; expectedEffects?: Array<{ indicator: string; direction: string; evidence: string }> }, index: number) => {
           console.log(`Mechanism ${index}:`, {
             description: mechanism.description,
-            expectedEffects: mechanism.expectedEffects?.map((effect: any) => ({
+            expectedEffects: mechanism.expectedEffects?.map((effect: { indicator: string; direction: string; evidence: string }) => ({
               indicator: effect.indicator,
               direction: effect.direction,
               evidence: effect.evidence

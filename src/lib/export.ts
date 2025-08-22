@@ -1,254 +1,110 @@
-import { Scenario, Result, CityProfile, Intervention } from './schemas';
-import { sampleCities } from '../data/sample-data';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { Scenario, ScenarioResult, CityProfile, Intervention } from './schemas';
 
-export function exportToPDF(scenario: Scenario, result: Result, city: CityProfile, intervention: Intervention): void {
-  if (!city) {
-    throw new Error(`City not found: ${scenario.cityId}`);
-  }
+export function exportToMarkdown(scenario: Scenario, result: ScenarioResult, city: CityProfile, interventions: Intervention[]): string {
+  const selectedInterventions = interventions.filter(i => scenario.interventionIds.includes(i.id));
+  
+  const markdown = `# What-if Analysis: ${scenario.whatIfQuestion}
 
-  if (!intervention) {
-    throw new Error(`Intervention not found for scenario: ${scenario.id}`);
-  }
+## Context
 
-  const formatPercentage = (value: number) => `${Math.round(Math.abs(value * 100))}%`;
-  const formatNumber = (value: number) => Math.abs(Math.round(value * 100) / 100);
-  const formatCurrency = (value: number) => `£${Math.abs(Math.round(value * 100) / 100)}M`;
+**City:** ${city.name}
+${city.mainChallenges ? `**Main Challenges:** ${city.mainChallenges.join(', ')}` : ''}
+${city.populationContext?.size ? `**Population:** ${city.populationContext.size.toLocaleString()}` : ''}
+${city.populationContext?.demographics ? `**Demographics:** ${city.populationContext.demographics}` : ''}
 
-  // Create a temporary HTML element for the PDF content
-  const pdfContent = document.createElement('div');
-  pdfContent.style.padding = '40px';
-  pdfContent.style.fontFamily = 'Arial, sans-serif';
-  pdfContent.style.fontSize = '12px';
-  pdfContent.style.lineHeight = '1.6';
-  pdfContent.style.maxWidth = '800px';
-  pdfContent.style.backgroundColor = 'white';
-  pdfContent.style.color = 'black';
+**Interventions:**
+${selectedInterventions.map(int => `- ${int.title} (${int.category})`).join('\n')}
 
-  pdfContent.innerHTML = `
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="color: #1e40af; font-size: 28px; margin-bottom: 10px;">What-if Analysis</h1>
-      <h2 style="color: #374151; font-size: 20px; font-weight: normal;">${scenario.title}</h2>
-    </div>
+## Narrative Summary
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">City Context</h3>
-      <p style="margin: 5px 0;"><strong>${city.name}</strong> - Population: ${city.demographics.population.toLocaleString()}, Households: ${city.demographics.households?.toLocaleString() || 'N/A'}</p>
-    </div>
+${result.narrativeSummary}
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Intervention</h3>
-      <p style="margin: 5px 0;"><strong>${intervention.title}</strong> (${intervention.categories.join(', ')})</p>
-      <p style="margin: 5px 0; color: #6b7280;">${intervention.description || ''}</p>
-      <p style="margin: 5px 0;"><strong>Scope:</strong> ${intervention.implementation.scope} over ${intervention.implementation.durationMonths} months</p>
-      <p style="margin: 5px 0;"><strong>Funding Model:</strong> ${intervention.implementation.fundingModel || 'Not specified'}</p>
-    </div>
+## Stakeholder Impacts
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Key Assumptions</h3>
-      ${intervention.assumptions && intervention.assumptions.length > 0 
-        ? intervention.assumptions.map((assumption: string) => `<p style="margin: 5px 0;">• ${assumption}</p>`).join('')
-        : '<p style="margin: 5px 0; color: #6b7280; font-style: italic;">No specific assumptions were added to this intervention.</p>'
-      }
-    </div>
+${result.stakeholderImpacts.map(impact => `
+### ${impact.group.charAt(0).toUpperCase() + impact.group.slice(1)}
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Key Performance Indicators</h3>
-      
-      <div style="margin-bottom: 20px;">
-        <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Environmental Impact</h4>
-        <p style="margin: 5px 0;">• <strong>Emissions Change:</strong> ${formatPercentage(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0)} ${(result.kpis.GHGEmissionsMtCO2e?.deltaPct || 0) > 0 ? 'increase' : 'decrease'}</p>
-        <p style="margin: 5px 0;">• <strong>Congestion Change:</strong> ${formatPercentage(result.kpis.CongestionIndex?.deltaPct || 0)} ${(result.kpis.CongestionIndex?.deltaPct || 0) > 0 ? 'increase' : 'decrease'}</p>
-      </div>
+**Benefits:**
+${impact.benefits.map(benefit => `- ${benefit}`).join('\n')}
 
-      <div style="margin-bottom: 20px;">
-        <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Mobility & Transport</h4>
-        <p style="margin: 5px 0;">• <strong>Commute Time Change:</strong> ${formatNumber(result.kpis.AvgCommuteMin?.delta || 0)} minutes ${(result.kpis.AvgCommuteMin?.delta || 0) > 0 ? 'increase' : 'decrease'}</p>
-        <p style="margin: 5px 0;">• <strong>Modal Shift:</strong></p>
-        <div style="margin-left: 20px;">
-          <p style="margin: 3px 0;">- Car: ${formatPercentage(result.kpis.ModalShareCarPct?.deltaPct || 0)}</p>
-          <p style="margin: 3px 0;">- Transit: ${formatPercentage(result.kpis.ModalShareTransitPct?.deltaPct || 0)}</p>
-          <p style="margin: 3px 0;">- Walk: ${formatPercentage(result.kpis.ModalShareWalkPct?.deltaPct || 0)}</p>
-          <p style="margin: 3px 0;">- Cycle: ${formatPercentage(result.kpis.ModalShareCyclePct?.deltaPct || 0)}</p>
-        </div>
-      </div>
+**Concerns:**
+${impact.concerns.map(concern => `- ${concern}`).join('\n')}
 
-      <div style="margin-bottom: 20px;">
-        <h4 style="color: #374151; font-size: 14px; margin-bottom: 10px;">Economic & Social</h4>
-        <p style="margin: 5px 0;">• <strong>Fiscal Impact:</strong> ${formatCurrency(result.fiscalImpactM || 0)} annually</p>
-        <p style="margin: 5px 0;">• <strong>Health Index Change:</strong> ${formatPercentage(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0)} points ${(result.kpis.BaselineHealthIndex_0_100?.deltaPct || 0) > 0 ? 'improvement' : 'decline'}</p>
-        <p style="margin: 5px 0;">• <strong>Trust Index Change:</strong> ${formatPercentage(result.kpis.TrustIndex_0_100?.deltaPct || 0)} points ${(result.kpis.TrustIndex_0_100?.deltaPct || 0) > 0 ? 'improvement' : 'decline'}</p>
-        <p style="margin: 5px 0;">• <strong>Equity Score:</strong> ${result.equityScore_0_100 ? `${Math.round(result.equityScore_0_100)}%` : 'N/A'} (weights impacts for vulnerable groups)</p>
-      </div>
-    </div>
+**Engagement Needs:**
+${impact.engagementNeeds.map(need => `- ${need}`).join('\n')}
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Three Key Insights</h3>
-      ${result.qualitativeFindings && Array.isArray(result.qualitativeFindings) && result.qualitativeFindings.length > 0
-        ? result.qualitativeFindings.slice(0, 3).map((finding: string, index: number) => 
-            `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${finding}</p>`
-          ).join('')
-        : '<p style="margin: 8px 0; color: #6b7280; font-style: italic;">No qualitative findings available for this scenario.</p>'
-      }
-    </div>
+${impact.stance ? `**Stance:** ${impact.stance}` : ''}
+`).join('\n')}
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Three Key Risks</h3>
-      ${result.risksMaterialised && Array.isArray(result.risksMaterialised) && result.risksMaterialised.length > 0
-        ? result.risksMaterialised.slice(0, 3).map((risk: string, index: number) => 
-            `<p style="margin: 8px 0;"><strong>${index + 1}.</strong> ${risk}</p>`
-          ).join('')
-        : '<p style="margin: 8px 0; color: #6b7280; font-style: italic;">No risks identified for this scenario.</p>'
-      }
-    </div>
+## System Effects
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Stakeholder Sentiment</h3>
-      ${result.stakeholderSentiment
-        ? `<p style="margin: 5px 0;">• <strong>Citizens:</strong> ${formatSentiment(result.stakeholderSentiment.citizens)}</p>
-           <p style="margin: 5px 0;">• <strong>Businesses:</strong> ${formatSentiment(result.stakeholderSentiment.businesses)}</p>
-           <p style="margin: 5px 0;">• <strong>NGOs:</strong> ${formatSentiment(result.stakeholderSentiment.ngo)}</p>
-           <p style="margin: 5px 0;">• <strong>Local Council:</strong> ${formatSentiment(result.stakeholderSentiment.council)}</p>`
-        : '<p style="margin: 5px 0; color: #6b7280; font-style: italic;">Stakeholder sentiment data not available for this scenario.</p>'
-      }
-    </div>
+${result.systemEffects.map(effect => `
+### ${effect.domain}
+**Effect:** ${effect.effect}
+**Polarity:** ${effect.polarity}
+**Confidence:** ${effect.confidence}
+`).join('\n')}
 
-    <div style="margin-bottom: 30px;">
-      <h3 style="color: #1e40af; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Confidence Level</h3>
-      <p style="margin: 5px 0;"><strong>${result.confidence_0_1 ? Math.round(result.confidence_0_1 * 100) : 'N/A'}%</strong> - Based on data quality and intervention complexity</p>
-    </div>
+## Policy & Trend Interactions
 
-    <div style="margin-top: 40px; padding: 20px; background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;">
-      <p style="margin: 0; color: #92400e; font-size: 11px;">
-        <strong>⚠️ Important Note:</strong> This is an exploratory simulation, not a forecast. Results are based on simplified models and assumptions. Use for decision support and sensemaking, not prediction.
-      </p>
-    </div>
+${result.policyInteractions.map(interaction => `
+### ${interaction.policy}
+**Interaction:** ${interaction.interaction}
+**Description:** ${interaction.description}
+`).join('\n')}
 
-    <div style="margin-top: 20px; text-align: center; color: #6b7280; font-size: 10px; font-style: italic;">
-      Generated by What-if: A digital testbed for urban innovation
-    </div>
-  `;
+## Risks & Unknowns
 
-  // Add the element to the DOM temporarily
-  document.body.appendChild(pdfContent);
+${result.risks.map(risk => `
+### ${risk.risk}
+**Likelihood:** ${risk.likelihood}
+**Impact:** ${risk.impact}
+`).join('\n')}
 
-  // Convert to canvas and then to PDF
-  html2canvas(pdfContent, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff'
-  }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
+## Assumptions & Gaps
 
-    let position = 0;
+${result.assumptions.map(assumption => `
+### ${assumption.assumption}
+**Confidence:** ${assumption.confidence}
+`).join('\n')}
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+## Signals to Watch
 
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+${result.signals.map(signal => `
+### ${signal.signal}
+${signal.description}
+`).join('\n')}
 
-    // Download the PDF
-    const filename = `what-if-${scenario.id}.pdf`;
-    pdf.save(filename);
+## Next Experiments
 
-    // Clean up
-    document.body.removeChild(pdfContent);
-  });
-}
+${result.experiments.map(experiment => `
+### ${experiment.experiment}
+**Effort:** ${experiment.effort}
+**Timeline:** ${experiment.timeline}
+`).join('\n')}
 
-function formatSentiment(sentiment: number): string {
-  if (sentiment >= 0.5) return 'Strongly Positive';
-  if (sentiment >= 0.1) return 'Positive';
-  if (sentiment >= -0.1) return 'Neutral';
-  if (sentiment >= -0.5) return 'Negative';
-  return 'Strongly Negative';
-}
+${result.synergies && result.synergies.length > 0 ? `
+## Portfolio Synergies
 
-// Keep the old markdown function for backward compatibility
-export function exportToMarkdown(scenario: Scenario, result: Result): string {
-  const city = sampleCities.find(c => c.id === scenario.cityId);
-  if (!city) {
-    throw new Error(`City not found: ${scenario.cityId}`);
-  }
+${result.synergies.map(synergy => `- ${synergy}`).join('\n')}
+` : ''}
 
-  const formatPercentage = (value: number) => `${Math.round(Math.abs(value * 100))}%`;
-  const formatNumber = (value: number) => Math.abs(Math.round(value * 100) / 100);
-  const formatCurrency = (value: number) => `£${Math.abs(Math.round(value * 100) / 100)}M`;
+${result.gaps && result.gaps.length > 0 ? `
+## Portfolio Gaps
 
-  const markdown = `# What-if Analysis: ${scenario.title}
-
-## City Context
-**${city.name}** - Population: ${city.population.toLocaleString()}, Households: ${city.households.toLocaleString()}
-
-## Intervention
-**${scenario.intervention.name}** (${scenario.intervention.domain})
-${scenario.intervention.description || ''}
-
-**Rollout:** ${scenario.intervention.rollout.scope} over ${scenario.intervention.rollout.durationMonths} months
-**Governance:** ${scenario.intervention.governanceModel || 'Not specified'}
-
-## Key Assumptions
-${scenario.assumptions.map(assumption => `- ${assumption}`).join('\n')}
-
-## Key Performance Indicators
-
-### Environmental Impact
-- **Emissions Change:** ${formatPercentage(result.kpis.emissionsDeltaPct)} ${result.kpis.emissionsDeltaPct > 0 ? 'increase' : 'decrease'}
-- **Congestion Change:** ${formatPercentage(result.kpis.congestionDeltaPct)} ${result.kpis.congestionDeltaPct > 0 ? 'increase' : 'decrease'}
-
-### Mobility & Transport
-- **Commute Time Change:** ${formatNumber(result.kpis.avgCommuteDeltaMin)} minutes ${result.kpis.avgCommuteDeltaMin > 0 ? 'increase' : 'decrease'}
-- **Modal Shift:**
-  - Car: ${formatPercentage(result.kpis.modalShift.car)} → ${formatPercentage(result.kpis.modalShift.car + result.kpis.modalShift.car)}
-  - Transit: ${formatPercentage(result.kpis.modalShift.transit)} → ${formatPercentage(result.kpis.modalShift.transit + result.kpis.modalShift.transit)}
-  - Walk: ${formatPercentage(result.kpis.modalShift.walk)} → ${formatPercentage(result.kpis.modalShift.walk + result.kpis.modalShift.walk)}
-  - Cycle: ${formatPercentage(result.kpis.modalShift.cycle)} → ${formatPercentage(result.kpis.modalShift.cycle + result.kpis.modalShift.cycle)}
-
-### Economic & Social
-- **Fiscal Impact:** ${formatCurrency(result.kpis.fiscalImpactMGBP)} annually
-- **Health Index Change:** ${formatNumber(result.kpis.healthIndexDelta)} points ${result.kpis.healthIndexDelta > 0 ? 'improvement' : 'decline'}
-- **Trust Index Change:** ${formatNumber(result.kpis.trustIndexDelta)} points ${result.kpis.trustIndexDelta > 0 ? 'improvement' : 'decline'}
-- **Equity Score:** ${formatPercentage(result.kpis.equityScore)} (weights impacts for vulnerable groups)
-
-## Three Key Insights
-${result.narrativeFindings.slice(0, 3).map((finding, index) => `${index + 1}. ${finding}`).join('\n')}
-
-## Three Key Risks
-${result.risks.slice(0, 3).map((risk, index) => `${index + 1}. ${risk}`).join('\n')}
-
-## Stakeholder Sentiment
-- **Citizens:** ${formatSentiment(result.stakeholderSentiment.citizens)}
-- **Businesses:** ${formatSentiment(result.stakeholderSentiment.businesses)}
-- **NGOs:** ${formatSentiment(result.stakeholderSentiment.ngo)}
-- **Local Council:** ${formatSentiment(result.stakeholderSentiment.council)}
-
-## Confidence Level
-**${Math.round(result.confidence * 100)}%** - Based on data quality and intervention complexity
+${result.gaps.map(gap => `- ${gap}`).join('\n')}
+` : ''}
 
 ---
 
-**⚠️ Important Note:** This is an exploratory simulation, not a forecast. Results are based on simplified models and assumptions. Use for decision support and sensemaking, not prediction.
-
-*Generated by What-if: A digital testbed for urban innovation*
+*Generated on ${result.generatedAt} • Confidence: ${Math.round(result.confidence_0_1 * 100)}%*
 `;
 
   return markdown;
 }
 
-export function downloadMarkdown(content: string, filename: string = 'what-if-analysis.md') {
-  const blob = new Blob([content], { type: 'text/markdown' });
+export function downloadMarkdown(markdown: string, filename: string): void {
+  const blob = new Blob([markdown], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

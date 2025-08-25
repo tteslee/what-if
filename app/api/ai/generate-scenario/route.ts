@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { ScenarioResultSchema } from '../../../../src/lib/schemas';
+import { ScenarioResultSchema, Intervention } from '../../../../src/lib/schemas';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -30,7 +30,7 @@ ${city.timeline ? `- Timeline: ${city.timeline}` : ''}
 ${city.budgetConstraints ? `- Budget Constraints: ${city.budgetConstraints}` : ''}
 
 **Interventions:**
-${interventions.map((int, i) => `
+${interventions.map((int: Intervention, i: number) => `
 ${i + 1}. ${int.title}
    - Summary: ${int.summary}
    - Category: ${int.category}

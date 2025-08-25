@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
+import { CityProfile, Intervention } from '../../../src/lib/schemas';
 import CityForm from '../../../src/components/CityForm';
 import InterventionForm from '../../../src/components/InterventionForm';
 
@@ -25,7 +26,7 @@ export default function NewScenarioPage() {
     selectedInterventionIds,
     addSelectedIntervention,
     removeSelectedIntervention,
-    clearSelectedInterventions,
+
     assumptions,
     addAssumption,
     removeAssumption,
@@ -82,13 +83,13 @@ export default function NewScenarioPage() {
     }
   };
 
-  const handleCityFormSubmit = (cityData: any) => {
+  const handleCityFormSubmit = (cityData: CityProfile) => {
     addCustomCity(cityData);
     setSelectedCity(cityData.id);
     setShowCityForm(false);
   };
 
-  const handleInterventionFormSubmit = (interventionData: any) => {
+  const handleInterventionFormSubmit = (interventionData: Intervention) => {
     addCustomIntervention(interventionData);
     addSelectedIntervention(interventionData.id);
     setShowInterventionForm(false);

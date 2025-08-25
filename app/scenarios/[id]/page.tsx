@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { ScenarioResult } from '../../../src/lib/schemas';
+import { Scenario, ScenarioResult } from '../../../src/lib/schemas';
 
 export default function ScenarioResultPage() {
   const params = useParams();
   const router = useRouter();
   const { scenarios, results, cities, interventions } = useWhatIfStore();
-  const [scenario, setScenario] = useState<any>(null);
+  const [scenario, setScenario] = useState<Scenario | null>(null);
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -366,7 +366,7 @@ export default function ScenarioResultPage() {
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center">
             <h2 className="text-xl font-semibold text-slate-900 mb-4">Scenario Analysis Not Generated</h2>
             <p className="text-slate-600 mb-6">
-              The scenario analysis hasn't been generated yet. This might be due to an error or the analysis is still in progress.
+              The scenario analysis hasn&apos;t been generated yet. This might be due to an error or the analysis is still in progress.
             </p>
             <button
               onClick={() => router.push('/scenarios/new')}

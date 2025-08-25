@@ -1,53 +1,43 @@
 import { create } from 'zustand';
-import { Scenario, Result, City, Intervention } from './schemas';
-import { sampleCities, sampleInterventions } from '../data/sample-data';
-import { runScenario, runComparison } from './simulate';
 import { storageService } from './storage-service';
+import { sampleCities, sampleInterventions } from '../data/sample-data';
+import { CityProfile, Intervention, Scenario, ScenarioResult } from './schemas';
 
-interface WhatIfStore {
+interface WhatIfState {
   // Data
-  cities: City[];
+  cities: CityProfile[];
   interventions: Intervention[];
   scenarios: Scenario[];
-  results: Record<string, Result>;
+  results: Record<string, ScenarioResult>;
   
   // UI State
   currentStep: number;
-  selectedCityId: string | null;
-  selectedInterventionId: string | null;
   whatIfQuestion: string;
+  selectedCityId: string | null;
+  selectedInterventionIds: string[]; // Support multiple interventions
   assumptions: string[];
   
   // Actions
   setCurrentStep: (step: number) => void;
-  setSelectedCity: (cityId: string) => void;
-  setSelectedIntervention: (interventionId: string) => void;
   setWhatIfQuestion: (question: string) => void;
+  setSelectedCity: (cityId: string) => void;
+  addSelectedIntervention: (interventionId: string) => void;
+  removeSelectedIntervention: (interventionId: string) => void;
+  clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
-  clearAssumptions: () => void;
-  
-  // Scenario Management
   createScenario: () => Scenario | null;
-  runScenario: (scenarioId: string) => Result | null;
-  runComparison: (scenarioIds: string[]) => Result[];
-  
-  // Data Loading
+  generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: () => void;
-  
-  // Custom Profile Management
-  addCustomCity: (city: City) => void;
+  addCustomCity: (city: CityProfile) => void;
   addCustomIntervention: (intervention: Intervention) => void;
   deleteCustomCity: (cityId: string) => void;
   deleteCustomIntervention: (interventionId: string) => void;
-  generateCustomCity: (description: string) => Promise<City | null>;
-  generateCustomIntervention: (description: string) => Promise<Intervention | null>;
-  
-  // Reset
+  clearLegacyData: () => void;
   reset: () => void;
 }
 
-export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
+export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   // Initial state
   cities: [],
   interventions: [],
@@ -55,7 +45,7 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   results: {},
   currentStep: 0,
   selectedCityId: null,
-  selectedInterventionId: null,
+  selectedInterventionIds: [],
   whatIfQuestion: '',
   assumptions: [],
   
@@ -64,7 +54,19 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   
   setSelectedCity: (cityId: string) => set({ selectedCityId: cityId }),
   
-  setSelectedIntervention: (interventionId: string) => set({ selectedInterventionId: interventionId }),
+  addSelectedIntervention: (interventionId: string) => {
+    set((state) => ({
+      selectedInterventionIds: [...state.selectedInterventionIds, interventionId]
+    }));
+  },
+  
+  removeSelectedIntervention: (interventionId: string) => {
+    set((state) => ({
+      selectedInterventionIds: state.selectedInterventionIds.filter(id => id !== interventionId)
+    }));
+  },
+  
+  clearSelectedInterventions: () => set({ selectedInterventionIds: [] }),
   
   setWhatIfQuestion: (question: string) => set({ whatIfQuestion: question }),
   
@@ -87,87 +89,112 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
   // Scenario Management
   createScenario: () => {
     const state = get();
-    const { selectedCityId, selectedInterventionId, whatIfQuestion, assumptions } = state;
-    
-    if (!selectedCityId || !selectedInterventionId || !whatIfQuestion.trim()) {
+    if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
     }
-    
-    const city = state.cities.find(c => c.id === selectedCityId);
-    const intervention = state.interventions.find(i => i.id === selectedInterventionId);
-    
-    if (!city || !intervention) {
-      return null;
-    }
-    
+
     const scenario: Scenario = {
       id: `scenario-${Date.now()}`,
-      title: whatIfQuestion,
-      cityId: selectedCityId,
-      intervention,
-      assumptions: [...assumptions],
+      whatIfQuestion: state.whatIfQuestion,
+      cityId: state.selectedCityId,
+      interventionIds: state.selectedInterventionIds,
+      notes: `Assumptions: ${state.assumptions.join(', ')}`,
     };
-    
+
     set((state) => ({
-      scenarios: [...state.scenarios, scenario]
+      scenarios: [...state.scenarios, scenario],
     }));
-    
+
     return scenario;
   },
-  
-  runScenario: (scenarioId: string) => {
+
+  generateScenario: async (scenarioId: string) => {
     const state = get();
     const scenario = state.scenarios.find(s => s.id === scenarioId);
-    const city = state.cities.find(c => c.id === scenario?.cityId);
-    
-    if (!scenario || !city) {
-      return null;
+    if (!scenario) return null;
+
+    // Get the actual city and interventions data
+    const city = state.cities.find(c => c.id === scenario.cityId);
+    const interventions = state.interventions.filter(i => scenario.interventionIds.includes(i.id));
+
+    if (!city || interventions.length === 0) {
+      throw new Error('City or interventions not found');
     }
-    
-    const result = runScenario(scenario, city);
-    
-    set((state) => ({
-      results: { ...state.results, [scenarioId]: result }
-    }));
-    
-    return result;
+
+    try {
+      const response = await fetch('/api/ai/generate-scenario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          scenarioId,
+          scenarioData: {
+            whatIfQuestion: scenario.whatIfQuestion,
+            city,
+            interventions
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      }
+
+      const result: ScenarioResult = await response.json();
+      
+      set((state) => ({
+        results: { ...state.results, [scenarioId]: result },
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error generating scenario:', error);
+      throw error;
+    }
   },
   
-  runComparison: (scenarioIds: string[]) => {
-    const state = get();
-    const scenarios = state.scenarios.filter(s => scenarioIds.includes(s.id));
-    const city = state.cities.find(c => c.id === scenarios[0]?.cityId);
-    
-    if (scenarios.length === 0 || !city) {
-      return [];
-    }
-    
-    const results = runComparison(scenarios, city);
-    
-    // Store results
-    const newResults = { ...state.results };
-    results.forEach((result, index) => {
-      newResults[scenarios[index].id] = result;
-    });
-    
-    set({ results: newResults });
-    
-    return results;
-  },
-  
-  // Data Loading
   loadSampleData: () => {
+    console.log('Loading sample data...');
+    
+    // Clear any legacy data first
+    storageService.clearLegacyData();
+    
     const customCities = storageService.getCustomCities();
     const customInterventions = storageService.getCustomInterventions();
     
+    console.log('Sample cities:', sampleCities);
+    console.log('Custom cities:', customCities);
+    console.log('Sample interventions:', sampleInterventions);
+    console.log('Custom interventions:', customInterventions);
+    
+    const newCities = [...sampleCities, ...customCities];
+    const newInterventions = [...sampleInterventions, ...customInterventions];
+    
+    console.log('About to set state with:', { newCities, newInterventions });
+    
     set({
-      cities: [...sampleCities, ...customCities],
-      interventions: [...sampleInterventions, ...customInterventions],
+      cities: newCities,
+      interventions: newInterventions,
     });
+    
+    console.log('Store state after loading:', {
+      cities: newCities,
+      interventions: newInterventions,
+    });
+    
+    // Verify the state was actually updated
+    setTimeout(() => {
+      const state = get();
+      console.log('Store state verification after timeout:', {
+        cities: state.cities,
+        interventions: state.interventions,
+      });
+    }, 100);
   },
   
   // Custom Profile Management
-  addCustomCity: (city: City) => {
+  addCustomCity: (city: CityProfile) => {
     storageService.saveCustomCity(city);
     set((state) => ({
       cities: [...state.cities, city]
@@ -195,54 +222,16 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
     }));
   },
   
-  generateCustomCity: async (description: string) => {
-    try {
-      const response = await fetch('/api/ai/generate-city', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ description }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate city');
-      }
-
-      const city = await response.json();
-      const state = get();
-      state.addCustomCity(city);
-      return city;
-    } catch (error) {
-      console.error('Error generating custom city:', error);
-      return null;
-    }
-  },
-  
-  generateCustomIntervention: async (description: string) => {
-    try {
-      const response = await fetch('/api/ai/generate-intervention', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ description }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate intervention');
-      }
-
-      const intervention = await response.json();
-      const state = get();
-      state.addCustomIntervention(intervention);
-      return intervention;
-    } catch (error) {
-      console.error('Error generating custom intervention:', error);
-      return null;
-    }
+  clearLegacyData: () => {
+    storageService.clearLegacyData();
+    // Reload data after clearing legacy data
+    const customCities = storageService.getCustomCities();
+    const customInterventions = storageService.getCustomInterventions();
+    
+    set({
+      cities: [...sampleCities, ...customCities],
+      interventions: [...sampleInterventions, ...customInterventions],
+    });
   },
   
   // Reset
@@ -252,7 +241,7 @@ export const useWhatIfStore = create<WhatIfStore>((set, get) => ({
       results: {},
       currentStep: 0,
       selectedCityId: null,
-      selectedInterventionId: null,
+      selectedInterventionIds: [],
       whatIfQuestion: '',
       assumptions: [],
     });

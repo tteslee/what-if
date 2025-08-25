@@ -107,6 +107,33 @@ export class StorageService {
       console.error('Error importing custom data:', error);
     }
   }
+
+  // Clear legacy AI-generated data that doesn't follow the new schema
+  clearLegacyData(): void {
+    try {
+      const cities = this.getCustomCities();
+      const interventions = this.getCustomInterventions();
+      
+      // Filter out legacy cities (Seoul, Hong Kong, London, Daegu, etc.)
+      const legacyCityIds = ['seoul', 'hong-kong', 'london', 'daegu', 'midvale', 'harbourton'];
+      const filteredCities = cities.filter(city => !legacyCityIds.includes(city.id.toLowerCase()));
+      
+      // Filter out legacy interventions that don't follow the new schema
+      const legacyInterventionIds = ['congestion-charge-legacy', 'community-solar-legacy', 'vacant-to-co-housing-legacy'];
+      const filteredInterventions = interventions.filter(intervention => !legacyInterventionIds.includes(intervention.id));
+      
+      // Save the filtered data back to storage
+      localStorage.setItem(this.CITIES_KEY, JSON.stringify(filteredCities));
+      localStorage.setItem(this.INTERVENTIONS_KEY, JSON.stringify(filteredInterventions));
+      
+      console.log('Cleared legacy data:', {
+        removedCities: cities.length - filteredCities.length,
+        removedInterventions: interventions.length - filteredInterventions.length
+      });
+    } catch (error) {
+      console.error('Error clearing legacy data:', error);
+    }
+  }
 }
 
 export const storageService = StorageService.getInstance();

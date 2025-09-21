@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 import { CityProfile, Intervention, Scenario, ScenarioResult } from './schemas';
-import { z } from 'zod';
 
 export class DatabaseService {
   private static instance: DatabaseService;
@@ -238,7 +237,7 @@ export class DatabaseService {
       name: dbCity.name as string,
       scale: dbCity.scale as "Citywide" | "DistrictNeighbourhood" | "CorridorStreet" | "SpecificSite",
       mainChallenges: dbCity.main_challenges as string[],
-      populationContext: dbCity.population_context as unknown,
+      populationContext: dbCity.population_context as { size?: number; demographics?: string } | undefined,
       neighbourhoodCharacteristics: dbCity.neighbourhood_characteristics as string | undefined,
       vulnerableGroups: dbCity.vulnerable_groups as string[] | undefined,
       regulatoryContext: dbCity.regulatory_context as string | undefined,

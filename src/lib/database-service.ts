@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { CityProfile, Intervention, Scenario, ScenarioResult } from './schemas';
+import { CityProfile, Intervention, Scenario, ScenarioResult, CityScale, InterventionCategory } from './schemas';
 
 export class DatabaseService {
   private static instance: DatabaseService;
@@ -235,7 +235,7 @@ export class DatabaseService {
     return {
       id: dbCity.id as string,
       name: dbCity.name as string,
-      scale: dbCity.scale as string,
+      scale: dbCity.scale as CityScale,
       mainChallenges: dbCity.main_challenges as string[],
       populationContext: dbCity.population_context as unknown,
       neighbourhoodCharacteristics: dbCity.neighbourhood_characteristics as string | undefined,
@@ -291,7 +291,7 @@ export class DatabaseService {
       id: dbIntervention.id as string,
       title: dbIntervention.title as string,
       summary: dbIntervention.summary as string,
-      category: dbIntervention.category as string,
+      category: dbIntervention.category as InterventionCategory,
       scopeOfApplication: dbIntervention.scope_of_application as string,
       detailedDescription: dbIntervention.detailed_description as string | undefined,
       parameters: dbIntervention.parameters as unknown,

@@ -66,7 +66,7 @@ export default function NewScenarioPage() {
   };
 
   const handleCreateAndGenerate = async () => {
-    const scenario = createScenario();
+    const scenario = await createScenario();
     if (scenario) {
       setIsGeneratingScenario(true);
       try {
@@ -83,14 +83,14 @@ export default function NewScenarioPage() {
     }
   };
 
-  const handleCityFormSubmit = (cityData: CityProfile) => {
-    addCustomCity(cityData);
+  const handleCityFormSubmit = async (cityData: CityProfile) => {
+    await addCustomCity(cityData);
     setSelectedCity(cityData.id);
     setShowCityForm(false);
   };
 
-  const handleInterventionFormSubmit = (interventionData: Intervention) => {
-    addCustomIntervention(interventionData);
+  const handleInterventionFormSubmit = async (interventionData: Intervention) => {
+    await addCustomIntervention(interventionData);
     addSelectedIntervention(interventionData.id);
     setShowInterventionForm(false);
   };

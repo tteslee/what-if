@@ -231,7 +231,7 @@ export class DatabaseService {
   }
 
   // Data transformation methods
-  private transformCityFromDB(dbCity: any): CityProfile {
+  private transformCityFromDB(dbCity: Record<string, unknown>): CityProfile {
     return {
       id: dbCity.id,
       name: dbCity.name,
@@ -258,7 +258,7 @@ export class DatabaseService {
     };
   }
 
-  private transformCityToDB(city: CityProfile): any {
+  private transformCityToDB(city: CityProfile): Record<string, unknown> {
     return {
       id: city.id,
       name: city.name,
@@ -286,7 +286,7 @@ export class DatabaseService {
     };
   }
 
-  private transformInterventionFromDB(dbIntervention: any): Intervention {
+  private transformInterventionFromDB(dbIntervention: Record<string, unknown>): Intervention {
     return {
       id: dbIntervention.id,
       title: dbIntervention.title,
@@ -310,7 +310,7 @@ export class DatabaseService {
     };
   }
 
-  private transformInterventionToDB(intervention: Intervention): any {
+  private transformInterventionToDB(intervention: Intervention): Record<string, unknown> {
     return {
       id: intervention.id,
       title: intervention.title,
@@ -335,7 +335,7 @@ export class DatabaseService {
     };
   }
 
-  private transformScenarioFromDB(dbScenario: any): Scenario {
+  private transformScenarioFromDB(dbScenario: Record<string, unknown>): Scenario {
     return {
       id: dbScenario.id,
       whatIfQuestion: dbScenario.what_if_question,
@@ -345,7 +345,7 @@ export class DatabaseService {
     };
   }
 
-  private transformScenarioToDB(scenario: Scenario): any {
+  private transformScenarioToDB(scenario: Scenario): Record<string, unknown> {
     return {
       id: scenario.id,
       what_if_question: scenario.whatIfQuestion,
@@ -356,7 +356,7 @@ export class DatabaseService {
     };
   }
 
-  private transformScenarioResultFromDB(dbResult: any): ScenarioResult {
+  private transformScenarioResultFromDB(dbResult: Record<string, unknown>): ScenarioResult {
     return {
       scenarioId: dbResult.scenario_id,
       narrativeSummary: dbResult.narrative_summary,
@@ -374,7 +374,7 @@ export class DatabaseService {
     };
   }
 
-  private transformScenarioResultToDB(result: ScenarioResult): any {
+  private transformScenarioResultToDB(result: ScenarioResult): Record<string, unknown> {
     return {
       id: `result-${result.scenarioId}`,
       scenario_id: result.scenarioId,

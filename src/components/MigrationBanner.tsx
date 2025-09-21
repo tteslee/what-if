@@ -65,7 +65,7 @@ export default function MigrationBanner() {
           </h3>
           <div className="mt-2 text-sm text-blue-700">
             <p>
-              We've upgraded to a shared database! You have local data that can be migrated to the new system.
+              We&apos;ve upgraded to a shared database! You have local data that can be migrated to the new system.
             </p>
             {migrationResult ? (
               <div className="mt-2">

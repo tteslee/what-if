@@ -300,7 +300,7 @@ export class DatabaseService {
       stakeholderFocus: dbIntervention.stakeholder_focus as string[] | undefined,
       implementationNotes: dbIntervention.implementation_notes as string | undefined,
       risks: dbIntervention.risks as string[] | undefined,
-      categories: dbIntervention.categories as string[] | undefined,
+      categories: dbIntervention.categories as ("BehaviourChange" | "CivicParticipation" | "SkillsAndIndustry" | "PhysicalInfrastructure" | "Governance" | "PolicyAndRegulation" | "Finance" | "Technology")[] | undefined,
       description: dbIntervention.description as string | undefined,
       params: dbIntervention.params as Record<string, number> | undefined,
       mechanisms: dbIntervention.mechanisms as { description: string; expectedEffects: { indicator: string; direction: string; magnitudeHintPct?: number; evidence?: string; equityWeight_0_2?: number }[] }[] | undefined,

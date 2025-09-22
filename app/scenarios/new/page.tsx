@@ -73,7 +73,17 @@ export default function NewScenarioPage() {
   }, [reset, whatIfQuestion, setWhatIfQuestion]);
 
   useEffect(() => {
+    console.log('New scenario page useEffect:', {
+      currentStep,
+      citiesLength: cities?.length || 0,
+      interventionsLength: interventions?.length || 0,
+      language,
+      cities: cities?.map(c => ({ name: c.name, lang: c.lang })) || [],
+      interventions: interventions?.map(i => ({ title: i.title, lang: i.lang })) || []
+    });
+    
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
+      console.log('Calling loadSampleData with language:', language);
       loadSampleData(language);
     }
   }, [currentStep, cities, interventions, loadSampleData, language]);

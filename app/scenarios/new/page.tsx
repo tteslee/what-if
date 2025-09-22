@@ -48,6 +48,19 @@ export default function NewScenarioPage() {
   const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
 
+  // Reset form when component mounts to ensure clean slate
+  useEffect(() => {
+    reset();
+    // Reset local state as well
+    setAssumptionInput('');
+    setShowCityForm(false);
+    setShowInterventionForm(false);
+    setSelectedInterventionDetails(null);
+    setSelectedCityDetails(null);
+    setIsGeneratingScenario(false);
+    setIsPublic(false);
+  }, [reset]);
+
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
       loadSampleData();

@@ -3,8 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
-import { AuthProvider } from '../src/lib/auth-context';
-import ClientUserMenu from '../src/components/ClientUserMenu';
+import UserMenu from '../src/components/UserMenu';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -46,16 +45,14 @@ export default function RootLayout({
                 >
                   Compare
                 </Link>
-                <ClientUserMenu />
+                <UserMenu />
               </div>
             </div>
           </div>
         </nav>
 
         {/* Main Content */}
-        <AuthProvider>
-          <main>{children}</main>
-        </AuthProvider>
+        <main>{children}</main>
         <Analytics />
       </body>
     </html>

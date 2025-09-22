@@ -1,18 +1,49 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '../lib/auth-context';
+import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import AuthModal from './AuthModal';
 
 export default function UserMenu() {
-  const { user, signOut } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  useEffect(() => {
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleSignOut = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     setShowUserMenu(false);
   };
+
+  if (loading) {
+    return (
+      <button className="bg-gray-300 text-gray-500 px-4 py-2 rounded-md cursor-not-allowed">
+        Loading...
+      </button>
+    );
+  }
 
   if (!user) {
     return (

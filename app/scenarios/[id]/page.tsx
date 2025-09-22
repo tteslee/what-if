@@ -157,7 +157,7 @@ export default function ScenarioResultPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading scenario...</p>
+          <p className="text-slate-600">{t.common.loading}</p>
         </div>
       </div>
     );
@@ -207,11 +207,11 @@ export default function ScenarioResultPage() {
 
           {/* Context Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Context</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.context}</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-medium text-slate-900 mb-2">City</h3>
-                <p className="text-slate-700">{city?.name || 'Loading...'}</p>
+                <h3 className="font-medium text-slate-900 mb-2">{t.scenario.result.city}</h3>
+                <p className="text-slate-700">{city?.name || t.common.loading}</p>
                 {city?.mainChallenges && (
                   <p className="text-sm text-slate-600 mt-1">
                     Challenges: {city.mainChallenges.join(', ')}
@@ -219,7 +219,7 @@ export default function ScenarioResultPage() {
                 )}
               </div>
               <div>
-                <h3 className="font-medium text-slate-900 mb-2">Interventions</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t.scenario.result.interventions}</h3>
                 <div className="space-y-1">
                   {selectedInterventions?.length > 0 ? (
                     selectedInterventions.map((intervention) => (
@@ -228,7 +228,7 @@ export default function ScenarioResultPage() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-slate-500">Loading...</p>
+                    <p className="text-slate-500">{t.common.loading}</p>
                   )}
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function ScenarioResultPage() {
           <div className="space-y-6">
             {/* Narrative Summary */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Narrative Summary</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.narrativeSummary}</h2>
               <p className="text-slate-700 leading-relaxed">{result.narrativeSummary}</p>
             </div>
 
@@ -265,7 +265,7 @@ export default function ScenarioResultPage() {
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Benefits</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.benefits}</h4>
                         <ul className="space-y-1">
                           {impact.benefits?.map((benefit, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
@@ -276,7 +276,7 @@ export default function ScenarioResultPage() {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Concerns</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.concerns}</h4>
                         <ul className="space-y-1">
                           {impact.concerns?.map((concern, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
@@ -287,7 +287,7 @@ export default function ScenarioResultPage() {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Engagement Needs</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.engagementNeeds}</h4>
                         <ul className="space-y-1">
                           {impact.engagementNeeds?.map((need, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">

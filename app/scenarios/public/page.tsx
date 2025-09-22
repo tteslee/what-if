@@ -164,7 +164,7 @@ export default function PublicScenariosPage() {
               <select
                 value={languageFilter}
                 onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'ko')}
-                className="px-3 py-1 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-1 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Languages</option>
                 <option value="en">English</option>

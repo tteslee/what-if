@@ -143,7 +143,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Helsinki, Madrid, Singapore"
             required
           />
@@ -156,7 +156,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           <select
             value={formData.scale}
             onChange={(e) => setFormData(prev => ({ ...prev, scale: e.target.value as CityScale }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             required
           >
             <option value="Citywide">Citywide</option>
@@ -237,7 +237,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, size: e.target.value }
                 }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., 656920"
               />
             </div>
@@ -252,7 +252,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, demographics: e.target.value }
                 }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., aging population with growing tech sector"
               />
             </div>
@@ -266,7 +266,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
               type="text"
               value={formData.neighbourhoodCharacteristics}
               onChange={(e) => setFormData(prev => ({ ...prev, neighbourhoodCharacteristics: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
               placeholder="e.g., mixed-use with strong public transport"
             />
           </div>
@@ -317,7 +317,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
               type="text"
               value={formData.regulatoryContext}
               onChange={(e) => setFormData(prev => ({ ...prev, regulatoryContext: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
               placeholder="e.g., Bus lane reallocation is contentious"
             />
           </div>
@@ -331,7 +331,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                 type="text"
                 value={formData.timeline}
                 onChange={(e) => setFormData(prev => ({ ...prev, timeline: e.target.value }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., 2-year implementation window"
               />
             </div>
@@ -343,7 +343,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                 type="text"
                 value={formData.budgetConstraints}
                 onChange={(e) => setFormData(prev => ({ ...prev, budgetConstraints: e.target.value }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., €5M available for pilot"
               />
             </div>

@@ -186,7 +186,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
             type="text"
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., School Air Quality Sensors, Congestion Pricing"
             required
           />
@@ -200,7 +200,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
             type="text"
             value={formData.summary}
             onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Install low-cost sensors in schools to monitor air quality"
             required
           />
@@ -213,7 +213,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
           <select
             value={formData.category}
             onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as InterventionCategory }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             required
           >
             <option value="BehaviourChange">Behaviour Change</option>
@@ -235,7 +235,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
             type="text"
             value={formData.scopeOfApplication}
             onChange={(e) => setFormData(prev => ({ ...prev, scopeOfApplication: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Primary schools in urban areas"
             required
           />
@@ -266,7 +266,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
             <textarea
               value={formData.detailedDescription}
               onChange={(e) => setFormData(prev => ({ ...prev, detailedDescription: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
               rows={4}
               placeholder="A paragraph elaborating approach & goals..."
             />
@@ -418,7 +418,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
             <textarea
               value={formData.implementationNotes}
               onChange={(e) => setFormData(prev => ({ ...prev, implementationNotes: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
               rows={3}
               placeholder="Timeline, budget, regulatory enablers/barriers..."
             />

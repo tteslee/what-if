@@ -416,7 +416,7 @@ export class DatabaseService {
       city_id: scenario.cityId,
       intervention_ids: scenario.interventionIds,
       notes: scenario.notes,
-      is_public: true,
+      is_public: scenario.isPublic || false,
     };
   }
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario, ScenarioResult } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
+import { databaseService } from '../../../src/lib/database-service';
 
 export default function ScenarioResultPage() {
   const params = useParams();
@@ -58,15 +59,9 @@ export default function ScenarioResultPage() {
           setScenario(dbScenario);
           
           // Try to load the result as well
-          const { data: resultData } = await supabase
-            .from('scenario_results')
-            .select('*')
-            .eq('scenario_id', scenarioId)
-            .single();
-            
+          const resultData = await databaseService.getScenarioResult(scenarioId);
           if (resultData) {
-            // Transform result data if needed
-            setResult(resultData as ScenarioResult);
+            setResult(resultData);
           }
         }
       } catch (error) {

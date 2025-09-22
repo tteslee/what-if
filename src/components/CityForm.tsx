@@ -177,7 +177,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   type="text"
                   value={challenge}
                   onChange={(e) => updateChallenge(index, e.target.value)}
-                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                   placeholder="e.g., air quality, congestion, housing affordability"
                   required
                 />
@@ -282,7 +282,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                     type="text"
                     value={group}
                     onChange={(e) => updateVulnerableGroup(index, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                     placeholder="e.g., elderly, low-income, children"
                   />
                   <button
@@ -360,7 +360,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                     type="text"
                     value={asset}
                     onChange={(e) => updateAsset(index, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                     placeholder="e.g., schools, bus line 12, public housing blocks"
                   />
                   <button

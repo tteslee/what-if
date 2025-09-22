@@ -283,14 +283,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={param.key}
                     onChange={(e) => updateParameter(index, 'key', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., sensorsCount"
                   />
                   <input
                     type="text"
                     value={param.value}
                     onChange={(e) => updateParameter(index, 'value', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., 200"
                   />
                   <button
@@ -323,7 +323,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={synergy}
                     onChange={(e) => updateSynergy(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Works best with: School Streets, Green Corridors"
                   />
                   <button
@@ -356,7 +356,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={outcome}
                     onChange={(e) => updateOutcome(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Reduce children's exposure to air pollution"
                   />
                   <button
@@ -389,7 +389,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={stakeholder}
                     onChange={(e) => updateStakeholder(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., children, commuters, landlords"
                   />
                   <button
@@ -435,7 +435,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={risk}
                     onChange={(e) => updateRisk(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Sensor maintenance and calibration challenges"
                   />
                   <button

@@ -3,17 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { Scenario, ScenarioResult } from '../../../src/lib/schemas';
+import { Scenario, ScenarioResult, CityProfile, Intervention } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
 import { databaseService } from '../../../src/lib/database-service';
 
 export default function ScenarioResultPage() {
   const params = useParams();
   const router = useRouter();
-  const { scenarios, results, cities, interventions } = useWhatIfStore();
+  const { scenarios, results } = useWhatIfStore();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [city, setCity] = useState<CityProfile | null>(null);
+  const [selectedInterventions, setSelectedInterventions] = useState<Intervention[]>([]);
 
   useEffect(() => {
     const loadScenario = async () => {
@@ -95,6 +97,31 @@ export default function ScenarioResultPage() {
     loadScenario();
   }, [params.id, scenarios, results]);
 
+  // Load city and interventions based on the scenario's language, not current language
+  useEffect(() => {
+    const loadScenarioData = async () => {
+      if (!scenario) return;
+      
+      try {
+        // Load city and interventions in the scenario's language
+        const [cityData, interventionData] = await Promise.all([
+          databaseService.getCities(scenario.lang),
+          databaseService.getInterventions(scenario.lang)
+        ]);
+        
+        const foundCity = cityData.find(c => c.id === scenario.cityId);
+        const foundInterventions = interventionData.filter(i => scenario.interventionIds.includes(i.id));
+        
+        setCity(foundCity || null);
+        setSelectedInterventions(foundInterventions);
+      } catch (error) {
+        console.error('Error loading scenario data:', error);
+      }
+    };
+    
+    loadScenarioData();
+  }, [scenario]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -121,9 +148,6 @@ export default function ScenarioResultPage() {
       </div>
     );
   }
-
-  const city = cities.find(c => c.id === scenario.cityId);
-  const selectedInterventions = interventions.filter(i => scenario.interventionIds.includes(i.id));
 
   return (
     <div className="min-h-screen bg-slate-50">

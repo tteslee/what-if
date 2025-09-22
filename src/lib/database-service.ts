@@ -20,7 +20,6 @@ export class DatabaseService {
         .from('cities')
         .select('*')
         .eq('is_public', true)
-        .eq('lang', lang)
         .order('name');
 
       if (error) {
@@ -88,7 +87,6 @@ export class DatabaseService {
         .from('interventions')
         .select('*')
         .eq('is_public', true)
-        .eq('lang', lang)
         .order('title');
 
       if (error) {
@@ -157,7 +155,6 @@ export class DatabaseService {
       let query = supabase
         .from('scenarios')
         .select('*')
-        .eq('lang', lang)
         .order('created_at', { ascending: false });
 
       if (user) {

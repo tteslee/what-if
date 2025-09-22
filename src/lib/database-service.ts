@@ -27,7 +27,19 @@ export class DatabaseService {
         return [];
       }
 
-      return data?.map(this.transformCityFromDB) || [];
+      const cities = data?.map(this.transformCityFromDB) || [];
+      
+      // Filter by language if lang column exists, otherwise return all cities
+      // This handles the transition period where lang column might not exist yet
+      const filteredCities = cities.filter(city => {
+        // If city has no lang field or lang field is undefined, include it
+        if (!city.lang) return true;
+        // Otherwise filter by the requested language
+        return city.lang === lang;
+      });
+      
+      console.log(`Filtered cities for language ${lang}:`, filteredCities.length, 'out of', cities.length);
+      return filteredCities;
     } catch (error) {
       console.error('Error fetching cities:', error);
       return [];
@@ -94,7 +106,19 @@ export class DatabaseService {
         return [];
       }
 
-      return data?.map(this.transformInterventionFromDB) || [];
+      const interventions = data?.map(this.transformInterventionFromDB) || [];
+      
+      // Filter by language if lang column exists, otherwise return all interventions
+      // This handles the transition period where lang column might not exist yet
+      const filteredInterventions = interventions.filter(intervention => {
+        // If intervention has no lang field or lang field is undefined, include it
+        if (!intervention.lang) return true;
+        // Otherwise filter by the requested language
+        return intervention.lang === lang;
+      });
+      
+      console.log(`Filtered interventions for language ${lang}:`, filteredInterventions.length, 'out of', interventions.length);
+      return filteredInterventions;
     } catch (error) {
       console.error('Error fetching interventions:', error);
       return [];
@@ -172,7 +196,19 @@ export class DatabaseService {
         return [];
       }
 
-      return data?.map(this.transformScenarioFromDB) || [];
+      const scenarios = data?.map(this.transformScenarioFromDB) || [];
+      
+      // Filter by language if lang column exists, otherwise return all scenarios
+      // This handles the transition period where lang column might not exist yet
+      const filteredScenarios = scenarios.filter(scenario => {
+        // If scenario has no lang field or lang field is undefined, include it
+        if (!scenario.lang) return true;
+        // Otherwise filter by the requested language
+        return scenario.lang === lang;
+      });
+      
+      console.log(`Filtered scenarios for language ${lang}:`, filteredScenarios.length, 'out of', scenarios.length);
+      return filteredScenarios;
     } catch (error) {
       console.error('Error fetching scenarios:', error);
       return [];

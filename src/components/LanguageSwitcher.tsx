@@ -1,14 +1,19 @@
 'use client';
 
 import { useTranslation } from '../contexts/TranslationContext';
+import { useWhatIfStore } from '../lib/store';
 
 export default function LanguageSwitcher() {
   const { language, setLanguage } = useTranslation();
+  const { clearData } = useWhatIfStore();
 
   return (
     <div className="flex items-center space-x-2">
       <button
-        onClick={() => setLanguage('en')}
+        onClick={() => {
+          clearData();
+          setLanguage('en');
+        }}
         className={`px-3 py-1 text-sm rounded-md transition-colors ${
           language === 'en'
             ? 'bg-blue-600 text-white'
@@ -18,7 +23,10 @@ export default function LanguageSwitcher() {
         EN
       </button>
       <button
-        onClick={() => setLanguage('ko')}
+        onClick={() => {
+          clearData();
+          setLanguage('ko');
+        }}
         className={`px-3 py-1 text-sm rounded-md transition-colors ${
           language === 'ko'
             ? 'bg-blue-600 text-white'

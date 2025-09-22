@@ -28,6 +28,7 @@ interface WhatIfState {
   createScenario: (isPublic?: boolean, lang?: 'en' | 'ko') => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: (lang?: 'en' | 'ko') => Promise<void>;
+  clearData: () => void;
   addCustomCity: (city: CityProfile) => Promise<void>;
   addCustomIntervention: (intervention: Intervention) => Promise<void>;
   deleteCustomCity: (cityId: string) => Promise<void>;
@@ -278,6 +279,16 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   
   setScenarios: (scenarios: Scenario[]) => {
     set({ scenarios });
+  },
+  
+  // Clear data (for language switching)
+  clearData: () => {
+    set({
+      cities: [],
+      interventions: [],
+      scenarios: [],
+      results: {},
+    });
   },
   
   // Reset

@@ -58,6 +58,21 @@ export const ko = {
     message: '이 도구는 의사결정을 돕는 시나리오 생성을 위해 만들어졌으며, 정확한 예측이 아닙니다.',
   },
 
+  // Public Scenarios Page
+  publicScenarios: {
+    title: '공개 시나리오',
+    subtitle: '커뮤니티가 공유한 시나리오를 탐색해보세요',
+    loading: '공개 시나리오 로딩 중...',
+    noScenarios: '아직 공개 시나리오가 없습니다',
+    noScenariosDescription: '커뮤니티와 시나리오를 공유하는 첫 번째 주인공이 되어보세요.',
+    createNewScenario: '새 시나리오 생성',
+    view: '보기',
+    public: '공개',
+    city: '도시',
+    interventions: '솔루션',
+    notes: '메모',
+  },
+
   // Scenario creation
   scenario: {
     steps: {

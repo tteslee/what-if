@@ -58,6 +58,21 @@ export const en = {
     message: 'This is an exploratory simulation tool, not a forecast. Use for decision support and sensemaking.',
   },
 
+  // Public Scenarios Page
+  publicScenarios: {
+    title: 'Public Scenarios',
+    subtitle: 'Explore scenarios shared by the community',
+    loading: 'Loading public scenarios...',
+    noScenarios: 'No public scenarios yet',
+    noScenariosDescription: 'Be the first to share a scenario with the community.',
+    createNewScenario: 'Create New Scenario',
+    view: 'View',
+    public: 'Public',
+    city: 'City',
+    interventions: 'Interventions',
+    notes: 'Notes',
+  },
+
   // Scenario creation
   scenario: {
     steps: {

@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 export default function PublicScenariosPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { cities, interventions, loadSampleData } = useWhatIfStore();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
@@ -78,7 +80,7 @@ export default function PublicScenariosPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading public scenarios...</p>
+          <p className="text-slate-600">{t.publicScenarios.loading}</p>
         </div>
       </div>
     );
@@ -89,8 +91,8 @@ export default function PublicScenariosPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Public Scenarios</h1>
-          <p className="text-slate-600">Explore scenarios shared by the community</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.publicScenarios.title}</h1>
+          <p className="text-slate-600">{t.publicScenarios.subtitle}</p>
         </div>
 
         {/* Scenarios List */}
@@ -101,13 +103,13 @@ export default function PublicScenariosPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No public scenarios yet</h3>
-            <p className="text-slate-600 mb-6">Be the first to share a scenario with the community.</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">{t.publicScenarios.noScenarios}</h3>
+            <p className="text-slate-600 mb-6">{t.publicScenarios.noScenariosDescription}</p>
             <button
               onClick={() => router.push('/scenarios/new')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Create New Scenario
+              {t.publicScenarios.createNewScenario}
             </button>
           </div>
         ) : (
@@ -121,19 +123,19 @@ export default function PublicScenariosPage() {
                         What if we {scenario.whatIfQuestion}
                       </h3>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Public
+                        {t.publicScenarios.public}
                       </span>
                     </div>
                     <div className="text-sm text-slate-600 mb-3">
                       <div className="mb-1">
-                        <span className="font-medium">City:</span> {getCityName(scenario.cityId)}
+                        <span className="font-medium">{t.publicScenarios.city}:</span> {getCityName(scenario.cityId)}
                       </div>
                       <div className="mb-1">
-                        <span className="font-medium">Interventions:</span> {getInterventionNames(scenario.interventionIds)}
+                        <span className="font-medium">{t.publicScenarios.interventions}:</span> {getInterventionNames(scenario.interventionIds)}
                       </div>
                       {scenario.notes && (
                         <div>
-                          <span className="font-medium">Notes:</span> {scenario.notes}
+                          <span className="font-medium">{t.publicScenarios.notes}:</span> {scenario.notes}
                         </div>
                       )}
                     </div>
@@ -143,7 +145,7 @@ export default function PublicScenariosPage() {
                       onClick={() => handleViewScenario(scenario.id)}
                       className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                     >
-                      View
+                      {t.publicScenarios.view}
                     </button>
                   </div>
                 </div>
@@ -159,7 +161,7 @@ export default function PublicScenariosPage() {
               onClick={() => router.push('/scenarios/new')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Create New Scenario
+              {t.publicScenarios.createNewScenario}
             </button>
           </div>
         )}

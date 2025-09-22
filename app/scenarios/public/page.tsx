@@ -115,6 +115,7 @@ export default function PublicScenariosPage() {
       }
       
       const names = data.map(i => i.title).join(', ');
+      console.log('Intervention names for scenario:', interventionIds, '->', names);
       return names || 'No interventions';
     } catch (error) {
       console.error('Error fetching intervention names:', error);

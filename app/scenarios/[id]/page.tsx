@@ -122,6 +122,7 @@ export default function ScenarioResultPage() {
         
         console.log('Found city:', foundCity?.name || 'NOT FOUND');
         console.log('Found interventions:', foundInterventions.length, foundInterventions.map(i => i.title));
+        console.log('Intervention IDs from scenario:', scenario.interventionIds);
         
         // If not found in specific language, try fallback to any language
         if (!foundCity || foundInterventions.length === 0) {

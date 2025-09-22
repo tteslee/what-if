@@ -30,15 +30,22 @@ export default function PublicScenariosPage() {
         return;
       }
 
-      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => ({
-        id: dbScenario.id as string,
-        whatIfQuestion: dbScenario.what_if_question as string,
-        cityId: dbScenario.city_id as string,
-        interventionIds: dbScenario.intervention_ids as string[],
-        notes: dbScenario.notes as string,
-        isPublic: dbScenario.is_public as boolean,
-      })) || [];
+      console.log('Public scenarios query result:', data);
+      console.log('Number of public scenarios found:', data?.length || 0);
+      
+      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => {
+        console.log('Public scenario:', dbScenario.id, 'is_public:', dbScenario.is_public, 'created_by:', dbScenario.created_by);
+        return {
+          id: dbScenario.id as string,
+          whatIfQuestion: dbScenario.what_if_question as string,
+          cityId: dbScenario.city_id as string,
+          interventionIds: dbScenario.intervention_ids as string[],
+          notes: dbScenario.notes as string,
+          isPublic: dbScenario.is_public as boolean,
+        };
+      }) || [];
 
+      console.log('Transformed public scenarios:', transformedScenarios);
       setScenarios(transformedScenarios);
       setLoading(false);
     } catch (error) {

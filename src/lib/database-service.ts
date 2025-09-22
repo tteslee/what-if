@@ -184,15 +184,21 @@ export class DatabaseService {
       const { data: { user } } = await supabase.auth.getUser();
       const scenarioData = this.transformScenarioToDB(scenario);
       
+      console.log('Saving scenario:', scenario.id, 'isPublic parameter:', isPublic, 'scenario.isPublic:', scenario.isPublic);
+      console.log('User logged in:', !!user, 'User ID:', user?.id);
+      
       // Add user info if logged in
       if (user) {
         scenarioData.created_by = user.id;
         scenarioData.is_public = isPublic;
+        console.log('Setting is_public to:', isPublic, 'for logged-in user');
       } else {
         // If not logged in, scenarios are public by default
         scenarioData.is_public = true;
+        console.log('Setting is_public to true for non-logged-in user');
       }
 
+      console.log('Final scenario data to save:', scenarioData);
       const { error } = await supabase
         .from('scenarios')
         .upsert(scenarioData);
@@ -420,7 +426,6 @@ export class DatabaseService {
       city_id: scenario.cityId,
       intervention_ids: scenario.interventionIds,
       notes: scenario.notes,
-      is_public: scenario.isPublic || false,
     };
   }
 

@@ -442,6 +442,7 @@ export class DatabaseService {
       city_id: scenario.cityId,
       intervention_ids: scenario.interventionIds,
       notes: scenario.notes,
+      lang: scenario.lang || 'en',
     };
   }
 

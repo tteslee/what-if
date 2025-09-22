@@ -8,12 +8,18 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { scenarioId, scenarioData } = await request.json();
+    const { scenarioId, scenarioData, language = 'en' } = await request.json();
 
     // Use the actual scenario data provided by the user
     const { whatIfQuestion, city, interventions } = scenarioData;
 
+    const languageInstruction = language === 'ko' 
+      ? 'IMPORTANT: Generate the entire response in Korean (한국어). All text content should be in Korean, including the narrative summary, stakeholder impacts, system effects, and all other sections.'
+      : 'IMPORTANT: Generate the entire response in English.';
+
     const prompt = `You are an expert urban planner and systems analyst. Generate a comprehensive scenario analysis for the following urban intervention:
+
+${languageInstruction}
 
 **What-if Question:** ${whatIfQuestion}
 

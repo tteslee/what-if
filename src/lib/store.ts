@@ -136,6 +136,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
         },
         body: JSON.stringify({ 
           scenarioId,
+          language: scenario.lang || 'en',
           scenarioData: {
             whatIfQuestion: scenario.whatIfQuestion,
             city,

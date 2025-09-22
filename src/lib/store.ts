@@ -169,27 +169,67 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     console.log('Loading data from database for language:', lang);
     
     try {
-      const [cities, interventions, scenarios] = await Promise.all([
+      // First try to load from database
+      const [dbCities, dbInterventions, dbScenarios] = await Promise.all([
         databaseService.getCities(lang),
         databaseService.getInterventions(lang),
         databaseService.getScenarios(lang),
       ]);
       
-      console.log('Loaded from database:', { cities, interventions, scenarios });
+      console.log('Loaded from database:', { cities: dbCities.length, interventions: dbInterventions.length, scenarios: dbScenarios.length });
+      
+      // If database has data, use it; otherwise fall back to sample data
+      let cities = dbCities;
+      let interventions = dbInterventions;
+      
+      if (dbCities.length === 0 || dbInterventions.length === 0) {
+        console.log('Database has no data, loading sample data for language:', lang);
+        
+        if (lang === 'ko') {
+          const { sampleCitiesKo, sampleInterventionsKo } = await import('../data/sample-data');
+          cities = dbCities.length > 0 ? dbCities : sampleCitiesKo;
+          interventions = dbInterventions.length > 0 ? dbInterventions : sampleInterventionsKo;
+        } else {
+          const { sampleCities, sampleInterventions } = await import('../data/sample-data');
+          cities = dbCities.length > 0 ? dbCities : sampleCities;
+          interventions = dbInterventions.length > 0 ? dbInterventions : sampleInterventions;
+        }
+      }
       
       set({
         cities,
         interventions,
-        scenarios,
+        scenarios: dbScenarios,
       });
       
       console.log('Store state after loading:', {
         cities: cities.length,
         interventions: interventions.length,
-        scenarios: scenarios.length,
+        scenarios: dbScenarios.length,
       });
     } catch (error) {
       console.error('Error loading data from database:', error);
+      
+      // Fallback to sample data on error
+      try {
+        if (lang === 'ko') {
+          const { sampleCitiesKo, sampleInterventionsKo } = await import('../data/sample-data');
+          set({
+            cities: sampleCitiesKo,
+            interventions: sampleInterventionsKo,
+            scenarios: [],
+          });
+        } else {
+          const { sampleCities, sampleInterventions } = await import('../data/sample-data');
+          set({
+            cities: sampleCities,
+            interventions: sampleInterventions,
+            scenarios: [],
+          });
+        }
+      } catch (fallbackError) {
+        console.error('Error loading sample data:', fallbackError);
+      }
     }
   },
   

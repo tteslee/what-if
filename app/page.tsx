@@ -6,10 +6,10 @@ import { useWhatIfStore } from '../src/lib/store';
 import MigrationBanner from '../src/components/MigrationBanner';
 
 const EXAMPLE_QUESTIONS = [
-  "could enhance the collective intelligence of Helsinki?",
+  "could make housing affordable for everyone in our city?",
   "could cool Madrid by 8.5 degrees celsius?",
   "could eliminate traffic fatalities in Singapore?",
-  "could make housing affordable for everyone in our city?",
+  "could reduce air pollution by 50% by 2030?",
   "could create a zero-waste circular economy?",
   "could ensure every child has access to quality education within walking distance?",
 ];

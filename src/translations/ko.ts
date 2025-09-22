@@ -1,0 +1,232 @@
+export const ko = {
+  // Navigation
+  nav: {
+    home: '홈',
+    newScenario: '새 시나리오',
+    myScenarios: '내 시나리오',
+    publicScenarios: '공개 시나리오',
+    login: '로그인',
+    signup: '회원가입',
+    logout: '로그아웃',
+  },
+
+  // Authentication
+  auth: {
+    signIn: '로그인',
+    signOut: '로그아웃',
+    loading: '로딩 중...',
+  },
+
+  // Main page
+  main: {
+    title: 'What-if',
+    subtitle: '도시 혁신을 위한 디지털 실험실',
+    description: '"만약에" 질문을 던지고 다양한 아이디어가 도시 환경을 어떻게 변화시킬 수 있는지 확인해보세요.',
+    inputPlaceholder: '도시의 집단 지능을 향상시킬 수 있다면?',
+    createScenario: '새 시나리오 만들기',
+    showExamples: '예시 질문 보기',
+    hideExamples: '예시 질문 숨기기',
+    exampleQuestions: [
+      '서울의 대기 오염을 줄일 수 있다면?',
+      '마드리드를 8.5도 시원하게 만들 수 있다면?',
+      '싱가포르에서 교통사고를 완전히 없앨 수 있다면?',
+      '모든 사람이 살 수 있는 주택을 만들 수 있다면?',
+      '제로웨이스트 순환 경제를 만들 수 있다면?',
+      '모든 아이가 도보 거리 내에서 양질의 교육을 받을 수 있다면?',
+    ],
+  },
+
+  // Design Principles
+  designPrinciples: {
+    requiredFirst: {
+      title: '도시 혁신 솔루션 데이터베이스',
+      description: '도시, 범위, 과제 등 핵심 정보를 담은 데이터베이스를 관리하세요.',
+    },
+    portfolioApproach: {
+      title: '포트폴리오 접근법',
+      description: '여러 솔루션을 결합하여 시너지 효과를 창출하세요.',
+    },
+    stressTestNarratives: {
+      title: '시나리오 스트레스 테스트',
+      description: '정확한 결과 예측보다는 이해관계자, 위험, 다음 실험에 초점을 맞춘 구조화된 시나리오를 생성하세요.',
+    },
+  },
+
+  // Warning Message
+  warning: {
+    title: '⚠️ 중요:',
+    message: '이 도구는 의사결정을 돕는 시나리오 생성을 위해 만들어졌으며, 정확한 예측이 아닙니다.',
+  },
+
+  // Public Scenarios Page
+  publicScenarios: {
+    title: '공개 시나리오',
+    subtitle: '커뮤니티가 공유한 시나리오를 탐색해보세요',
+    loading: '공개 시나리오 로딩 중...',
+    noScenarios: '아직 공개 시나리오가 없습니다',
+    noScenariosDescription: '커뮤니티와 시나리오를 공유하는 첫 번째 주인공이 되어보세요.',
+    createNewScenario: '새 시나리오 생성',
+    view: '보기',
+    public: '공개',
+    city: '도시',
+    interventions: '솔루션',
+    notes: '메모',
+  },
+
+  // Scenario creation
+  scenario: {
+    steps: {
+      question: {
+        title: '당신의 아이디어',
+        description: '무엇이 궁금하신가요?',
+        label: '만약에 우리가',
+        placeholder: '도시의 집단 지능을 향상시킬 수 있다면?',
+      },
+      city: {
+        title: '도시 선택',
+        description: '어디서 일어날까요?',
+        createCustom: '맞춤 도시 만들기',
+        createCustomDescription: '폼을 작성하여 나만의 도시 프로필을 만드세요',
+        loading: '도시 로딩 중...',
+      },
+      interventions: {
+        title: '솔루션 선택',
+        description: '무엇을 테스트하고 싶으신가요?',
+        createCustom: '커스텀 솔루션 만들기',
+        createCustomDescription: '폼을 작성하여 자신만의 솔루션 프로필을 만드세요',
+        selected: '선택된 솔루션',
+        available: '사용 가능한 솔루션',
+        loading: '솔루션 로딩 중...',
+      },
+      review: {
+        title: '검토 및 생성',
+        description: '분석할 준비가 되었나요?',
+        question: '질문:',
+        city: '도시:',
+        interventions: '솔루션:',
+        assumptions: '가정:',
+        addAssumption: '가정 추가',
+        privacy: '공개여부:',
+        public: '공개',
+        private: '비공개',
+        publicDescription: '이 시나리오는 모든 사람에게 보입니다',
+        privateDescription: '이 시나리오는 당신에게만 보입니다',
+        generate: '시나리오 분석 생성',
+        generating: '분석 생성 중...',
+      },
+    },
+    buttons: {
+      next: '다음',
+      previous: '이전',
+      create: '새 시나리오 만들기',
+      view: '보기',
+      delete: '삭제',
+      makePublic: '공개로 만들기',
+      makePrivate: '비공개로 만들기',
+      startOver: '처음부터',
+    },
+    result: {
+      title: '시나리오 분석',
+      portfolioAnalysis: '포트폴리오 분석',
+      stakeholderImpacts: '이해관계자 영향',
+      risksAndUnknowns: '위험 및 미지수',
+      notGenerated: '시나리오 분석이 생성되지 않음',
+      context: '맥락',
+      city: '도시',
+      interventions: '솔루션',
+      narrativeSummary: '서술적 요약',
+      benefits: '혜택',
+      concerns: '우려사항',
+      engagementNeeds: '참여 요구사항',
+      support: '지지',
+      citizens: '시민',
+      signalsToWatch: '주시할 신호',
+      nextExperiments: '다음 실험',
+      timeline: '타임라인',
+      lowEffort: '낮은 노력',
+      synergies: '시너지',
+      gaps: '갭',
+      assumptions: '가정',
+      systemEffects: '시스템 효과',
+      policyTrends: '정책 동향',
+    },
+  },
+
+  // Common
+  common: {
+    loading: '로딩 중...',
+    error: '오류',
+    success: '성공',
+    cancel: '취소',
+    save: '저장',
+    edit: '편집',
+    delete: '삭제',
+    confirm: '확인',
+    back: '뒤로',
+    close: '닫기',
+  },
+
+  // Status messages
+  status: {
+    noScenarios: '시나리오를 찾을 수 없습니다',
+    noPublicScenarios: '아직 공개 시나리오가 없습니다',
+    beFirstToShare: '커뮤니티와 공유할 첫 번째 시나리오를 만드세요.',
+    scenarioNotGenerated: '시나리오 분석이 생성되지 않음',
+    scenarioNotGeneratedDescription: '시나리오 분석이 아직 생성되지 않았습니다. 오류가 발생했거나 분석이 아직 진행 중일 수 있습니다.',
+  },
+
+  // City Form
+  cityForm: {
+    createCustomCity: '커스텀 도시 생성',
+    fillRequiredFields: '새 도시 프로필을 생성하려면 필수 필드를 작성하세요.',
+    name: '도시 이름',
+    scale: '적용 규모',
+    citywide: '도시 전체',
+    districtNeighbourhood: '구/동',
+    corridorStreet: '거리',
+    specificSite: '특정 부지',
+    mainChallenges: '주요 문제',
+    addChallenge: '문제 추가',
+    showOptional: '선택 사항 보기',
+    hideOptional: '선택 사항 숨기기',
+    populationContext: '인구 세부 사항 (선택 사항)',
+    populationSize: '인구',
+    demographics: '인구 특성',
+    neighbourhoodCharacteristics: '지역 특성 (선택 사항)',
+    vulnerableGroups: '취약 계층 (선택 사항)',
+    addVulnerableGroup: '취약 계층 추가',
+    regulatoryContext: '규제 맥락 (선택 사항)',
+    timeline: '기간 (선택 사항)',
+    budgetConstraints: '예산 제약 (선택 사항)',
+    existingAssets: '기존 자산 및 인프라 (선택 사항)',
+    addExistingAsset: '기존 자산 추가',
+    cancel: '취소',
+    submit: '제출',
+  },
+
+  // Intervention Form
+  interventionForm: {
+    createCustomIntervention: '커스텀 솔루션 생성',
+    fillRequiredFields: '새 솔루션 프로필을 생성하려면 필수 필드를 작성하세요.',
+    title: '솔루션 제목',
+    summary: '요약',
+    category: '카테고리',
+    scopeOfApplication: '적용 범위',
+    detailedDescription: '상세 설명 (선택 사항)',
+    parameters: '매개변수 (선택 사항)',
+    addParameter: '매개변수 추가',
+    synergies: '시너지 (선택 사항)',
+    addSynergy: '시너지 추가',
+    intendedOutcomes: '임팩트 (선택 사항)',
+    addIntendedOutcome: '임팩트 추가',
+    stakeholderFocus: '주요 이해관계자 (선택 사항)',
+    addStakeholder: '이해관계자 추가',
+    implementationNotes: '실현 가능성을 위한 참고사항 (선택 사항)',
+    risks: '위험요소 (선택 사항)',
+    addRisk: '위험요소 추가',
+    showOptional: '선택 사항 보기',
+    hideOptional: '선택 사항 숨기기',
+    cancel: '취소',
+    submit: '제출',
+  },
+};

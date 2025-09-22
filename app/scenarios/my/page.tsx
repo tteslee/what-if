@@ -38,6 +38,7 @@ export default function MyScenariosPage() {
           interventionIds: dbScenario.intervention_ids as string[],
           notes: dbScenario.notes as string,
           isPublic: dbScenario.is_public as boolean,
+          lang: (dbScenario.lang as 'en' | 'ko') || 'en',
         };
       }) || [];
 

@@ -30,6 +30,7 @@ export const ConfidenceLevel = z.enum(["High", "Medium", "Low"]);
 export const CityProfileSchema = z.object({
   id: z.string(),
   name: z.string(),
+  lang: z.enum(['en', 'ko']).default('en'),
   
   // Required fields
   scale: CityScale,
@@ -137,6 +138,7 @@ export type CityProfile = z.infer<typeof CityProfileSchema>;
  *  ───────────────────────────────────────────────────────────── */
 export const InterventionSchema = z.object({
   id: z.string(),
+  lang: z.enum(['en', 'ko']).default('en'),
   
   // Required fields
   title: z.string(), // e.g. "School Air Quality Sensors"
@@ -226,6 +228,7 @@ export const ScenarioSchema = z.object({
   interventionIds: z.array(z.string()).min(1), // Support multiple interventions
   notes: z.string().optional(),
   isPublic: z.boolean().optional(),
+  lang: z.enum(['en', 'ko']).default('en'),
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 

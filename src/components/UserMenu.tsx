@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import AuthModal from './AuthModal';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function UserMenu() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -40,7 +42,7 @@ export default function UserMenu() {
   if (loading) {
     return (
       <button className="bg-gray-300 text-gray-500 px-4 py-2 rounded-md cursor-not-allowed">
-        Loading...
+        {t.auth.loading}
       </button>
     );
   }
@@ -52,7 +54,7 @@ export default function UserMenu() {
           onClick={() => setShowAuthModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
         >
-          Sign In
+          {t.auth.signIn}
         </button>
         <AuthModal
           isOpen={showAuthModal}
@@ -94,7 +96,7 @@ export default function UserMenu() {
             onClick={handleSignOut}
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            Sign Out
+            {t.auth.signOut}
           </button>
         </div>
       )}

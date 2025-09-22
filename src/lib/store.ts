@@ -25,9 +25,10 @@ interface WhatIfState {
   clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
-  createScenario: (isPublic?: boolean) => Promise<Scenario | null>;
+  createScenario: (isPublic?: boolean, lang?: 'en' | 'ko') => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
-  loadSampleData: () => Promise<void>;
+  loadSampleData: (lang?: 'en' | 'ko') => Promise<void>;
+  clearData: () => void;
   addCustomCity: (city: CityProfile) => Promise<void>;
   addCustomIntervention: (intervention: Intervention) => Promise<void>;
   deleteCustomCity: (cityId: string) => Promise<void>;
@@ -87,7 +88,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   clearAssumptions: () => set({ assumptions: [] }),
   
   // Scenario Management
-  createScenario: async (isPublic: boolean = false) => {
+  createScenario: async (isPublic: boolean = false, lang: 'en' | 'ko' = 'en') => {
     const state = get();
     if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
@@ -100,6 +101,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
       isPublic: isPublic,
+      lang: lang,
     };
 
     const success = await databaseService.saveScenario(scenario, isPublic);
@@ -134,6 +136,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
         },
         body: JSON.stringify({ 
           scenarioId,
+          language: scenario.lang || 'en',
           scenarioData: {
             whatIfQuestion: scenario.whatIfQuestion,
             city,
@@ -164,31 +167,71 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     }
   },
   
-  loadSampleData: async () => {
-    console.log('Loading data from database...');
+  loadSampleData: async (lang: 'en' | 'ko' = 'en') => {
+    console.log('Loading data from database for language:', lang);
     
     try {
-      const [cities, interventions, scenarios] = await Promise.all([
-        databaseService.getCities(),
-        databaseService.getInterventions(),
-        databaseService.getScenarios(),
+      // First try to load from database
+      const [dbCities, dbInterventions, dbScenarios] = await Promise.all([
+        databaseService.getCities(lang),
+        databaseService.getInterventions(lang),
+        databaseService.getScenarios(lang),
       ]);
       
-      console.log('Loaded from database:', { cities, interventions, scenarios });
+      console.log('Loaded from database:', { cities: dbCities.length, interventions: dbInterventions.length, scenarios: dbScenarios.length });
+      
+      // If database has data, use it; otherwise fall back to sample data
+      let cities = dbCities;
+      let interventions = dbInterventions;
+      
+      if (dbCities.length === 0 || dbInterventions.length === 0) {
+        console.log('Database has no data, loading sample data for language:', lang);
+        
+        if (lang === 'ko') {
+          const { sampleCitiesKo, sampleInterventionsKo } = await import('../data/sample-data');
+          cities = dbCities.length > 0 ? dbCities : sampleCitiesKo;
+          interventions = dbInterventions.length > 0 ? dbInterventions : sampleInterventionsKo;
+        } else {
+          const { sampleCities, sampleInterventions } = await import('../data/sample-data');
+          cities = dbCities.length > 0 ? dbCities : sampleCities;
+          interventions = dbInterventions.length > 0 ? dbInterventions : sampleInterventions;
+        }
+      }
       
       set({
         cities,
         interventions,
-        scenarios,
+        scenarios: dbScenarios,
       });
       
       console.log('Store state after loading:', {
         cities: cities.length,
         interventions: interventions.length,
-        scenarios: scenarios.length,
+        scenarios: dbScenarios.length,
       });
     } catch (error) {
       console.error('Error loading data from database:', error);
+      
+      // Fallback to sample data on error
+      try {
+        if (lang === 'ko') {
+          const { sampleCitiesKo, sampleInterventionsKo } = await import('../data/sample-data');
+          set({
+            cities: sampleCitiesKo,
+            interventions: sampleInterventionsKo,
+            scenarios: [],
+          });
+        } else {
+          const { sampleCities, sampleInterventions } = await import('../data/sample-data');
+          set({
+            cities: sampleCities,
+            interventions: sampleInterventions,
+            scenarios: [],
+          });
+        }
+      } catch (fallbackError) {
+        console.error('Error loading sample data:', fallbackError);
+      }
     }
   },
   
@@ -237,6 +280,16 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   
   setScenarios: (scenarios: Scenario[]) => {
     set({ scenarios });
+  },
+  
+  // Clear data (for language switching)
+  clearData: () => {
+    set({
+      cities: [],
+      interventions: [],
+      scenarios: [],
+      results: {},
+    });
   },
   
   // Reset

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CityProfile } from '../lib/schemas';
 import { z } from 'zod';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const CityScale = z.enum([
   "Citywide",
@@ -18,6 +19,7 @@ interface CityFormProps {
 }
 
 export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
+  const { language, t } = useTranslation();
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -41,6 +43,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
     const city: CityProfile = {
       id: `custom-${Date.now()}`,
       name: formData.name,
+      lang: language,
       scale: formData.scale,
       mainChallenges: formData.mainChallenges.filter(c => c.trim()),
       ...(showOptionalFields && {
@@ -126,21 +129,21 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">Create Custom City</h2>
-        <p className="text-slate-600 text-base">Fill in the required fields to create a new city profile.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">{t.cityForm.createCustomCity}</h2>
+        <p className="text-slate-600 text-base">{t.cityForm.fillRequiredFields}</p>
       </div>
 
       {/* Required Fields */}
       <div className="space-y-6">
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            City Name *
+            {t.cityForm.name} *
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Helsinki, Madrid, Singapore"
             required
           />
@@ -148,24 +151,24 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Scale *
+            {t.cityForm.scale} *
           </label>
           <select
             value={formData.scale}
             onChange={(e) => setFormData(prev => ({ ...prev, scale: e.target.value as CityScale }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             required
           >
-            <option value="Citywide">Citywide</option>
-            <option value="DistrictNeighbourhood">District/Neighbourhood</option>
-            <option value="CorridorStreet">Corridor/Street</option>
-            <option value="SpecificSite">Specific Site (school, park, building)</option>
+            <option value="Citywide">{t.cityForm.citywide}</option>
+            <option value="DistrictNeighbourhood">{t.cityForm.districtNeighbourhood}</option>
+            <option value="CorridorStreet">{t.cityForm.corridorStreet}</option>
+            <option value="SpecificSite">{t.cityForm.specificSite}</option>
           </select>
         </div>
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Main Urban Challenges / Drivers *
+            {t.cityForm.mainChallenges} *
           </label>
           <div className="space-y-3">
             {formData.mainChallenges.map((challenge, index) => (
@@ -174,7 +177,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   type="text"
                   value={challenge}
                   onChange={(e) => updateChallenge(index, e.target.value)}
-                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                   placeholder="e.g., air quality, congestion, housing affordability"
                   required
                 />
@@ -199,7 +202,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Add another challenge
+{t.cityForm.addChallenge}
             </button>
           </div>
         </div>
@@ -215,7 +218,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           <svg className={`w-5 h-5 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          {showOptionalFields ? 'Hide' : 'Show'} optional details
+{showOptionalFields ? t.cityForm.hideOptional : t.cityForm.showOptional}
         </button>
       </div>
 
@@ -225,7 +228,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-base font-semibold text-slate-700 mb-3">
-                Population Size
+                {t.cityForm.populationSize}
               </label>
               <input
                 type="number"
@@ -234,13 +237,13 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, size: e.target.value }
                 }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., 656920"
               />
             </div>
             <div>
               <label className="block text-base font-semibold text-slate-700 mb-3">
-                Demographics
+                {t.cityForm.demographics}
               </label>
               <input
                 type="text"
@@ -249,7 +252,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                   ...prev, 
                   populationContext: { ...prev.populationContext, demographics: e.target.value }
                 }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., aging population with growing tech sector"
               />
             </div>
@@ -257,20 +260,20 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
 
           <div>
             <label className="block text-base font-semibold text-slate-700 mb-3">
-              Neighbourhood Characteristics / Land Use Mix
+              {t.cityForm.neighbourhoodCharacteristics}
             </label>
             <input
               type="text"
               value={formData.neighbourhoodCharacteristics}
               onChange={(e) => setFormData(prev => ({ ...prev, neighbourhoodCharacteristics: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
               placeholder="e.g., mixed-use with strong public transport"
             />
           </div>
 
           <div>
             <label className="block text-base font-semibold text-slate-700 mb-3">
-              Vulnerable or Priority Groups
+              {t.cityForm.vulnerableGroups}
             </label>
             <div className="space-y-3">
               {formData.vulnerableGroups.map((group, index) => (
@@ -279,7 +282,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                     type="text"
                     value={group}
                     onChange={(e) => updateVulnerableGroup(index, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                     placeholder="e.g., elderly, low-income, children"
                   />
                   <button
@@ -301,20 +304,20 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add vulnerable group
+{t.cityForm.addVulnerableGroup}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-base font-semibold text-slate-700 mb-3">
-              Regulatory or Political Context
+              {t.cityForm.regulatoryContext}
             </label>
             <input
               type="text"
               value={formData.regulatoryContext}
               onChange={(e) => setFormData(prev => ({ ...prev, regulatoryContext: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
               placeholder="e.g., Bus lane reallocation is contentious"
             />
           </div>
@@ -322,25 +325,25 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-base font-semibold text-slate-700 mb-3">
-                Timeline
+                {t.cityForm.timeline}
               </label>
               <input
                 type="text"
                 value={formData.timeline}
                 onChange={(e) => setFormData(prev => ({ ...prev, timeline: e.target.value }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., 2-year implementation window"
               />
             </div>
             <div>
               <label className="block text-base font-semibold text-slate-700 mb-3">
-                Budget Constraints
+                {t.cityForm.budgetConstraints}
               </label>
               <input
                 type="text"
                 value={formData.budgetConstraints}
                 onChange={(e) => setFormData(prev => ({ ...prev, budgetConstraints: e.target.value }))}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                 placeholder="e.g., €5M available for pilot"
               />
             </div>
@@ -348,7 +351,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
 
           <div>
             <label className="block text-base font-semibold text-slate-700 mb-3">
-              Existing Assets / Infrastructure
+              {t.cityForm.existingAssets}
             </label>
             <div className="space-y-3">
               {formData.existingAssets.map((asset, index) => (
@@ -357,7 +360,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                     type="text"
                     value={asset}
                     onChange={(e) => updateAsset(index, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                    className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
                     placeholder="e.g., schools, bus line 12, public housing blocks"
                   />
                   <button
@@ -379,7 +382,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add existing asset
+{t.cityForm.addExistingAsset}
               </button>
             </div>
           </div>
@@ -393,13 +396,13 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           onClick={onCancel}
           className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
-          Cancel
+{t.cityForm.cancel}
         </button>
         <button
           type="submit"
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
-          Create City
+          {t.cityForm.submit}
         </button>
       </div>
     </form>

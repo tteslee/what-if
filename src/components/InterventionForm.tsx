@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Intervention } from '../lib/schemas';
 import { z } from 'zod';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const InterventionCategory = z.enum([
   "BehaviourChange",
@@ -22,6 +23,7 @@ interface InterventionFormProps {
 }
 
 export default function InterventionForm({ onSubmit, onCancel }: InterventionFormProps) {
+  const { language, t } = useTranslation();
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -42,6 +44,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
     
     const intervention: Intervention = {
       id: `custom-${Date.now()}`,
+      lang: language,
       title: formData.title,
       summary: formData.summary,
       category: formData.category,
@@ -169,21 +172,21 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
   return (
     <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">Create Custom Intervention</h2>
-        <p className="text-slate-600 text-base">Fill in the required fields to create a new intervention profile.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">{t.interventionForm.createCustomIntervention}</h2>
+        <p className="text-slate-600 text-base">{t.interventionForm.fillRequiredFields}</p>
       </div>
 
       {/* Required Fields */}
       <div className="space-y-6">
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Title / Name *
+            {t.interventionForm.title} *
           </label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., School Air Quality Sensors, Congestion Pricing"
             required
           />
@@ -191,13 +194,13 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Summary / One-liner *
+            {t.interventionForm.summary} *
           </label>
           <input
             type="text"
             value={formData.summary}
             onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Install low-cost sensors in schools to monitor air quality"
             required
           />
@@ -205,12 +208,12 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Category *
+            {t.interventionForm.category} *
           </label>
           <select
             value={formData.category}
             onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as InterventionCategory }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             required
           >
             <option value="BehaviourChange">Behaviour Change</option>
@@ -226,13 +229,13 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            Scope of Application *
+            {t.interventionForm.scopeOfApplication} *
           </label>
           <input
             type="text"
             value={formData.scopeOfApplication}
             onChange={(e) => setFormData(prev => ({ ...prev, scopeOfApplication: e.target.value }))}
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             placeholder="e.g., Primary schools in urban areas"
             required
           />
@@ -249,7 +252,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
           <svg className={`w-5 h-5 transition-transform ${showOptionalFields ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          {showOptionalFields ? 'Hide' : 'Show'} optional details
+{showOptionalFields ? t.interventionForm.hideOptional : t.interventionForm.showOptional}
         </button>
       </div>
 
@@ -258,12 +261,12 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
         <div className="space-y-4 border-t border-slate-200 pt-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Detailed Description
+              {t.interventionForm.detailedDescription}
             </label>
             <textarea
               value={formData.detailedDescription}
               onChange={(e) => setFormData(prev => ({ ...prev, detailedDescription: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
               rows={4}
               placeholder="A paragraph elaborating approach & goals..."
             />
@@ -271,7 +274,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Parameters / Key Features
+              {t.interventionForm.parameters}
             </label>
             <div className="space-y-2">
               {formData.parameters.map((param, index) => (
@@ -280,14 +283,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={param.key}
                     onChange={(e) => updateParameter(index, 'key', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., sensorsCount"
                   />
                   <input
                     type="text"
                     value={param.value}
                     onChange={(e) => updateParameter(index, 'value', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., 200"
                   />
                   <button
@@ -304,14 +307,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                 onClick={addParameter}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                + Add parameter
++ {t.interventionForm.addParameter}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Synergies / Links to Other Interventions
+              {t.interventionForm.synergies}
             </label>
             <div className="space-y-2">
               {formData.synergies.map((synergy, index) => (
@@ -320,7 +323,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={synergy}
                     onChange={(e) => updateSynergy(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Works best with: School Streets, Green Corridors"
                   />
                   <button
@@ -337,14 +340,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                 onClick={addSynergy}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                + Add synergy
++ {t.interventionForm.addSynergy}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Intended Outcomes
+              {t.interventionForm.intendedOutcomes}
             </label>
             <div className="space-y-2">
               {formData.intendedOutcomes.map((outcome, index) => (
@@ -353,7 +356,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={outcome}
                     onChange={(e) => updateOutcome(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Reduce children's exposure to air pollution"
                   />
                   <button
@@ -370,14 +373,14 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                 onClick={addOutcome}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                + Add outcome
++ {t.interventionForm.addIntendedOutcome}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Stakeholder Focus
+              {t.interventionForm.stakeholderFocus}
             </label>
             <div className="space-y-2">
               {formData.stakeholderFocus.map((stakeholder, index) => (
@@ -386,7 +389,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={stakeholder}
                     onChange={(e) => updateStakeholder(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., children, commuters, landlords"
                   />
                   <button
@@ -403,19 +406,19 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                 onClick={addStakeholder}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                + Add stakeholder
++ {t.interventionForm.addStakeholder}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Implementation Notes
+              {t.interventionForm.implementationNotes}
             </label>
             <textarea
               value={formData.implementationNotes}
               onChange={(e) => setFormData(prev => ({ ...prev, implementationNotes: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
               rows={3}
               placeholder="Timeline, budget, regulatory enablers/barriers..."
             />
@@ -423,7 +426,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Risks
+              {t.interventionForm.risks}
             </label>
             <div className="space-y-2">
               {formData.risks.map((risk, index) => (
@@ -432,7 +435,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                     type="text"
                     value={risk}
                     onChange={(e) => updateRisk(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                     placeholder="e.g., Sensor maintenance and calibration challenges"
                   />
                   <button
@@ -449,7 +452,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
                 onClick={addRisk}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                + Add risk
++ {t.interventionForm.addRisk}
               </button>
             </div>
           </div>
@@ -463,13 +466,13 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
           onClick={onCancel}
           className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
-          Cancel
+{t.interventionForm.cancel}
         </button>
         <button
           type="submit"
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
-          Create Intervention
+          {t.interventionForm.submit}
         </button>
       </div>
     </form>

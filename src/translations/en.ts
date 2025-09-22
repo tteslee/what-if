@@ -1,0 +1,232 @@
+export const en = {
+  // Navigation
+  nav: {
+    home: 'Home',
+    newScenario: 'New Scenario',
+    myScenarios: 'My Scenarios',
+    publicScenarios: 'Public Scenarios',
+    login: 'Login',
+    signup: 'Sign Up',
+    logout: 'Logout',
+  },
+
+  // Authentication
+  auth: {
+    signIn: 'Sign In',
+    signOut: 'Sign Out',
+    loading: 'Loading...',
+  },
+
+  // Main page
+  main: {
+    title: 'What-if',
+    subtitle: 'Explore the future of your city',
+    description: 'Ask "what if" questions and discover how different interventions could transform your urban environment.',
+    inputPlaceholder: 'could enhance the collective intelligence of your city?',
+    createScenario: 'Create New Scenario',
+    showExamples: 'Show example questions',
+    hideExamples: 'Hide example questions',
+    exampleQuestions: [
+      'could reduce air pollution in Seoul?',
+      'could cool Madrid by 8.5 degrees celsius?',
+      'could eliminate traffic fatalities in Singapore?',
+      'could make housing affordable for everyone in our city?',
+      'could create a zero-waste circular economy?',
+      'could ensure every child has access to quality education within walking distance?',
+    ],
+  },
+
+  // Design Principles
+  designPrinciples: {
+    requiredFirst: {
+      title: 'Create City and Intervention Profiles',
+      description: 'Manage a database of essential information - city, challenges, and interventions.',
+    },
+    portfolioApproach: {
+      title: 'Portfolio Approach',
+      description: 'Combine multiple interventions to create synergistic effects. Identify gaps and opportunities across different categories.',
+    },
+    stressTestNarratives: {
+      title: 'Stress-Test Narratives',
+      description: 'Generate structured analysis focusing on stakeholders, risks, and next experiments rather than predictions.',
+    },
+  },
+
+  // Warning Message
+  warning: {
+    title: '⚠️ Important:',
+    message: 'This is an exploratory simulation tool, not a forecast. Use for decision support and sensemaking.',
+  },
+
+  // Public Scenarios Page
+  publicScenarios: {
+    title: 'Public Scenarios',
+    subtitle: 'Explore scenarios shared by the community',
+    loading: 'Loading public scenarios...',
+    noScenarios: 'No public scenarios yet',
+    noScenariosDescription: 'Be the first to share a scenario with the community.',
+    createNewScenario: 'Create New Scenario',
+    view: 'View',
+    public: 'Public',
+    city: 'City',
+    interventions: 'Interventions',
+    notes: 'Notes',
+  },
+
+  // Scenario creation
+  scenario: {
+    steps: {
+      question: {
+        title: 'Your Question',
+        description: 'What are you curious about?',
+        label: 'What if we',
+        placeholder: 'could enhance the collective intelligence of your city?',
+      },
+      city: {
+        title: 'Choose a City',
+        description: 'Where would this happen?',
+        createCustom: 'Create Custom City',
+        createCustomDescription: 'Fill out a form to create your own city profile',
+        loading: 'Loading cities...',
+      },
+      interventions: {
+        title: 'Pick Interventions',
+        description: 'What would you like to test?',
+        createCustom: 'Create Custom Intervention',
+        createCustomDescription: 'Fill out a form to create your own intervention profile',
+        selected: 'Selected Interventions',
+        available: 'Available Interventions',
+        loading: 'Loading interventions...',
+      },
+      review: {
+        title: 'Review & Generate',
+        description: 'Ready to analyze?',
+        question: 'Question:',
+        city: 'City:',
+        interventions: 'Interventions:',
+        assumptions: 'Assumptions:',
+        addAssumption: 'Add assumption',
+        privacy: 'Privacy:',
+        public: 'Public',
+        private: 'Private',
+        publicDescription: 'This scenario will be visible to everyone',
+        privateDescription: 'This scenario will only be visible to you',
+        generate: 'Generate Scenario Analysis',
+        generating: 'Generating analysis...',
+      },
+    },
+    buttons: {
+      next: 'Next',
+      previous: 'Previous',
+      create: 'Create New Scenario',
+      view: 'View',
+      delete: 'Delete',
+      makePublic: 'Make Public',
+      makePrivate: 'Make Private',
+      startOver: 'Start Over',
+    },
+    result: {
+      title: 'Scenario Analysis',
+      portfolioAnalysis: 'Portfolio Analysis',
+      stakeholderImpacts: 'Stakeholder Impacts',
+      risksAndUnknowns: 'Risks & Unknowns',
+      notGenerated: 'Scenario Analysis Not Generated',
+      context: 'Context',
+      city: 'City',
+      interventions: 'Interventions',
+      narrativeSummary: 'Narrative Summary',
+      benefits: 'Benefits',
+      concerns: 'Concerns',
+      engagementNeeds: 'Engagement Needs',
+      support: 'Support',
+      citizens: 'Citizens',
+      signalsToWatch: 'Signals to Watch',
+      nextExperiments: 'Next Experiments',
+      timeline: 'Timeline',
+      lowEffort: 'Low Effort',
+      synergies: 'Synergies',
+      gaps: 'Gaps',
+      assumptions: 'Assumptions',
+      systemEffects: 'System Effects',
+      policyTrends: 'Policy Trends',
+    },
+  },
+
+  // Common
+  common: {
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    cancel: 'Cancel',
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm: 'Confirm',
+    back: 'Back',
+    close: 'Close',
+  },
+
+  // Status messages
+  status: {
+    noScenarios: 'No scenarios found',
+    noPublicScenarios: 'No public scenarios yet',
+    beFirstToShare: 'Be the first to share a scenario with the community.',
+    scenarioNotGenerated: 'Scenario Analysis Not Generated',
+    scenarioNotGeneratedDescription: 'The scenario analysis hasn\'t been generated yet. This might be due to an error or the analysis is still in progress.',
+  },
+
+  // City Form
+  cityForm: {
+    createCustomCity: 'Create Custom City',
+    fillRequiredFields: 'Fill in the required fields to create a new city profile.',
+    name: 'City Name',
+    scale: 'City Scale',
+    citywide: 'Citywide',
+    districtNeighbourhood: 'District/Neighbourhood',
+    corridorStreet: 'Corridor/Street',
+    specificSite: 'Specific Site',
+    mainChallenges: 'Main Challenges',
+    addChallenge: 'Add challenge',
+    showOptional: 'Show optional details',
+    hideOptional: 'Hide optional details',
+    populationContext: 'Population Context (Optional)',
+    populationSize: 'Population Size',
+    demographics: 'Demographics',
+    neighbourhoodCharacteristics: 'Neighbourhood Characteristics (Optional)',
+    vulnerableGroups: 'Vulnerable or Priority Groups (Optional)',
+    addVulnerableGroup: 'Add vulnerable group',
+    regulatoryContext: 'Regulatory Context (Optional)',
+    timeline: 'Timeline (Optional)',
+    budgetConstraints: 'Budget Constraints (Optional)',
+    existingAssets: 'Existing Assets (Optional)',
+    addExistingAsset: 'Add existing asset',
+    cancel: 'Cancel',
+    submit: 'Submit',
+  },
+
+  // Intervention Form
+  interventionForm: {
+    createCustomIntervention: 'Create Custom Intervention',
+    fillRequiredFields: 'Fill in the required fields to create a new intervention profile.',
+    title: 'Intervention Title',
+    summary: 'Summary',
+    category: 'Category',
+    scopeOfApplication: 'Scope of Application',
+    detailedDescription: 'Detailed Description (Optional)',
+    parameters: 'Parameters (Optional)',
+    addParameter: 'Add parameter',
+    synergies: 'Synergies (Optional)',
+    addSynergy: 'Add synergy',
+    intendedOutcomes: 'Intended Outcomes (Optional)',
+    addIntendedOutcome: 'Add intended outcome',
+    stakeholderFocus: 'Stakeholder Focus (Optional)',
+    addStakeholder: 'Add stakeholder',
+    implementationNotes: 'Implementation Notes (Optional)',
+    risks: 'Risks (Optional)',
+    addRisk: 'Add risk',
+    showOptional: 'Show optional details',
+    hideOptional: 'Hide optional details',
+    cancel: 'Cancel',
+    submit: 'Submit',
+  },
+};

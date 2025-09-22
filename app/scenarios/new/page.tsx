@@ -6,15 +6,12 @@ import { useWhatIfStore } from '../../../src/lib/store';
 import { CityProfile, Intervention } from '../../../src/lib/schemas';
 import CityForm from '../../../src/components/CityForm';
 import InterventionForm from '../../../src/components/InterventionForm';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
-const STEPS = [
-  { id: 0, title: 'Your Question', description: 'What are you curious about?' },
-  { id: 1, title: 'Choose a City', description: 'Where would this happen?' },
-  { id: 2, title: 'Pick Interventions', description: 'What would you like to test?' },
-  { id: 3, title: 'Review & Generate', description: 'Ready to analyze?' },
-];
+// STEPS will be defined inside the component to use translations
 
 export default function NewScenarioPage() {
+  const { language, t } = useTranslation();
   const router = useRouter();
   const {
     currentStep,
@@ -48,6 +45,14 @@ export default function NewScenarioPage() {
   const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
 
+  // Define STEPS with translations
+  const STEPS = [
+    { id: 0, title: t.scenario.steps.question.title, description: t.scenario.steps.question.description },
+    { id: 1, title: t.scenario.steps.city.title, description: t.scenario.steps.city.description },
+    { id: 2, title: t.scenario.steps.interventions.title, description: t.scenario.steps.interventions.description },
+    { id: 3, title: t.scenario.steps.review.title, description: t.scenario.steps.review.description },
+  ];
+
   // Reset form when component mounts to ensure clean slate
   // But preserve the whatIfQuestion if it was set from the front page
   useEffect(() => {
@@ -68,10 +73,20 @@ export default function NewScenarioPage() {
   }, [reset, whatIfQuestion, setWhatIfQuestion]);
 
   useEffect(() => {
+    console.log('New scenario page useEffect:', {
+      currentStep,
+      citiesLength: cities?.length || 0,
+      interventionsLength: interventions?.length || 0,
+      language,
+      cities: cities?.map(c => ({ name: c.name, lang: c.lang })) || [],
+      interventions: interventions?.map(i => ({ title: i.title, lang: i.lang })) || []
+    });
+    
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
-      loadSampleData();
+      console.log('Calling loadSampleData with language:', language);
+      loadSampleData(language);
     }
-  }, [currentStep, cities, interventions, loadSampleData]);
+  }, [currentStep, cities, interventions, loadSampleData, language]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -86,7 +101,7 @@ export default function NewScenarioPage() {
   };
 
   const handleCreateAndGenerate = async () => {
-    const scenario = await createScenario(isPublic);
+    const scenario = await createScenario(isPublic, language);
     if (scenario) {
       setIsGeneratingScenario(true);
       try {
@@ -137,23 +152,23 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Complete your question
+                {t.scenario.steps.question.title}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-xl font-medium text-slate-500">What if we</span>
+                  <span className="text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
                 </div>
                 <input
                   type="text"
                   value={whatIfQuestion}
                   onChange={(e) => setWhatIfQuestion(e.target.value)}
-                  placeholder="could enhance the collective intelligence of our city?"
+                  placeholder={t.scenario.steps.question.placeholder}
                   className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 placeholder-slate-500"
                   autoFocus
                 />
               </div>
               <p className="mt-2 text-sm text-slate-600">
-                Think about outcomes: What would success look like? Who would benefit?
+                {t.scenario.steps.question.description}
               </p>
             </div>
           </div>
@@ -165,7 +180,7 @@ export default function NewScenarioPage() {
             <div className="space-y-6">
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading cities...</p>
+                <p className="text-slate-600">{t.scenario.steps.city.loading || 'Loading cities...'}</p>
               </div>
             </div>
           );
@@ -175,7 +190,7 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Select a city context
+                {t.scenario.steps.city.title}
               </label>
               
               {/* Create Custom City Form */}
@@ -188,9 +203,9 @@ export default function NewScenarioPage() {
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span className="text-blue-600 font-medium">Create Custom City</span>
+                    <span className="text-blue-600 font-medium">{t.scenario.steps.city.createCustom}</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">Fill out a form to create your own city profile</p>
+                  <p className="text-sm text-slate-600 mt-1">{t.scenario.steps.city.createCustomDescription}</p>
                 </button>
               </div>
 
@@ -269,7 +284,7 @@ export default function NewScenarioPage() {
             <div className="space-y-6">
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading interventions...</p>
+                <p className="text-slate-600">{t.scenario.steps.interventions.loading || 'Loading interventions...'}</p>
               </div>
             </div>
           );
@@ -279,7 +294,7 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Choose interventions (select multiple for portfolio approach)
+                {t.scenario.steps.interventions.title}
               </label>
               
               {/* Create Custom Intervention Form */}
@@ -292,16 +307,16 @@ export default function NewScenarioPage() {
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span className="text-blue-600 font-medium">Create Custom Intervention</span>
+                    <span className="text-blue-600 font-medium">{t.scenario.steps.interventions.createCustom}</span>
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">Fill out a form to create your own intervention profile</p>
+                  <p className="text-sm text-slate-600 mt-1">{t.scenario.steps.interventions.createCustomDescription}</p>
                 </button>
               </div>
 
               {/* Selected Interventions */}
               {selectedInterventionIds.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-700 mb-3">Selected Interventions ({selectedInterventionIds.length})</h4>
+                  <h4 className="text-sm font-medium text-slate-700 mb-3">{t.scenario.steps.interventions.selected} ({selectedInterventionIds.length})</h4>
                   <div className="space-y-2">
                     {selectedInterventionIds?.map((id) => {
                       const intervention = interventions.find(i => i.id === id);
@@ -327,6 +342,9 @@ export default function NewScenarioPage() {
               )}
 
               {/* Available Interventions */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-slate-700 mb-3">{t.scenario.steps.interventions.available}</h4>
+              </div>
               <div className="grid gap-4">
                 {interventions
                   ?.filter(i => !selectedInterventionIds.includes(i.id))
@@ -399,19 +417,19 @@ export default function NewScenarioPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Review your scenario
+                {t.scenario.steps.review.title}
               </label>
               <div className="bg-slate-50 p-6 rounded-lg space-y-4">
                 <div>
-                  <h3 className="font-semibold text-slate-900">Question:</h3>
-                  <p className="text-lg text-slate-700">What if we {whatIfQuestion}</p>
+                  <h3 className="font-semibold text-slate-900">{t.scenario.steps.review.question}:</h3>
+                  <p className="text-lg text-slate-700">{t.scenario.steps.question.label} {whatIfQuestion}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">City:</h3>
+                  <h3 className="font-semibold text-slate-900">{t.scenario.steps.review.city}:</h3>
                   <p className="text-slate-700">{selectedCity?.name}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">Interventions ({selectedInterventions.length}):</h3>
+                  <h3 className="font-semibold text-slate-900">{t.scenario.steps.review.interventions} ({selectedInterventions.length}):</h3>
                   <div className="space-y-2">
                     {selectedInterventions?.map((intervention) => (
                       <div key={intervention.id} className="text-slate-700">
@@ -425,7 +443,7 @@ export default function NewScenarioPage() {
 
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Add any key assumptions (optional)
+                {t.scenario.steps.review.assumptions}
               </label>
               <div className="space-y-3">
                 <div className="flex gap-2">
@@ -454,7 +472,7 @@ export default function NewScenarioPage() {
                     }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
-                    Add
+                    {t.scenario.steps.review.addAssumption}
                   </button>
                 </div>
                 {assumptions.length > 0 && (
@@ -478,7 +496,7 @@ export default function NewScenarioPage() {
             {/* Privacy Toggle */}
             <div>
               <label className="block text-lg font-medium text-slate-700 mb-3">
-                Privacy Settings
+                {t.scenario.steps.review.privacy}
               </label>
               <div className="bg-slate-50 p-4 rounded-lg">
                 <label className="flex items-center space-x-3">
@@ -490,10 +508,10 @@ export default function NewScenarioPage() {
                   />
                   <div>
                     <span className="text-sm font-medium text-slate-900">
-                      Make this scenario public
+                      {t.scenario.steps.review.public}
                     </span>
                     <p className="text-xs text-slate-600">
-                      Public scenarios can be viewed by anyone, even without an account
+                      {t.scenario.steps.review.publicDescription}
                     </p>
                   </div>
                 </label>
@@ -513,7 +531,7 @@ export default function NewScenarioPage() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Create New Scenario</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.buttons.create}</h1>
             <p className="text-slate-600">Walk through the steps to set up your urban intervention analysis</p>
           </div>
           <button
@@ -523,7 +541,7 @@ export default function NewScenarioPage() {
             }}
             className="px-4 py-2 text-sm border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50"
           >
-            Start Over
+{t.scenario.buttons.startOver || 'Start Over'}
           </button>
         </div>
 
@@ -569,7 +587,7 @@ export default function NewScenarioPage() {
             disabled={currentStep === 0}
             className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Back
+{t.scenario.buttons.previous}
           </button>
           
           <div className="flex gap-3">
@@ -585,10 +603,10 @@ export default function NewScenarioPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Generating Scenario...
+{t.scenario.steps.review.generating}
                   </>
                 ) : (
-                  'Generate Scenario Analysis'
+                  t.scenario.steps.review.generate
                 )}
               </button>
             ) : (
@@ -597,7 +615,7 @@ export default function NewScenarioPage() {
                 disabled={!canProceed()}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+{t.scenario.buttons.next}
               </button>
             )}
           </div>

@@ -3,17 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
-import { Scenario, ScenarioResult } from '../../../src/lib/schemas';
+import { Scenario, ScenarioResult, CityProfile, Intervention } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
 import { databaseService } from '../../../src/lib/database-service';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 export default function ScenarioResultPage() {
   const params = useParams();
   const router = useRouter();
-  const { scenarios, results, cities, interventions } = useWhatIfStore();
+  const { scenarios, results } = useWhatIfStore();
+  const { t } = useTranslation();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [city, setCity] = useState<CityProfile | null>(null);
+  const [selectedInterventions, setSelectedInterventions] = useState<Intervention[]>([]);
 
   useEffect(() => {
     const loadScenario = async () => {
@@ -68,6 +72,7 @@ export default function ScenarioResultPage() {
             interventionIds: data.intervention_ids as string[],
             notes: data.notes as string,
             isPublic: data.is_public as boolean,
+            lang: (data.lang as 'en' | 'ko') || 'en',
           };
           
           setScenario(dbScenario);
@@ -94,12 +99,66 @@ export default function ScenarioResultPage() {
     loadScenario();
   }, [params.id, scenarios, results]);
 
+  // Load city and interventions based on the scenario's language, not current language
+  useEffect(() => {
+    const loadScenarioData = async () => {
+      if (!scenario) return;
+      
+      try {
+        console.log('Loading scenario data for scenario:', scenario.id, 'with lang:', scenario.lang);
+        console.log('City ID:', scenario.cityId, 'Intervention IDs:', scenario.interventionIds);
+        
+        // Load city and interventions in the scenario's language
+        const [cityData, interventionData] = await Promise.all([
+          databaseService.getCities(scenario.lang),
+          databaseService.getInterventionsByIds(scenario.interventionIds)
+        ]);
+        
+        console.log('Loaded city data:', cityData.length, 'cities');
+        console.log('Loaded intervention data:', interventionData.length, 'interventions');
+        
+        const foundCity = cityData.find(c => c.id === scenario.cityId);
+        const foundInterventions = interventionData.filter(i => scenario.interventionIds.includes(i.id));
+        
+        console.log('Found city:', foundCity?.name || 'NOT FOUND');
+        console.log('Found interventions:', foundInterventions.length, foundInterventions.map(i => i.title));
+        console.log('Intervention IDs from scenario:', scenario.interventionIds);
+        
+        // If not found in specific language, try fallback to any language
+        if (!foundCity || foundInterventions.length === 0) {
+          console.log('Data not found in specific language, trying fallback...');
+          
+          const [fallbackCityData, fallbackInterventionData] = await Promise.all([
+            databaseService.getCities('en'), // Try English as fallback
+            databaseService.getInterventions('en')
+          ]);
+          
+          const fallbackCity = fallbackCityData.find(c => c.id === scenario.cityId);
+          const fallbackInterventions = fallbackInterventionData.filter(i => scenario.interventionIds.includes(i.id));
+          
+          console.log('Fallback city:', fallbackCity?.name || 'NOT FOUND');
+          console.log('Fallback interventions:', fallbackInterventions.length, fallbackInterventions.map(i => i.title));
+          
+          setCity(fallbackCity || null);
+          setSelectedInterventions(fallbackInterventions);
+        } else {
+          setCity(foundCity);
+          setSelectedInterventions(foundInterventions);
+        }
+      } catch (error) {
+        console.error('Error loading scenario data:', error);
+      }
+    };
+    
+    loadScenarioData();
+  }, [scenario]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading scenario...</p>
+          <p className="text-slate-600">{t.common.loading}</p>
         </div>
       </div>
     );
@@ -121,9 +180,6 @@ export default function ScenarioResultPage() {
     );
   }
 
-  const city = cities.find(c => c.id === scenario.cityId);
-  const selectedInterventions = interventions.filter(i => scenario.interventionIds.includes(i.id));
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -131,7 +187,7 @@ export default function ScenarioResultPage() {
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Scenario Analysis</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.result.title}</h1>
               <p className="text-slate-600">What if we {scenario.whatIfQuestion}</p>
             </div>
             <div className="flex gap-3">
@@ -152,11 +208,11 @@ export default function ScenarioResultPage() {
 
           {/* Context Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Context</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.context}</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-medium text-slate-900 mb-2">City</h3>
-                <p className="text-slate-700">{city?.name}</p>
+                <h3 className="font-medium text-slate-900 mb-2">{t.scenario.result.city}</h3>
+                <p className="text-slate-700">{city?.name || t.common.loading}</p>
                 {city?.mainChallenges && (
                   <p className="text-sm text-slate-600 mt-1">
                     Challenges: {city.mainChallenges.join(', ')}
@@ -164,13 +220,17 @@ export default function ScenarioResultPage() {
                 )}
               </div>
               <div>
-                <h3 className="font-medium text-slate-900 mb-2">Interventions</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t.scenario.result.interventions}</h3>
                 <div className="space-y-1">
-                  {selectedInterventions?.map((intervention) => (
-                    <div key={intervention.id} className="text-slate-700">
-                      • {intervention.title} ({intervention.category})
-                    </div>
-                  ))}
+                  {selectedInterventions?.length > 0 ? (
+                    selectedInterventions.map((intervention) => (
+                      <div key={intervention.id} className="text-slate-700">
+                        • {intervention.title} ({intervention.category})
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-500">{t.common.loading}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -181,13 +241,13 @@ export default function ScenarioResultPage() {
           <div className="space-y-6">
             {/* Narrative Summary */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Narrative Summary</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.narrativeSummary}</h2>
               <p className="text-slate-700 leading-relaxed">{result.narrativeSummary}</p>
             </div>
 
             {/* Stakeholder Impacts */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Stakeholder Impacts</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.stakeholderImpacts}</h2>
               <div className="grid gap-4">
                 {result.stakeholderImpacts?.map((impact, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
@@ -206,7 +266,7 @@ export default function ScenarioResultPage() {
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Benefits</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.benefits}</h4>
                         <ul className="space-y-1">
                           {impact.benefits?.map((benefit, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
@@ -217,7 +277,7 @@ export default function ScenarioResultPage() {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Concerns</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.concerns}</h4>
                         <ul className="space-y-1">
                           {impact.concerns?.map((concern, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
@@ -228,7 +288,7 @@ export default function ScenarioResultPage() {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-2">Engagement Needs</h4>
+                        <h4 className="font-medium text-slate-900 mb-2">{t.scenario.result.engagementNeeds}</h4>
                         <ul className="space-y-1">
                           {impact.engagementNeeds?.map((need, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
@@ -246,7 +306,7 @@ export default function ScenarioResultPage() {
 
             {/* System Effects */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">System Effects</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.systemEffects}</h2>
               <div className="grid gap-4">
                 {result.systemEffects?.map((effect, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
@@ -278,7 +338,7 @@ export default function ScenarioResultPage() {
 
             {/* Policy Interactions */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Policy & Trend Interactions</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.policyTrends}</h2>
               <div className="grid gap-4">
                 {result.policyInteractions?.map((interaction, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
@@ -302,7 +362,7 @@ export default function ScenarioResultPage() {
             {/* Risks & Assumptions */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Risks & Unknowns</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.risksAndUnknowns}</h2>
                 <div className="space-y-3">
                   {result.risks?.map((risk, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -331,7 +391,7 @@ export default function ScenarioResultPage() {
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Assumptions & Gaps</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.assumptions} & {t.scenario.result.gaps}</h2>
                 <div className="space-y-3">
                   {result.assumptions?.map((assumption, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -354,7 +414,7 @@ export default function ScenarioResultPage() {
             {/* Signals & Experiments */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Signals to Watch</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.signalsToWatch}</h2>
                 <div className="space-y-3">
                   {result.signals?.map((signal, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -366,7 +426,7 @@ export default function ScenarioResultPage() {
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Next Experiments</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.nextExperiments}</h2>
                 <div className="space-y-3">
                   {result.experiments?.map((experiment, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -377,10 +437,10 @@ export default function ScenarioResultPage() {
                           experiment.effort === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-red-100 text-red-800'
                         }`}>
-                          {experiment.effort} Effort
+                          {experiment.effort === 'Low' ? t.scenario.result.lowEffort : experiment.effort} Effort
                         </span>
                       </div>
-                      <p className="text-sm text-slate-700">Timeline: {experiment.timeline}</p>
+                      <p className="text-sm text-slate-700">{t.scenario.result.timeline}: {experiment.timeline}</p>
                     </div>
                   ))}
                 </div>
@@ -390,11 +450,11 @@ export default function ScenarioResultPage() {
             {/* Portfolio Analysis */}
             {(result.synergies || result.gaps) && (
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Portfolio Analysis</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.portfolioAnalysis}</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {result.synergies && result.synergies.length > 0 && (
                     <div>
-                      <h3 className="font-medium text-slate-900 mb-3">Synergies</h3>
+                      <h3 className="font-medium text-slate-900 mb-3">{t.scenario.result.synergies}</h3>
                       <ul className="space-y-2">
                         {result.synergies?.map((synergy, index) => (
                           <li key={index} className="text-slate-700 flex items-start">
@@ -407,7 +467,7 @@ export default function ScenarioResultPage() {
                   )}
                   {result.gaps && result.gaps.length > 0 && (
                     <div>
-                      <h3 className="font-medium text-slate-900 mb-3">Gaps</h3>
+                      <h3 className="font-medium text-slate-900 mb-3">{t.scenario.result.gaps}</h3>
                       <ul className="space-y-2">
                         {result.gaps?.map((gap, index) => (
                           <li key={index} className="text-slate-700 flex items-start">
@@ -431,7 +491,7 @@ export default function ScenarioResultPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Scenario Analysis Not Generated</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.notGenerated}</h2>
             <p className="text-slate-600 mb-6">
               The scenario analysis hasn&apos;t been generated yet. This might be due to an error or the analysis is still in progress.
             </p>

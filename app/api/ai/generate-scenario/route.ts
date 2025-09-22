@@ -52,56 +52,56 @@ Please provide a structured analysis in the following JSON format. IMPORTANT: Us
   "narrativeSummary": "A 5-8 sentence story of what might happen if these interventions are tried, anchored in the what-if question and grounded by the context.",
   "stakeholderImpacts": [
     {
-      "group": "citizens",
+      "group": "Relevant Stakeholder",
       "benefits": ["benefit 1", "benefit 2"],
       "concerns": ["concern 1", "concern 2"],
       "engagementNeeds": ["need 1", "need 2"],
-      "stance": "Support"
+      "stance": "Relevant Stance"
     }
   ],
   "systemEffects": [
     {
-      "domain": "Environment",
+      "domain": "Relevant Domain",
       "effect": "description of effect",
-      "polarity": "Positive",
-      "confidence": "Medium"
+      "polarity": "Relevant Polarity",
+      "confidence": "Relevant Confidence"
     }
   ],
   "policyInteractions": [
     {
-      "policy": "Clean Air Plan",
-      "interaction": "Enables",
+      "policy": "Relevant Policy Name",
+      "interaction": "level of relevance",
       "description": "how the intervention interacts with this policy"
     }
   ],
   "risks": [
     {
       "risk": "description of risk",
-      "likelihood": "Medium",
-      "impact": "High"
+      "likelihood": "Relevant Likelihood",
+      "impact": "Relevant Impact"
     }
   ],
   "assumptions": [
     {
       "assumption": "what the scenario assumes",
-      "confidence": "High"
+      "confidence": "Relevant Confidence"
     }
   ],
   "signals": [
     {
-      "signal": "air quality readings near schools",
+      "signal": "Relevant Signals",
       "description": "what this signal would indicate"
     }
   ],
   "experiments": [
     {
-      "experiment": "2-week school street trial with mobile sensors",
-      "effort": "Low",
-      "timeline": "1 month"
+      "experiment": "suggest relevant experiments",
+      "effort": "indicate level of effort based on the scale of the intervention",
+      "timeline": "indicate the timeline of the experiment"
     }
   ],
-  "synergies": ["Technology + CivicParticipation creates data-driven democracy"],
-  "gaps": ["No finance mechanism included"],
+  "synergies": ["Suggest relevant synergies based on the intervention or the category of intervention"],
+  "gaps": ["Identify gaps in the intervention"],
   "generatedAt": "${new Date().toISOString()}",
   "confidence_0_1": 0.75
 }
@@ -119,6 +119,13 @@ CRITICAL ENUM VALUES - Use ONLY these exact values:
 
 Do NOT use variations like "Support with reservations", "Affirms", "Somewhat positive", "Ambiguous", etc. Use ONLY the exact enum values listed above.
 
+IMPORTANT FOR POLICY INTERACTIONS:
+- Generate policies that are actually relevant to the specific interventions and city context
+- Consider local, regional, and national policies that would realistically interact with these interventions
+- Do NOT use generic examples like "Clean Air Plan" unless the interventions are actually related to air quality
+- Think about policies related to: urban planning, transportation, housing, economic development, environmental protection, social services, etc.
+- Base policy names on realistic policies that would exist in the given city context
+
 Focus on creating a realistic, nuanced analysis that considers both positive and negative outcomes, stakeholder perspectives, and practical implementation challenges.`;
 
     const completion = await openai.chat.completions.create({
@@ -126,7 +133,7 @@ Focus on creating a realistic, nuanced analysis that considers both positive and
       messages: [
         {
           role: "system",
-          content: "You are an expert urban planner and systems analyst. Provide realistic, nuanced analysis of urban interventions considering multiple stakeholder perspectives, system effects, and implementation challenges. CRITICAL: Always use the exact enum values specified in the prompt - do not create variations or synonyms."
+          content: "You are an expert urban planner and systems analyst. Provide realistic, nuanced analysis of urban interventions considering multiple stakeholder perspectives, system effects, and implementation challenges. CRITICAL: Always use the exact enum values specified in the prompt - do not create variations or synonyms. For policy interactions, generate policies that are contextually relevant to the specific interventions and city, not generic examples."
         },
         {
           role: "user",

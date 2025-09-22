@@ -30,12 +30,12 @@ export default function PublicScenariosPage() {
         return;
       }
 
-      const transformedScenarios = data?.map((dbScenario: any) => ({
-        id: dbScenario.id,
-        whatIfQuestion: dbScenario.what_if_question,
-        cityId: dbScenario.city_id,
-        interventionIds: dbScenario.intervention_ids,
-        notes: dbScenario.notes,
+      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => ({
+        id: dbScenario.id as string,
+        whatIfQuestion: dbScenario.what_if_question as string,
+        cityId: dbScenario.city_id as string,
+        interventionIds: dbScenario.intervention_ids as string[],
+        notes: dbScenario.notes as string,
       })) || [];
 
       setScenarios(transformedScenarios);

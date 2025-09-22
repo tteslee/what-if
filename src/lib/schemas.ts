@@ -225,6 +225,7 @@ export const ScenarioSchema = z.object({
   cityId: z.string(),
   interventionIds: z.array(z.string()).min(1), // Support multiple interventions
   notes: z.string().optional(),
+  isPublic: z.boolean().optional(),
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 

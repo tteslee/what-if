@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario } from '../../../src/lib/schemas';
@@ -11,28 +11,9 @@ export default function MyScenariosPage() {
   const { cities, interventions, loadSampleData } = useWhatIfStore();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      loadUserScenarios();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    loadSampleData();
-  }, [loadSampleData]);
-
-  const loadUserScenarios = async () => {
+  const loadUserScenarios = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -47,20 +28,39 @@ export default function MyScenariosPage() {
         return;
       }
 
-      const transformedScenarios = data?.map((dbScenario: any) => ({
-        id: dbScenario.id,
-        whatIfQuestion: dbScenario.what_if_question,
-        cityId: dbScenario.city_id,
-        interventionIds: dbScenario.intervention_ids,
-        notes: dbScenario.notes,
-        isPublic: dbScenario.is_public,
+      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => ({
+        id: dbScenario.id as string,
+        whatIfQuestion: dbScenario.what_if_question as string,
+        cityId: dbScenario.city_id as string,
+        interventionIds: dbScenario.intervention_ids as string[],
+        notes: dbScenario.notes as string,
+        isPublic: dbScenario.is_public as boolean,
       })) || [];
 
       setScenarios(transformedScenarios);
     } catch (error) {
       console.error('Error loading user scenarios:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadUserScenarios();
+    }
+  }, [user, loadUserScenarios]);
+
+  useEffect(() => {
+    loadSampleData();
+  }, [loadSampleData]);
 
   const getCityName = (cityId: string) => {
     const city = cities.find(c => c.id === cityId);
@@ -83,6 +83,7 @@ export default function MyScenariosPage() {
 
   const handleDeleteScenario = async (scenarioId: string) => {
     if (!confirm('Are you sure you want to delete this scenario?')) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase

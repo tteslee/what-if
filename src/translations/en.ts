@@ -36,6 +36,28 @@ export const en = {
     ],
   },
 
+  // Design Principles
+  designPrinciples: {
+    requiredFirst: {
+      title: 'Required First',
+      description: 'Start with essential information - city, scope, and challenges. Add details progressively without blocking progress.',
+    },
+    portfolioApproach: {
+      title: 'Portfolio Approach',
+      description: 'Combine multiple interventions to create synergistic effects. Identify gaps and opportunities across different categories.',
+    },
+    stressTestNarratives: {
+      title: 'Stress-Test Narratives',
+      description: 'Generate structured analysis focusing on stakeholders, risks, and next experiments rather than predictions.',
+    },
+  },
+
+  // Warning Message
+  warning: {
+    title: '⚠️ Important:',
+    message: 'This is an exploratory simulation tool, not a forecast. Use for decision support and sensemaking.',
+  },
+
   // Scenario creation
   scenario: {
     steps: {

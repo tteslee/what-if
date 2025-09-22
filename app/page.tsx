@@ -104,8 +104,8 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Required First</h3>
-                  <p className="text-slate-600 text-sm">Start with essential information - city, scope, and challenges. Add details progressively without blocking progress.</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t.designPrinciples.requiredFirst.title}</h3>
+                  <p className="text-slate-600 text-sm">{t.designPrinciples.requiredFirst.description}</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
@@ -114,8 +114,8 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Portfolio Approach</h3>
-                  <p className="text-slate-600 text-sm">Combine multiple interventions to create synergistic effects. Identify gaps and opportunities across different categories.</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t.designPrinciples.portfolioApproach.title}</h3>
+                  <p className="text-slate-600 text-sm">{t.designPrinciples.portfolioApproach.description}</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
@@ -124,8 +124,8 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Stress-Test Narratives</h3>
-                  <p className="text-slate-600 text-sm">Generate structured analysis focusing on stakeholders, risks, and next experiments rather than predictions.</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t.designPrinciples.stressTestNarratives.title}</h3>
+                  <p className="text-slate-600 text-sm">{t.designPrinciples.stressTestNarratives.description}</p>
                 </div>
               </div>
             </div>
@@ -133,8 +133,7 @@ export default function HomePage() {
             {/* Caveat Banner */}
             <div className="mt-12 p-4 bg-amber-50 border border-amber-200 rounded-lg max-w-2xl mx-auto">
               <p className="text-amber-800 text-sm">
-                <span className="font-medium">⚠️ Important:</span> This is an exploratory simulation tool, not a forecast. 
-                Use for decision support and sensemaking.
+                <span className="font-medium">{t.warning.title}</span> {t.warning.message}
               </p>
             </div>
           </div>

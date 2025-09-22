@@ -28,15 +28,20 @@ export default function MyScenariosPage() {
         return;
       }
 
-      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => ({
-        id: dbScenario.id as string,
-        whatIfQuestion: dbScenario.what_if_question as string,
-        cityId: dbScenario.city_id as string,
-        interventionIds: dbScenario.intervention_ids as string[],
-        notes: dbScenario.notes as string,
-        isPublic: dbScenario.is_public as boolean,
-      })) || [];
+      console.log('Raw database scenarios:', data);
+      const transformedScenarios = data?.map((dbScenario: Record<string, unknown>) => {
+        console.log('Transforming scenario:', dbScenario.id, 'is_public:', dbScenario.is_public);
+        return {
+          id: dbScenario.id as string,
+          whatIfQuestion: dbScenario.what_if_question as string,
+          cityId: dbScenario.city_id as string,
+          interventionIds: dbScenario.intervention_ids as string[],
+          notes: dbScenario.notes as string,
+          isPublic: dbScenario.is_public as boolean,
+        };
+      }) || [];
 
+      console.log('Transformed scenarios:', transformedScenarios);
       setScenarios(transformedScenarios);
     } catch (error) {
       console.error('Error loading user scenarios:', error);
@@ -111,11 +116,16 @@ export default function MyScenariosPage() {
     isUpdatingPrivacyRef.current = true;
     try {
       console.log('Toggling privacy for scenario:', scenarioId, 'from', currentIsPublic, 'to', !currentIsPublic);
-      const { error } = await supabase
+      console.log('User ID:', user.id);
+      
+      const { data: updateData, error } = await supabase
         .from('scenarios')
         .update({ is_public: !currentIsPublic })
         .eq('id', scenarioId)
-        .eq('created_by', user.id);
+        .eq('created_by', user.id)
+        .select();
+
+      console.log('Update result:', updateData, 'Error:', error);
 
       if (error) {
         console.error('Error toggling scenario privacy:', error);
@@ -230,7 +240,10 @@ export default function MyScenariosPage() {
                       View
                     </button>
                     <button
-                      onClick={() => handleTogglePrivacy(scenario.id, scenario.isPublic || false)}
+                      onClick={() => {
+                        console.log('Toggle button clicked for scenario:', scenario.id, 'current isPublic:', scenario.isPublic);
+                        handleTogglePrivacy(scenario.id, scenario.isPublic || false);
+                      }}
                       className={`px-4 py-2 text-sm rounded-md transition-colors ${
                         scenario.isPublic
                           ? 'bg-green-100 text-green-800 hover:bg-green-200'

@@ -27,7 +27,19 @@ export default function ScenarioResultPage() {
       
       if (foundScenario) {
         setScenario(foundScenario);
-        setResult(foundResult || null);
+        
+        // Always try to load the result from database, even if found in store
+        // This ensures we have the latest result data
+        console.log('Scenario found in store, loading result from database for:', scenarioId);
+        const resultData = await databaseService.getScenarioResult(scenarioId);
+        if (resultData) {
+          console.log('Scenario result loaded from database:', resultData);
+          setResult(resultData);
+        } else {
+          console.log('No scenario result found in database, using store result:', foundResult);
+          setResult(foundResult || null);
+        }
+        
         setLoading(false);
         return;
       }

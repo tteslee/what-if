@@ -277,7 +277,10 @@ export class DatabaseService {
 
   async saveScenarioResult(result: ScenarioResult): Promise<boolean> {
     try {
+      console.log('Transforming scenario result for database:', result);
       const resultData = this.transformScenarioResultToDB(result);
+      console.log('Transformed result data:', resultData);
+      
       const { error } = await supabase
         .from('scenario_results')
         .upsert(resultData);
@@ -287,6 +290,7 @@ export class DatabaseService {
         return false;
       }
 
+      console.log('Scenario result saved successfully');
       return true;
     } catch (error) {
       console.error('Error saving scenario result:', error);

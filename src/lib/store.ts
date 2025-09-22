@@ -149,7 +149,9 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       const result: ScenarioResult = await response.json();
       
       // Save result to database
-      await databaseService.saveScenarioResult(result);
+      console.log('Saving scenario result to database:', result);
+      const saveSuccess = await databaseService.saveScenarioResult(result);
+      console.log('Scenario result save success:', saveSuccess);
       
       set((state) => ({
         results: { ...state.results, [scenarioId]: result },

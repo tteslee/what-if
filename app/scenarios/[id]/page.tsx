@@ -103,17 +103,45 @@ export default function ScenarioResultPage() {
       if (!scenario) return;
       
       try {
+        console.log('Loading scenario data for scenario:', scenario.id, 'with lang:', scenario.lang);
+        console.log('City ID:', scenario.cityId, 'Intervention IDs:', scenario.interventionIds);
+        
         // Load city and interventions in the scenario's language
         const [cityData, interventionData] = await Promise.all([
           databaseService.getCities(scenario.lang),
           databaseService.getInterventions(scenario.lang)
         ]);
         
+        console.log('Loaded city data:', cityData.length, 'cities');
+        console.log('Loaded intervention data:', interventionData.length, 'interventions');
+        
         const foundCity = cityData.find(c => c.id === scenario.cityId);
         const foundInterventions = interventionData.filter(i => scenario.interventionIds.includes(i.id));
         
-        setCity(foundCity || null);
-        setSelectedInterventions(foundInterventions);
+        console.log('Found city:', foundCity?.name || 'NOT FOUND');
+        console.log('Found interventions:', foundInterventions.length, foundInterventions.map(i => i.title));
+        
+        // If not found in specific language, try fallback to any language
+        if (!foundCity || foundInterventions.length === 0) {
+          console.log('Data not found in specific language, trying fallback...');
+          
+          const [fallbackCityData, fallbackInterventionData] = await Promise.all([
+            databaseService.getCities('en'), // Try English as fallback
+            databaseService.getInterventions('en')
+          ]);
+          
+          const fallbackCity = fallbackCityData.find(c => c.id === scenario.cityId);
+          const fallbackInterventions = fallbackInterventionData.filter(i => scenario.interventionIds.includes(i.id));
+          
+          console.log('Fallback city:', fallbackCity?.name || 'NOT FOUND');
+          console.log('Fallback interventions:', fallbackInterventions.length, fallbackInterventions.map(i => i.title));
+          
+          setCity(fallbackCity || null);
+          setSelectedInterventions(fallbackInterventions);
+        } else {
+          setCity(foundCity);
+          setSelectedInterventions(foundInterventions);
+        }
       } catch (error) {
         console.error('Error loading scenario data:', error);
       }
@@ -181,7 +209,7 @@ export default function ScenarioResultPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h3 className="font-medium text-slate-900 mb-2">City</h3>
-                <p className="text-slate-700">{city?.name}</p>
+                <p className="text-slate-700">{city?.name || 'Loading...'}</p>
                 {city?.mainChallenges && (
                   <p className="text-sm text-slate-600 mt-1">
                     Challenges: {city.mainChallenges.join(', ')}
@@ -191,11 +219,15 @@ export default function ScenarioResultPage() {
               <div>
                 <h3 className="font-medium text-slate-900 mb-2">Interventions</h3>
                 <div className="space-y-1">
-                  {selectedInterventions?.map((intervention) => (
-                    <div key={intervention.id} className="text-slate-700">
-                      • {intervention.title} ({intervention.category})
-                    </div>
-                  ))}
+                  {selectedInterventions?.length > 0 ? (
+                    selectedInterventions.map((intervention) => (
+                      <div key={intervention.id} className="text-slate-700">
+                        • {intervention.title} ({intervention.category})
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-500">Loading...</p>
+                  )}
                 </div>
               </div>
             </div>

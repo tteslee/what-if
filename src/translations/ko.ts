@@ -10,6 +10,13 @@ export const ko = {
     logout: '로그아웃',
   },
 
+  // Authentication
+  auth: {
+    signIn: '로그인',
+    signOut: '로그아웃',
+    loading: '로딩 중...',
+  },
+
   // Main page
   main: {
     title: 'What-if',
@@ -33,7 +40,7 @@ export const ko = {
   scenario: {
     steps: {
       question: {
-        title: '당신의 질문',
+        title: '당신의 아이디어',
         description: '무엇이 궁금하신가요?',
         label: '만약에 우리가',
         placeholder: '도시의 집단 지능을 향상시킬 수 있다면?',
@@ -60,7 +67,7 @@ export const ko = {
         interventions: '솔루션:',
         assumptions: '가정:',
         addAssumption: '가정 추가',
-        privacy: '개인정보:',
+        privacy: '공개여부:',
         public: '공개',
         private: '비공개',
         publicDescription: '이 시나리오는 모든 사람에게 보입니다',

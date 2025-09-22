@@ -10,6 +10,13 @@ export const en = {
     logout: 'Logout',
   },
 
+  // Authentication
+  auth: {
+    signIn: 'Sign In',
+    signOut: 'Sign Out',
+    loading: 'Loading...',
+  },
+
   // Main page
   main: {
     title: 'What-if',

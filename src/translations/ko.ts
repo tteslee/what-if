@@ -27,7 +27,7 @@ export const ko = {
     showExamples: '예시 질문 보기',
     hideExamples: '예시 질문 숨기기',
     exampleQuestions: [
-      '헬싱키의 집단 지능을 향상시킬 수 있다면?',
+      '서울의 대기 오염을 줄일 수 있다면?',
       '마드리드를 8.5도 시원하게 만들 수 있다면?',
       '싱가포르에서 교통사고를 완전히 없앨 수 있다면?',
       '모든 사람이 살 수 있는 주택을 만들 수 있다면?',
@@ -87,6 +87,7 @@ export const ko = {
         description: '어디서 일어날까요?',
         createCustom: '맞춤 도시 만들기',
         createCustomDescription: '폼을 작성하여 나만의 도시 프로필을 만드세요',
+        loading: '도시 로딩 중...',
       },
       interventions: {
         title: '솔루션 선택',
@@ -95,6 +96,7 @@ export const ko = {
         createCustomDescription: '폼을 작성하여 자신만의 솔루션 프로필을 만드세요',
         selected: '선택된 솔루션',
         available: '사용 가능한 솔루션',
+        loading: '솔루션 로딩 중...',
       },
       review: {
         title: '검토 및 생성',
@@ -121,6 +123,7 @@ export const ko = {
       delete: '삭제',
       makePublic: '공개로 만들기',
       makePrivate: '비공개로 만들기',
+      startOver: '처음부터',
     },
   },
 

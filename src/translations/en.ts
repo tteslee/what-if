@@ -27,7 +27,7 @@ export const en = {
     showExamples: 'Show example questions',
     hideExamples: 'Hide example questions',
     exampleQuestions: [
-      'could enhance the collective intelligence of Helsinki?',
+      'could reduce air pollution in Seoul?',
       'could cool Madrid by 8.5 degrees celsius?',
       'could eliminate traffic fatalities in Singapore?',
       'could make housing affordable for everyone in our city?',
@@ -87,6 +87,7 @@ export const en = {
         description: 'Where would this happen?',
         createCustom: 'Create Custom City',
         createCustomDescription: 'Fill out a form to create your own city profile',
+        loading: 'Loading cities...',
       },
       interventions: {
         title: 'Pick Interventions',
@@ -95,6 +96,7 @@ export const en = {
         createCustomDescription: 'Fill out a form to create your own intervention profile',
         selected: 'Selected Interventions',
         available: 'Available Interventions',
+        loading: 'Loading interventions...',
       },
       review: {
         title: 'Review & Generate',
@@ -121,6 +123,7 @@ export const en = {
       delete: 'Delete',
       makePublic: 'Make Public',
       makePrivate: 'Make Private',
+      startOver: 'Start Over',
     },
   },
 

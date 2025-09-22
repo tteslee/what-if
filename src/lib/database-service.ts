@@ -228,6 +228,32 @@ export class DatabaseService {
     }
   }
 
+  async toggleScenarioPrivacy(scenarioId: string, isPublic: boolean): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User must be logged in to toggle privacy');
+        return false;
+      }
+
+      const { error } = await supabase
+        .from('scenarios')
+        .update({ is_public: isPublic })
+        .eq('id', scenarioId)
+        .eq('created_by', user.id); // Ensure user can only toggle their own scenarios
+
+      if (error) {
+        console.error('Error toggling scenario privacy:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error toggling scenario privacy:', error);
+      return false;
+    }
+  }
+
   // Scenario Result methods
   async getScenarioResult(scenarioId: string): Promise<ScenarioResult | null> {
     try {

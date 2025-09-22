@@ -51,12 +51,6 @@ export default function RootLayout({
                 >
                   My Scenarios
                 </Link>
-                <Link 
-                  href="/scenarios/compare" 
-                  className="text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  Compare
-                </Link>
                 <UserMenu />
               </div>
             </div>

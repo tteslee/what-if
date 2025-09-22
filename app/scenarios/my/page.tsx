@@ -104,6 +104,30 @@ export default function MyScenariosPage() {
     }
   };
 
+  const handleTogglePrivacy = async (scenarioId: string, currentIsPublic: boolean) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('scenarios')
+        .update({ is_public: !currentIsPublic })
+        .eq('id', scenarioId)
+        .eq('created_by', user.id);
+
+      if (error) {
+        console.error('Error toggling scenario privacy:', error);
+        return;
+      }
+
+      // Update local state
+      setScenarios(prev => prev.map(s => 
+        s.id === scenarioId ? { ...s, isPublic: !currentIsPublic } : s
+      ));
+    } catch (error) {
+      console.error('Error toggling scenario privacy:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -196,6 +220,16 @@ export default function MyScenariosPage() {
                       className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                     >
                       View
+                    </button>
+                    <button
+                      onClick={() => handleTogglePrivacy(scenario.id, scenario.isPublic || false)}
+                      className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                        scenario.isPublic
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {scenario.isPublic ? 'Make Private' : 'Make Public'}
                     </button>
                     <button
                       onClick={() => handleDeleteScenario(scenario.id)}

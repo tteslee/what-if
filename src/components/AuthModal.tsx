@@ -36,10 +36,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             />
           ) : (
             <SignupForm 
-              onSuccess={() => {
-                onSuccess();
-                onClose();
-              }}
               onSwitchToLogin={() => setIsLogin(true)}
             />
           )}

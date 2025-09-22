@@ -5,20 +5,9 @@ import { useAuth } from '../lib/auth-context';
 import AuthModal from './AuthModal';
 
 export default function UserMenu() {
+  const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  
-  // Handle case when AuthProvider is not available (during SSG)
-  let user, signOut;
-  try {
-    const auth = useAuth();
-    user = auth.user;
-    signOut = auth.signOut;
-  } catch (error) {
-    // During SSG, AuthProvider might not be available
-    user = null;
-    signOut = async () => {};
-  }
 
   const handleSignOut = async () => {
     await signOut();

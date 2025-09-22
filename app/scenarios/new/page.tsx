@@ -49,8 +49,14 @@ export default function NewScenarioPage() {
   const [isPublic, setIsPublic] = useState(false);
 
   // Reset form when component mounts to ensure clean slate
+  // But preserve the whatIfQuestion if it was set from the front page
   useEffect(() => {
+    const currentQuestion = whatIfQuestion;
     reset();
+    // Restore the question if it was set from the front page
+    if (currentQuestion) {
+      setWhatIfQuestion(currentQuestion);
+    }
     // Reset local state as well
     setAssumptionInput('');
     setShowCityForm(false);
@@ -59,7 +65,7 @@ export default function NewScenarioPage() {
     setSelectedCityDetails(null);
     setIsGeneratingScenario(false);
     setIsPublic(false);
-  }, [reset]);
+  }, [reset, whatIfQuestion, setWhatIfQuestion]);
 
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {

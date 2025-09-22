@@ -39,8 +39,8 @@ export const en = {
   // Design Principles
   designPrinciples: {
     requiredFirst: {
-      title: 'Required First',
-      description: 'Start with essential information - city, scope, and challenges. Add details progressively without blocking progress.',
+      title: 'Create City and Intervention Profiles',
+      description: 'Manage a database of essential information - city, challenges, and interventions.',
     },
     portfolioApproach: {
       title: 'Portfolio Approach',

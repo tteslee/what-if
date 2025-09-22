@@ -39,16 +39,16 @@ export const ko = {
   // Design Principles
   designPrinciples: {
     requiredFirst: {
-      title: '필수 정보 우선',
-      description: '도시, 범위, 과제 등 핵심 정보부터 시작하세요. 진행을 막지 않으면서 점진적으로 세부사항을 추가하세요.',
+      title: '도시 프로필과 솔루션 프로필 생성',
+      description: '도시, 범위, 과제 등 핵심 정보를 담은 데이터베이스를 관리하세요.',
     },
     portfolioApproach: {
       title: '포트폴리오 접근법',
-      description: '여러 개입을 결합하여 시너지 효과를 창출하세요. 다양한 카테고리에서 격차와 기회를 식별하세요.',
+      description: '여러 솔루션을 결합하여 시너지 효과를 창출하세요.',
     },
     stressTestNarratives: {
-      title: '내러티브 스트레스 테스트',
-      description: '예측보다는 이해관계자, 위험, 다음 실험에 초점을 맞춘 구조화된 분석을 생성하세요.',
+      title: '시나리오 스트레스 테스트',
+      description: '정확한 결과 예측보다는 이해관계자, 위험, 다음 실험에 초점을 맞춘 구조화된 시나리오를 생성하세요.',
     },
   },
 

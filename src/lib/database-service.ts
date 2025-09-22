@@ -20,6 +20,7 @@ export class DatabaseService {
         .from('cities')
         .select('*')
         .eq('is_public', true)
+        .eq('lang', lang)
         .order('name');
 
       if (error) {
@@ -28,18 +29,8 @@ export class DatabaseService {
       }
 
       const cities = data?.map(this.transformCityFromDB) || [];
-      
-      // Filter by language if lang column exists, otherwise return all cities
-      // This handles the transition period where lang column might not exist yet
-      const filteredCities = cities.filter(city => {
-        // If city has no lang field or lang field is undefined, include it
-        if (!city.lang) return true;
-        // Otherwise filter by the requested language
-        return city.lang === lang;
-      });
-      
-      console.log(`Filtered cities for language ${lang}:`, filteredCities.length, 'out of', cities.length);
-      return filteredCities;
+      console.log(`Fetched ${cities.length} cities for language ${lang}`);
+      return cities;
     } catch (error) {
       console.error('Error fetching cities:', error);
       return [];
@@ -99,6 +90,7 @@ export class DatabaseService {
         .from('interventions')
         .select('*')
         .eq('is_public', true)
+        .eq('lang', lang)
         .order('title');
 
       if (error) {
@@ -107,18 +99,8 @@ export class DatabaseService {
       }
 
       const interventions = data?.map(this.transformInterventionFromDB) || [];
-      
-      // Filter by language if lang column exists, otherwise return all interventions
-      // This handles the transition period where lang column might not exist yet
-      const filteredInterventions = interventions.filter(intervention => {
-        // If intervention has no lang field or lang field is undefined, include it
-        if (!intervention.lang) return true;
-        // Otherwise filter by the requested language
-        return intervention.lang === lang;
-      });
-      
-      console.log(`Filtered interventions for language ${lang}:`, filteredInterventions.length, 'out of', interventions.length);
-      return filteredInterventions;
+      console.log(`Fetched ${interventions.length} interventions for language ${lang}`);
+      return interventions;
     } catch (error) {
       console.error('Error fetching interventions:', error);
       return [];
@@ -198,16 +180,10 @@ export class DatabaseService {
 
       const scenarios = data?.map(this.transformScenarioFromDB) || [];
       
-      // Filter by language if lang column exists, otherwise return all scenarios
-      // This handles the transition period where lang column might not exist yet
-      const filteredScenarios = scenarios.filter(scenario => {
-        // If scenario has no lang field or lang field is undefined, include it
-        if (!scenario.lang) return true;
-        // Otherwise filter by the requested language
-        return scenario.lang === lang;
-      });
+      // Filter by language at the database level
+      const filteredScenarios = scenarios.filter(scenario => scenario.lang === lang);
       
-      console.log(`Filtered scenarios for language ${lang}:`, filteredScenarios.length, 'out of', scenarios.length);
+      console.log(`Fetched ${filteredScenarios.length} scenarios for language ${lang}`);
       return filteredScenarios;
     } catch (error) {
       console.error('Error fetching scenarios:', error);

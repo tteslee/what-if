@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
 import { AuthProvider } from '../src/lib/auth-context';
-import UserMenu from '../src/components/UserMenu';
+import ClientUserMenu from '../src/components/ClientUserMenu';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -46,7 +46,7 @@ export default function RootLayout({
                 >
                   Compare
                 </Link>
-                <UserMenu />
+                <ClientUserMenu />
               </div>
             </div>
           </div>

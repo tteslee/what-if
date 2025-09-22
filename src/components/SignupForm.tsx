@@ -4,11 +4,10 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface SignupFormProps {
-  onSuccess: () => void;
   onSwitchToLogin: () => void;
 }
 
-export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
+export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,7 +44,7 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
       } else {
         setMessage('Check your email for the confirmation link!');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

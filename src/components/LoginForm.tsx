@@ -30,7 +30,7 @@ export default function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProp
       } else {
         onSuccess();
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

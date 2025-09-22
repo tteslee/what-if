@@ -36,7 +36,15 @@ export class DatabaseService {
 
   async saveCity(city: CityProfile): Promise<boolean> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const cityData = this.transformCityToDB(city);
+      
+      // Add user info if logged in
+      if (user) {
+        cityData.created_by = user.id;
+        cityData.is_public = false; // User-created cities are private by default
+      }
+
       const { error } = await supabase
         .from('cities')
         .upsert(cityData);
@@ -95,7 +103,15 @@ export class DatabaseService {
 
   async saveIntervention(intervention: Intervention): Promise<boolean> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const interventionData = this.transformInterventionToDB(intervention);
+      
+      // Add user info if logged in
+      if (user) {
+        interventionData.created_by = user.id;
+        interventionData.is_public = false; // User-created interventions are private by default
+      }
+
       const { error } = await supabase
         .from('interventions')
         .upsert(interventionData);
@@ -154,7 +170,15 @@ export class DatabaseService {
 
   async saveScenario(scenario: Scenario): Promise<boolean> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const scenarioData = this.transformScenarioToDB(scenario);
+      
+      // Add user info if logged in
+      if (user) {
+        scenarioData.created_by = user.id;
+        scenarioData.is_public = false; // User-created scenarios are private by default
+      }
+
       const { error } = await supabase
         .from('scenarios')
         .upsert(scenarioData);

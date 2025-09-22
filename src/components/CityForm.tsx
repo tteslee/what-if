@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CityProfile } from '../lib/schemas';
 import { z } from 'zod';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const CityScale = z.enum([
   "Citywide",
@@ -18,6 +19,7 @@ interface CityFormProps {
 }
 
 export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
+  const { language } = useTranslation();
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -41,6 +43,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
     const city: CityProfile = {
       id: `custom-${Date.now()}`,
       name: formData.name,
+      lang: language,
       scale: formData.scale,
       mainChallenges: formData.mainChallenges.filter(c => c.trim()),
       ...(showOptionalFields && {

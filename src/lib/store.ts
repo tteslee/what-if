@@ -27,7 +27,7 @@ interface WhatIfState {
   removeAssumption: (index: number) => void;
   createScenario: (isPublic?: boolean) => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
-  loadSampleData: () => Promise<void>;
+  loadSampleData: (lang?: 'en' | 'ko') => Promise<void>;
   addCustomCity: (city: CityProfile) => Promise<void>;
   addCustomIntervention: (intervention: Intervention) => Promise<void>;
   deleteCustomCity: (cityId: string) => Promise<void>;
@@ -100,6 +100,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
       isPublic: isPublic,
+      lang: 'en', // Default to English for now, will be updated based on current language
     };
 
     const success = await databaseService.saveScenario(scenario, isPublic);
@@ -164,14 +165,14 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     }
   },
   
-  loadSampleData: async () => {
-    console.log('Loading data from database...');
+  loadSampleData: async (lang: 'en' | 'ko' = 'en') => {
+    console.log('Loading data from database for language:', lang);
     
     try {
       const [cities, interventions, scenarios] = await Promise.all([
-        databaseService.getCities(),
-        databaseService.getInterventions(),
-        databaseService.getScenarios(),
+        databaseService.getCities(lang),
+        databaseService.getInterventions(lang),
+        databaseService.getScenarios(lang),
       ]);
       
       console.log('Loaded from database:', { cities, interventions, scenarios });

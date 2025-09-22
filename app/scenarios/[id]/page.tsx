@@ -68,6 +68,7 @@ export default function ScenarioResultPage() {
             interventionIds: data.intervention_ids as string[],
             notes: data.notes as string,
             isPublic: data.is_public as boolean,
+            lang: (data.lang as 'en' | 'ko') || 'en',
           };
           
           setScenario(dbScenario);

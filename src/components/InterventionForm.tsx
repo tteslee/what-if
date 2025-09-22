@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Intervention } from '../lib/schemas';
 import { z } from 'zod';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const InterventionCategory = z.enum([
   "BehaviourChange",
@@ -22,6 +23,7 @@ interface InterventionFormProps {
 }
 
 export default function InterventionForm({ onSubmit, onCancel }: InterventionFormProps) {
+  const { language } = useTranslation();
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -42,6 +44,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
     
     const intervention: Intervention = {
       id: `custom-${Date.now()}`,
+      lang: language,
       title: formData.title,
       summary: formData.summary,
       category: formData.category,

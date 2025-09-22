@@ -14,12 +14,13 @@ export class DatabaseService {
   private constructor() {}
 
   // City methods
-  async getCities(): Promise<CityProfile[]> {
+  async getCities(lang: 'en' | 'ko' = 'en'): Promise<CityProfile[]> {
     try {
       const { data, error } = await supabase
         .from('cities')
         .select('*')
         .eq('is_public', true)
+        .eq('lang', lang)
         .order('name');
 
       if (error) {
@@ -81,12 +82,13 @@ export class DatabaseService {
   }
 
   // Intervention methods
-  async getInterventions(): Promise<Intervention[]> {
+  async getInterventions(lang: 'en' | 'ko' = 'en'): Promise<Intervention[]> {
     try {
       const { data, error } = await supabase
         .from('interventions')
         .select('*')
         .eq('is_public', true)
+        .eq('lang', lang)
         .order('title');
 
       if (error) {
@@ -148,13 +150,14 @@ export class DatabaseService {
   }
 
   // Scenario methods
-  async getScenarios(): Promise<Scenario[]> {
+  async getScenarios(lang: 'en' | 'ko' = 'en'): Promise<Scenario[]> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
       let query = supabase
         .from('scenarios')
         .select('*')
+        .eq('lang', lang)
         .order('created_at', { ascending: false });
 
       if (user) {
@@ -309,6 +312,7 @@ export class DatabaseService {
     return {
       id: dbCity.id as string,
       name: dbCity.name as string,
+      lang: (dbCity.lang as 'en' | 'ko') || 'en',
       scale: dbCity.scale as "Citywide" | "DistrictNeighbourhood" | "CorridorStreet" | "SpecificSite",
       mainChallenges: dbCity.main_challenges as string[],
       populationContext: dbCity.population_context as { size?: number; demographics?: string } | undefined,
@@ -363,6 +367,7 @@ export class DatabaseService {
   private transformInterventionFromDB(dbIntervention: Record<string, unknown>): Intervention {
     return {
       id: dbIntervention.id as string,
+      lang: (dbIntervention.lang as 'en' | 'ko') || 'en',
       title: dbIntervention.title as string,
       summary: dbIntervention.summary as string,
       category: dbIntervention.category as "BehaviourChange" | "CivicParticipation" | "SkillsAndIndustry" | "PhysicalInfrastructure" | "Governance" | "PolicyAndRegulation" | "Finance" | "Technology",
@@ -416,6 +421,8 @@ export class DatabaseService {
       cityId: dbScenario.city_id as string,
       interventionIds: dbScenario.intervention_ids as string[],
       notes: dbScenario.notes as string | undefined,
+      isPublic: dbScenario.is_public as boolean | undefined,
+      lang: (dbScenario.lang as 'en' | 'ko') || 'en',
     };
   }
 

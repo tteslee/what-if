@@ -6,6 +6,7 @@ import { useWhatIfStore } from '../../../src/lib/store';
 import { CityProfile, Intervention } from '../../../src/lib/schemas';
 import CityForm from '../../../src/components/CityForm';
 import InterventionForm from '../../../src/components/InterventionForm';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 const STEPS = [
   { id: 0, title: 'Your Question', description: 'What are you curious about?' },
@@ -15,6 +16,7 @@ const STEPS = [
 ];
 
 export default function NewScenarioPage() {
+  const { language } = useTranslation();
   const router = useRouter();
   const {
     currentStep,
@@ -69,9 +71,9 @@ export default function NewScenarioPage() {
 
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
-      loadSampleData();
+      loadSampleData(language);
     }
-  }, [currentStep, cities, interventions, loadSampleData]);
+  }, [currentStep, cities, interventions, loadSampleData, language]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {

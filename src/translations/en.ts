@@ -147,6 +147,8 @@ export const en = {
       synergies: 'Synergies',
       gaps: 'Gaps',
       assumptions: 'Assumptions',
+      systemEffects: 'System Effects',
+      policyTrends: 'Policy Trends',
     },
   },
 

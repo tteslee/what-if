@@ -305,7 +305,7 @@ export default function ScenarioResultPage() {
 
             {/* System Effects */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">System Effects</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.systemEffects}</h2>
               <div className="grid gap-4">
                 {result.systemEffects?.map((effect, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
@@ -337,7 +337,7 @@ export default function ScenarioResultPage() {
 
             {/* Policy Interactions */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Policy & Trend Interactions</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.policyTrends}</h2>
               <div className="grid gap-4">
                 {result.policyInteractions?.map((interaction, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">

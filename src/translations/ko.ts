@@ -147,6 +147,8 @@ export const ko = {
       synergies: '시너지',
       gaps: '갭',
       assumptions: '가정',
+      systemEffects: '시스템 효과',
+      policyTrends: '정책 동향',
     },
   },
 

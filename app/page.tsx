@@ -4,19 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../src/lib/store';
 import MigrationBanner from '../src/components/MigrationBanner';
+import { useTranslation } from '../src/contexts/TranslationContext';
 
-const EXAMPLE_QUESTIONS = [
-  "could make housing affordable for everyone in our city?",
-  "could cool Madrid by 8.5 degrees celsius?",
-  "could eliminate traffic fatalities in Singapore?",
-  "could reduce air pollution by 50% by 2030?",
-  "could create a zero-waste circular economy?",
-  "could ensure every child has access to quality education within walking distance?",
-];
 
 export default function HomePage() {
   const router = useRouter();
   const { loadSampleData, setWhatIfQuestion } = useWhatIfStore();
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [showExamples, setShowExamples] = useState(false);
 
@@ -45,10 +39,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6">
-              What-if
+              {t.main.title}
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 mb-8 max-w-3xl mx-auto">
-              A digital testbed for urban innovation
+              {t.main.subtitle}
             </p>
             
             {/* Question Input */}
@@ -56,13 +50,13 @@ export default function HomePage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-xl font-medium text-slate-500">What if we</span>
+                    <span className="text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
                   </div>
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="could enhance the collective intelligence of our city?"
+                    placeholder={t.main.inputPlaceholder}
                     className="block w-full pl-36 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-900 placeholder-slate-500"
                     autoFocus
                   />
@@ -72,7 +66,7 @@ export default function HomePage() {
                   disabled={!inputValue.trim()}
                   className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium text-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
                 >
-                  Explore the possibilities
+                  {t.main.createScenario}
                 </button>
               </form>
 
@@ -82,12 +76,12 @@ export default function HomePage() {
                   onClick={() => setShowExamples(!showExamples)}
                   className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
-                  {showExamples ? 'Hide' : 'Show'} example questions
+                  {showExamples ? t.main.hideExamples : t.main.showExamples}
                 </button>
                 
                 {showExamples && (
                   <div className="mt-4 space-y-2">
-                    {EXAMPLE_QUESTIONS.map((example, index) => (
+                    {t.main.exampleQuestions.map((example, index) => (
                       <button
                         key={index}
                         onClick={() => handleExampleClick(example)}

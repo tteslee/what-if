@@ -140,6 +140,13 @@ export const ko = {
       engagementNeeds: '참여 요구사항',
       support: '지지',
       citizens: '시민',
+      signalsToWatch: '주시할 신호',
+      nextExperiments: '다음 실험',
+      timeline: '타임라인',
+      lowEffort: '낮은 노력',
+      synergies: '시너지',
+      gaps: '갭',
+      assumptions: '가정',
     },
   },
 

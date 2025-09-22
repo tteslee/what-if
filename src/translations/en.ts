@@ -140,6 +140,13 @@ export const en = {
       engagementNeeds: 'Engagement Needs',
       support: 'Support',
       citizens: 'Citizens',
+      signalsToWatch: 'Signals to Watch',
+      nextExperiments: 'Next Experiments',
+      timeline: 'Timeline',
+      lowEffort: 'Low Effort',
+      synergies: 'Synergies',
+      gaps: 'Gaps',
+      assumptions: 'Assumptions',
     },
   },
 

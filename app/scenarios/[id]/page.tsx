@@ -390,7 +390,7 @@ export default function ScenarioResultPage() {
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Assumptions & Gaps</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.assumptions} & {t.scenario.result.gaps}</h2>
                 <div className="space-y-3">
                   {result.assumptions?.map((assumption, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -413,7 +413,7 @@ export default function ScenarioResultPage() {
             {/* Signals & Experiments */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Signals to Watch</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.signalsToWatch}</h2>
                 <div className="space-y-3">
                   {result.signals?.map((signal, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -425,7 +425,7 @@ export default function ScenarioResultPage() {
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Next Experiments</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.nextExperiments}</h2>
                 <div className="space-y-3">
                   {result.experiments?.map((experiment, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -436,10 +436,10 @@ export default function ScenarioResultPage() {
                           experiment.effort === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-red-100 text-red-800'
                         }`}>
-                          {experiment.effort} Effort
+                          {experiment.effort === 'Low' ? t.scenario.result.lowEffort : experiment.effort} Effort
                         </span>
                       </div>
-                      <p className="text-sm text-slate-700">Timeline: {experiment.timeline}</p>
+                      <p className="text-sm text-slate-700">{t.scenario.result.timeline}: {experiment.timeline}</p>
                     </div>
                   ))}
                 </div>
@@ -453,7 +453,7 @@ export default function ScenarioResultPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   {result.synergies && result.synergies.length > 0 && (
                     <div>
-                      <h3 className="font-medium text-slate-900 mb-3">Synergies</h3>
+                      <h3 className="font-medium text-slate-900 mb-3">{t.scenario.result.synergies}</h3>
                       <ul className="space-y-2">
                         {result.synergies?.map((synergy, index) => (
                           <li key={index} className="text-slate-700 flex items-start">
@@ -466,7 +466,7 @@ export default function ScenarioResultPage() {
                   )}
                   {result.gaps && result.gaps.length > 0 && (
                     <div>
-                      <h3 className="font-medium text-slate-900 mb-3">Gaps</h3>
+                      <h3 className="font-medium text-slate-900 mb-3">{t.scenario.result.gaps}</h3>
                       <ul className="space-y-2">
                         {result.gaps?.map((gap, index) => (
                           <li key={index} className="text-slate-700 flex items-start">

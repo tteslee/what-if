@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario } from '../../../src/lib/schemas';
@@ -11,9 +11,10 @@ export default function MyScenariosPage() {
   const { cities, interventions, loadSampleData, scenarios, setScenarios } = useWhatIfStore();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const isUpdatingPrivacyRef = useRef(false);
 
   const loadUserScenarios = useCallback(async () => {
-    if (!user) return;
+    if (!user || isUpdatingPrivacyRef.current) return;
     
     try {
       const { data, error } = await supabase
@@ -107,6 +108,7 @@ export default function MyScenariosPage() {
   const handleTogglePrivacy = async (scenarioId: string, currentIsPublic: boolean) => {
     if (!user) return;
 
+    isUpdatingPrivacyRef.current = true;
     try {
       console.log('Toggling privacy for scenario:', scenarioId, 'from', currentIsPublic, 'to', !currentIsPublic);
       const { error } = await supabase
@@ -129,6 +131,8 @@ export default function MyScenariosPage() {
       console.log('Local state updated:', updatedScenarios);
     } catch (error) {
       console.error('Error toggling scenario privacy:', error);
+    } finally {
+      isUpdatingPrivacyRef.current = false;
     }
   };
 

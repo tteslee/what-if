@@ -150,11 +150,22 @@ export class DatabaseService {
   // Scenario methods
   async getScenarios(): Promise<Scenario[]> {
     try {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let query = supabase
         .from('scenarios')
         .select('*')
-        .eq('is_public', true)
         .order('created_at', { ascending: false });
+
+      if (user) {
+        // If user is logged in, fetch both public scenarios and user's own scenarios
+        query = query.or(`is_public.eq.true,created_by.eq.${user.id}`);
+      } else {
+        // If not logged in, only fetch public scenarios
+        query = query.eq('is_public', true);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching scenarios:', error);
@@ -168,7 +179,7 @@ export class DatabaseService {
     }
   }
 
-  async saveScenario(scenario: Scenario): Promise<boolean> {
+  async saveScenario(scenario: Scenario, isPublic: boolean = false): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const scenarioData = this.transformScenarioToDB(scenario);
@@ -176,7 +187,10 @@ export class DatabaseService {
       // Add user info if logged in
       if (user) {
         scenarioData.created_by = user.id;
-        scenarioData.is_public = false; // User-created scenarios are private by default
+        scenarioData.is_public = isPublic;
+      } else {
+        // If not logged in, scenarios are public by default
+        scenarioData.is_public = true;
       }
 
       const { error } = await supabase

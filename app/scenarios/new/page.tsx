@@ -46,6 +46,7 @@ export default function NewScenarioPage() {
   const [selectedInterventionDetails, setSelectedInterventionDetails] = useState<string | null>(null);
   const [selectedCityDetails, setSelectedCityDetails] = useState<string | null>(null);
   const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
@@ -66,7 +67,7 @@ export default function NewScenarioPage() {
   };
 
   const handleCreateAndGenerate = async () => {
-    const scenario = await createScenario();
+    const scenario = await createScenario(isPublic);
     if (scenario) {
       setIsGeneratingScenario(true);
       try {
@@ -452,6 +453,31 @@ export default function NewScenarioPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Privacy Toggle */}
+            <div>
+              <label className="block text-lg font-medium text-slate-700 mb-3">
+                Privacy Settings
+              </label>
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={isPublic}
+                    onChange={(e) => setIsPublic(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-slate-900">
+                      Make this scenario public
+                    </span>
+                    <p className="text-xs text-slate-600">
+                      Public scenarios can be viewed by anyone, even without an account
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           </div>

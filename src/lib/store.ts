@@ -25,7 +25,7 @@ interface WhatIfState {
   clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
-  createScenario: () => Promise<Scenario | null>;
+  createScenario: (isPublic?: boolean) => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: () => Promise<void>;
   addCustomCity: (city: CityProfile) => Promise<void>;
@@ -86,7 +86,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   clearAssumptions: () => set({ assumptions: [] }),
   
   // Scenario Management
-  createScenario: async () => {
+  createScenario: async (isPublic: boolean = false) => {
     const state = get();
     if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
@@ -100,7 +100,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
     };
 
-    const success = await databaseService.saveScenario(scenario);
+    const success = await databaseService.saveScenario(scenario, isPublic);
     if (success) {
       set((state) => ({
         scenarios: [...state.scenarios, scenario],

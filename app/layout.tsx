@@ -40,6 +40,18 @@ export default function RootLayout({
                   New Scenario
                 </Link>
                 <Link 
+                  href="/scenarios/public" 
+                  className="text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Public Scenarios
+                </Link>
+                <Link 
+                  href="/scenarios/my" 
+                  className="text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  My Scenarios
+                </Link>
+                <Link 
                   href="/scenarios/compare" 
                   className="text-slate-600 hover:text-slate-900 transition-colors"
                 >

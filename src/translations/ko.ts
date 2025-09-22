@@ -39,7 +39,7 @@ export const ko = {
   // Design Principles
   designPrinciples: {
     requiredFirst: {
-      title: '도시 프로필과 솔루션 프로필 생성',
+      title: '도시 혁신 솔루션 데이터베이스',
       description: '도시, 범위, 과제 등 핵심 정보를 담은 데이터베이스를 관리하세요.',
     },
     portfolioApproach: {

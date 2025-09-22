@@ -33,6 +33,7 @@ interface WhatIfState {
   deleteCustomCity: (cityId: string) => Promise<void>;
   deleteCustomIntervention: (interventionId: string) => Promise<void>;
   clearLegacyData: () => Promise<void>;
+  setScenarios: (scenarios: Scenario[]) => void;
   reset: () => void;
 }
 
@@ -229,6 +230,10 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     // For database, we don't need to clear legacy data as it's already clean
     // Just reload the data
     await get().loadSampleData();
+  },
+  
+  setScenarios: (scenarios: Scenario[]) => {
+    set({ scenarios });
   },
   
   // Reset

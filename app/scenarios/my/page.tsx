@@ -8,8 +8,7 @@ import { supabase } from '../../../src/lib/supabase';
 
 export default function MyScenariosPage() {
   const router = useRouter();
-  const { cities, interventions, loadSampleData } = useWhatIfStore();
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const { cities, interventions, loadSampleData, scenarios, setScenarios } = useWhatIfStore();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
 
@@ -41,7 +40,7 @@ export default function MyScenariosPage() {
     } catch (error) {
       console.error('Error loading user scenarios:', error);
     }
-  }, [user]);
+  }, [user, setScenarios]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -98,7 +97,8 @@ export default function MyScenariosPage() {
       }
 
       // Remove from local state
-      setScenarios(prev => prev.filter(s => s.id !== scenarioId));
+      const updatedScenarios = scenarios.filter((s: Scenario) => s.id !== scenarioId);
+      setScenarios(updatedScenarios);
     } catch (error) {
       console.error('Error deleting scenario:', error);
     }
@@ -120,9 +120,10 @@ export default function MyScenariosPage() {
       }
 
       // Update local state
-      setScenarios(prev => prev.map(s => 
+      const updatedScenarios = scenarios.map((s: Scenario) => 
         s.id === scenarioId ? { ...s, isPublic: !currentIsPublic } : s
-      ));
+      );
+      setScenarios(updatedScenarios);
     } catch (error) {
       console.error('Error toggling scenario privacy:', error);
     }

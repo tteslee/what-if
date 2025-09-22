@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario, ScenarioResult } from '../../../src/lib/schemas';
+import { supabase } from '../../../src/lib/supabase';
 
 export default function ScenarioResultPage() {
   const params = useParams();
@@ -14,17 +15,68 @@ export default function ScenarioResultPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (params.id) {
+    const loadScenario = async () => {
+      if (!params.id) return;
+      
       const scenarioId = params.id as string;
+      
+      // First try to find in global store
       const foundScenario = scenarios.find(s => s.id === scenarioId);
       const foundResult = results[scenarioId];
       
       if (foundScenario) {
         setScenario(foundScenario);
         setResult(foundResult || null);
+        setLoading(false);
+        return;
       }
+      
+      // If not found in store, load from database
+      try {
+        const { data, error } = await supabase
+          .from('scenarios')
+          .select('*')
+          .eq('id', scenarioId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching scenario:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data) {
+          const dbScenario: Scenario = {
+            id: data.id as string,
+            whatIfQuestion: data.what_if_question as string,
+            cityId: data.city_id as string,
+            interventionIds: data.intervention_ids as string[],
+            notes: data.notes as string,
+            isPublic: data.is_public as boolean,
+          };
+          
+          setScenario(dbScenario);
+          
+          // Try to load the result as well
+          const { data: resultData } = await supabase
+            .from('scenario_results')
+            .select('*')
+            .eq('scenario_id', scenarioId)
+            .single();
+            
+          if (resultData) {
+            // Transform result data if needed
+            setResult(resultData as ScenarioResult);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading scenario from database:', error);
+      }
+      
       setLoading(false);
-    }
+    };
+    
+    loadScenario();
   }, [params.id, scenarios, results]);
 
   if (loading) {

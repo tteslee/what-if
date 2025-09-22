@@ -151,7 +151,7 @@ export default function ScenarioResultPage() {
               <div>
                 <h3 className="font-medium text-slate-900 mb-2">Interventions</h3>
                 <div className="space-y-1">
-                  {selectedInterventions.map((intervention) => (
+                  {selectedInterventions?.map((intervention) => (
                     <div key={intervention.id} className="text-slate-700">
                       • {intervention.title} ({intervention.category})
                     </div>
@@ -174,7 +174,7 @@ export default function ScenarioResultPage() {
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
               <h2 className="text-xl font-semibold text-slate-900 mb-4">Stakeholder Impacts</h2>
               <div className="grid gap-4">
-                {result.stakeholderImpacts.map((impact, index) => (
+                {result.stakeholderImpacts?.map((impact, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-medium text-slate-900 capitalize">{impact.group}</h3>
@@ -193,7 +193,7 @@ export default function ScenarioResultPage() {
                       <div>
                         <h4 className="font-medium text-slate-900 mb-2">Benefits</h4>
                         <ul className="space-y-1">
-                          {impact.benefits.map((benefit, i) => (
+                          {impact.benefits?.map((benefit, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
                               <span className="text-green-500 mr-2">✓</span>
                               {benefit}
@@ -204,7 +204,7 @@ export default function ScenarioResultPage() {
                       <div>
                         <h4 className="font-medium text-slate-900 mb-2">Concerns</h4>
                         <ul className="space-y-1">
-                          {impact.concerns.map((concern, i) => (
+                          {impact.concerns?.map((concern, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
                               <span className="text-red-500 mr-2">⚠</span>
                               {concern}
@@ -215,7 +215,7 @@ export default function ScenarioResultPage() {
                       <div>
                         <h4 className="font-medium text-slate-900 mb-2">Engagement Needs</h4>
                         <ul className="space-y-1">
-                          {impact.engagementNeeds.map((need, i) => (
+                          {impact.engagementNeeds?.map((need, i) => (
                             <li key={i} className="text-sm text-slate-700 flex items-start">
                               <span className="text-blue-500 mr-2">→</span>
                               {need}
@@ -233,7 +233,7 @@ export default function ScenarioResultPage() {
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
               <h2 className="text-xl font-semibold text-slate-900 mb-4">System Effects</h2>
               <div className="grid gap-4">
-                {result.systemEffects.map((effect, index) => (
+                {result.systemEffects?.map((effect, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-slate-900">{effect.domain}</h3>
@@ -265,7 +265,7 @@ export default function ScenarioResultPage() {
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
               <h2 className="text-xl font-semibold text-slate-900 mb-4">Policy & Trend Interactions</h2>
               <div className="grid gap-4">
-                {result.policyInteractions.map((interaction, index) => (
+                {result.policyInteractions?.map((interaction, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-slate-900">{interaction.policy}</h3>
@@ -289,7 +289,7 @@ export default function ScenarioResultPage() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-4">Risks & Unknowns</h2>
                 <div className="space-y-3">
-                  {result.risks.map((risk, index) => (
+                  {result.risks?.map((risk, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-slate-900">{risk.risk}</span>
@@ -318,7 +318,7 @@ export default function ScenarioResultPage() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-4">Assumptions & Gaps</h2>
                 <div className="space-y-3">
-                  {result.assumptions.map((assumption, index) => (
+                  {result.assumptions?.map((assumption, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-slate-900">{assumption.assumption}</span>
@@ -341,7 +341,7 @@ export default function ScenarioResultPage() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-4">Signals to Watch</h2>
                 <div className="space-y-3">
-                  {result.signals.map((signal, index) => (
+                  {result.signals?.map((signal, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
                       <h3 className="font-medium text-slate-900 mb-1">{signal.signal}</h3>
                       <p className="text-sm text-slate-700">{signal.description}</p>
@@ -353,7 +353,7 @@ export default function ScenarioResultPage() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-4">Next Experiments</h2>
                 <div className="space-y-3">
-                  {result.experiments.map((experiment, index) => (
+                  {result.experiments?.map((experiment, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium text-slate-900">{experiment.experiment}</h3>
@@ -381,7 +381,7 @@ export default function ScenarioResultPage() {
                     <div>
                       <h3 className="font-medium text-slate-900 mb-3">Synergies</h3>
                       <ul className="space-y-2">
-                        {result.synergies.map((synergy, index) => (
+                        {result.synergies?.map((synergy, index) => (
                           <li key={index} className="text-slate-700 flex items-start">
                             <span className="text-green-500 mr-2">✓</span>
                             {synergy}
@@ -394,7 +394,7 @@ export default function ScenarioResultPage() {
                     <div>
                       <h3 className="font-medium text-slate-900 mb-3">Gaps</h3>
                       <ul className="space-y-2">
-                        {result.gaps.map((gap, index) => (
+                        {result.gaps?.map((gap, index) => (
                           <li key={index} className="text-slate-700 flex items-start">
                             <span className="text-red-500 mr-2">⚠</span>
                             {gap}

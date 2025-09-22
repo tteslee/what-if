@@ -185,7 +185,7 @@ export default function MyScenariosPage() {
           </div>
         ) : (
           <div className="grid gap-6">
-            {scenarios.map((scenario) => (
+            {scenarios?.map((scenario) => (
               <div key={scenario.id} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex items-start justify-between">
                 <div className="flex-1">

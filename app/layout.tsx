@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   title: 'What-if: A digital testbed for urban innovation',
   description: 'Simulate urban interventions before real-world pilots or workshops. Ask "What if we..." and explore the possibilities.',
 };
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -49,6 +51,7 @@ export default function RootLayout({
 
         {/* Main Content */}
         <main>{children}</main>
+        <Analytics />
       </body>
     </html>
   );

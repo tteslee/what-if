@@ -91,7 +91,7 @@ export default function NewScenarioPage() {
   };
 
   const handleCreateAndGenerate = async () => {
-    const scenario = await createScenario(isPublic);
+    const scenario = await createScenario(isPublic, language);
     if (scenario) {
       setIsGeneratingScenario(true);
       try {

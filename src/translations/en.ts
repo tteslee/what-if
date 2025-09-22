@@ -125,6 +125,13 @@ export const en = {
       makePrivate: 'Make Private',
       startOver: 'Start Over',
     },
+    result: {
+      title: 'Scenario Analysis',
+      portfolioAnalysis: 'Portfolio Analysis',
+      stakeholderImpacts: 'Stakeholder Impacts',
+      risksAndUnknowns: 'Risks & Unknowns',
+      notGenerated: 'Scenario Analysis Not Generated',
+    },
   },
 
   // Common

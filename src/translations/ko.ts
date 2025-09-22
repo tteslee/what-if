@@ -125,6 +125,13 @@ export const ko = {
       makePrivate: '비공개로 만들기',
       startOver: '처음부터',
     },
+    result: {
+      title: '시나리오 분석',
+      portfolioAnalysis: '포트폴리오 분석',
+      stakeholderImpacts: '이해관계자 영향',
+      risksAndUnknowns: '위험 및 미지수',
+      notGenerated: '시나리오 분석이 생성되지 않음',
+    },
   },
 
   // Common

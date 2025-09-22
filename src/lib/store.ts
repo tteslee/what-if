@@ -25,7 +25,7 @@ interface WhatIfState {
   clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
-  createScenario: (isPublic?: boolean) => Promise<Scenario | null>;
+  createScenario: (isPublic?: boolean, lang?: 'en' | 'ko') => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: (lang?: 'en' | 'ko') => Promise<void>;
   addCustomCity: (city: CityProfile) => Promise<void>;
@@ -87,7 +87,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   clearAssumptions: () => set({ assumptions: [] }),
   
   // Scenario Management
-  createScenario: async (isPublic: boolean = false) => {
+  createScenario: async (isPublic: boolean = false, lang: 'en' | 'ko' = 'en') => {
     const state = get();
     if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
@@ -100,7 +100,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
       isPublic: isPublic,
-      lang: 'en', // Default to English for now, will be updated based on current language
+      lang: lang,
     };
 
     const success = await databaseService.saveScenario(scenario, isPublic);

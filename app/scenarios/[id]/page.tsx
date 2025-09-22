@@ -6,11 +6,13 @@ import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario, ScenarioResult, CityProfile, Intervention } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
 import { databaseService } from '../../../src/lib/database-service';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 export default function ScenarioResultPage() {
   const params = useParams();
   const router = useRouter();
   const { scenarios, results } = useWhatIfStore();
+  const { t } = useTranslation();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,7 +186,7 @@ export default function ScenarioResultPage() {
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Scenario Analysis</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.result.title}</h1>
               <p className="text-slate-600">What if we {scenario.whatIfQuestion}</p>
             </div>
             <div className="flex gap-3">
@@ -244,7 +246,7 @@ export default function ScenarioResultPage() {
 
             {/* Stakeholder Impacts */}
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Stakeholder Impacts</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.stakeholderImpacts}</h2>
               <div className="grid gap-4">
                 {result.stakeholderImpacts?.map((impact, index) => (
                   <div key={index} className="border border-slate-200 rounded-lg p-4">
@@ -359,7 +361,7 @@ export default function ScenarioResultPage() {
             {/* Risks & Assumptions */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Risks & Unknowns</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.risksAndUnknowns}</h2>
                 <div className="space-y-3">
                   {result.risks?.map((risk, index) => (
                     <div key={index} className="border border-slate-200 rounded-lg p-3">
@@ -447,7 +449,7 @@ export default function ScenarioResultPage() {
             {/* Portfolio Analysis */}
             {(result.synergies || result.gaps) && (
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Portfolio Analysis</h2>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.portfolioAnalysis}</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {result.synergies && result.synergies.length > 0 && (
                     <div>
@@ -488,7 +490,7 @@ export default function ScenarioResultPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Scenario Analysis Not Generated</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">{t.scenario.result.notGenerated}</h2>
             <p className="text-slate-600 mb-6">
               The scenario analysis hasn&apos;t been generated yet. This might be due to an error or the analysis is still in progress.
             </p>

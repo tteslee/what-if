@@ -13,6 +13,7 @@ export default function PublicScenariosPage() {
   const { cities, interventions, loadSampleData } = useWhatIfStore();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'ko'>('all');
 
   useEffect(() => {
     loadSampleData();
@@ -76,6 +77,11 @@ export default function PublicScenariosPage() {
     router.push(`/scenarios/${scenarioId}`);
   };
 
+  const filteredScenarios = scenarios.filter(scenario => {
+    if (languageFilter === 'all') return true;
+    return scenario.lang === languageFilter;
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -92,12 +98,35 @@ export default function PublicScenariosPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.publicScenarios.title}</h1>
-          <p className="text-slate-600">{t.publicScenarios.subtitle}</p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.publicScenarios.title}</h1>
+              <p className="text-slate-600">
+                {t.publicScenarios.subtitle}
+                {scenarios.length > 0 && (
+                  <span className="ml-2 text-slate-500">
+                    ({filteredScenarios.length} of {scenarios.length} scenarios)
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-slate-700">Filter by language:</label>
+              <select
+                value={languageFilter}
+                onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'ko')}
+                className="px-3 py-1 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">All Languages</option>
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Scenarios List */}
-        {scenarios.length === 0 ? (
+        {filteredScenarios.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 text-center">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,7 +144,7 @@ export default function PublicScenariosPage() {
           </div>
         ) : (
           <div className="grid gap-6">
-            {scenarios.map((scenario) => (
+            {filteredScenarios.map((scenario) => (
               <div key={scenario.id} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -125,6 +154,11 @@ export default function PublicScenariosPage() {
                       </h3>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         {t.publicScenarios.public}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        scenario.lang === 'ko' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {scenario.lang === 'ko' ? '한국어' : 'English'}
                       </span>
                     </div>
                     <div className="text-sm text-slate-600 mb-3">
@@ -156,7 +190,7 @@ export default function PublicScenariosPage() {
         )}
 
         {/* Create New Button */}
-        {scenarios.length > 0 && (
+        {filteredScenarios.length > 0 && (
           <div className="mt-8 text-center">
             <button
               onClick={() => router.push('/scenarios/new')}

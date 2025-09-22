@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { storageService } from './storage-service';
-import { sampleCities, sampleInterventions } from '../data/sample-data';
+import { databaseService } from './database-service';
 import { CityProfile, Intervention, Scenario, ScenarioResult } from './schemas';
 
 interface WhatIfState {
@@ -26,14 +25,15 @@ interface WhatIfState {
   clearSelectedInterventions: () => void;
   addAssumption: (assumption: string) => void;
   removeAssumption: (index: number) => void;
-  createScenario: () => Scenario | null;
+  createScenario: (isPublic?: boolean) => Promise<Scenario | null>;
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
-  loadSampleData: () => void;
-  addCustomCity: (city: CityProfile) => void;
-  addCustomIntervention: (intervention: Intervention) => void;
-  deleteCustomCity: (cityId: string) => void;
-  deleteCustomIntervention: (interventionId: string) => void;
-  clearLegacyData: () => void;
+  loadSampleData: () => Promise<void>;
+  addCustomCity: (city: CityProfile) => Promise<void>;
+  addCustomIntervention: (intervention: Intervention) => Promise<void>;
+  deleteCustomCity: (cityId: string) => Promise<void>;
+  deleteCustomIntervention: (interventionId: string) => Promise<void>;
+  clearLegacyData: () => Promise<void>;
+  setScenarios: (scenarios: Scenario[]) => void;
   reset: () => void;
 }
 
@@ -87,7 +87,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   clearAssumptions: () => set({ assumptions: [] }),
   
   // Scenario Management
-  createScenario: () => {
+  createScenario: async (isPublic: boolean = false) => {
     const state = get();
     if (!state.selectedCityId || state.selectedInterventionIds.length === 0 || !state.whatIfQuestion.trim()) {
       return null;
@@ -99,13 +99,18 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       cityId: state.selectedCityId,
       interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
+      isPublic: isPublic,
     };
 
-    set((state) => ({
-      scenarios: [...state.scenarios, scenario],
-    }));
-
-    return scenario;
+    const success = await databaseService.saveScenario(scenario, isPublic);
+    if (success) {
+      set((state) => ({
+        scenarios: [...state.scenarios, scenario],
+      }));
+      return scenario;
+    }
+    
+    return null;
   },
 
   generateScenario: async (scenarioId: string) => {
@@ -143,6 +148,11 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
 
       const result: ScenarioResult = await response.json();
       
+      // Save result to database
+      console.log('Saving scenario result to database:', result);
+      const saveSuccess = await databaseService.saveScenarioResult(result);
+      console.log('Scenario result save success:', saveSuccess);
+      
       set((state) => ({
         results: { ...state.results, [scenarioId]: result },
       }));
@@ -154,84 +164,79 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
     }
   },
   
-  loadSampleData: () => {
-    console.log('Loading sample data...');
+  loadSampleData: async () => {
+    console.log('Loading data from database...');
     
-    // Clear any legacy data first
-    storageService.clearLegacyData();
-    
-    const customCities = storageService.getCustomCities();
-    const customInterventions = storageService.getCustomInterventions();
-    
-    console.log('Sample cities:', sampleCities);
-    console.log('Custom cities:', customCities);
-    console.log('Sample interventions:', sampleInterventions);
-    console.log('Custom interventions:', customInterventions);
-    
-    const newCities = [...sampleCities, ...customCities];
-    const newInterventions = [...sampleInterventions, ...customInterventions];
-    
-    console.log('About to set state with:', { newCities, newInterventions });
-    
-    set({
-      cities: newCities,
-      interventions: newInterventions,
-    });
-    
-    console.log('Store state after loading:', {
-      cities: newCities,
-      interventions: newInterventions,
-    });
-    
-    // Verify the state was actually updated
-    setTimeout(() => {
-      const state = get();
-      console.log('Store state verification after timeout:', {
-        cities: state.cities,
-        interventions: state.interventions,
+    try {
+      const [cities, interventions, scenarios] = await Promise.all([
+        databaseService.getCities(),
+        databaseService.getInterventions(),
+        databaseService.getScenarios(),
+      ]);
+      
+      console.log('Loaded from database:', { cities, interventions, scenarios });
+      
+      set({
+        cities,
+        interventions,
+        scenarios,
       });
-    }, 100);
+      
+      console.log('Store state after loading:', {
+        cities: cities.length,
+        interventions: interventions.length,
+        scenarios: scenarios.length,
+      });
+    } catch (error) {
+      console.error('Error loading data from database:', error);
+    }
   },
   
   // Custom Profile Management
-  addCustomCity: (city: CityProfile) => {
-    storageService.saveCustomCity(city);
-    set((state) => ({
-      cities: [...state.cities, city]
-    }));
+  addCustomCity: async (city: CityProfile) => {
+    const success = await databaseService.saveCity(city);
+    if (success) {
+      set((state) => ({
+        cities: [...state.cities, city]
+      }));
+    }
   },
   
-  addCustomIntervention: (intervention: Intervention) => {
-    storageService.saveCustomIntervention(intervention);
-    set((state) => ({
-      interventions: [...state.interventions, intervention]
-    }));
+  addCustomIntervention: async (intervention: Intervention) => {
+    const success = await databaseService.saveIntervention(intervention);
+    if (success) {
+      set((state) => ({
+        interventions: [...state.interventions, intervention]
+      }));
+    }
   },
   
-  deleteCustomCity: (cityId: string) => {
-    storageService.deleteCustomCity(cityId);
-    set((state) => ({
-      cities: state.cities.filter(c => c.id !== cityId)
-    }));
+  deleteCustomCity: async (cityId: string) => {
+    const success = await databaseService.deleteCity(cityId);
+    if (success) {
+      set((state) => ({
+        cities: state.cities.filter(c => c.id !== cityId)
+      }));
+    }
   },
   
-  deleteCustomIntervention: (interventionId: string) => {
-    storageService.deleteCustomIntervention(interventionId);
-    set((state) => ({
-      interventions: state.interventions.filter(i => i.id !== interventionId)
-    }));
+  deleteCustomIntervention: async (interventionId: string) => {
+    const success = await databaseService.deleteIntervention(interventionId);
+    if (success) {
+      set((state) => ({
+        interventions: state.interventions.filter(i => i.id !== interventionId)
+      }));
+    }
   },
   
-  clearLegacyData: () => {
-    storageService.clearLegacyData();
-    // Reload data after clearing legacy data
-    const customCities = storageService.getCustomCities();
-    const customInterventions = storageService.getCustomInterventions();
-    
-    set({
-      cities: [...sampleCities, ...customCities],
-      interventions: [...sampleInterventions, ...customInterventions],
-    });
+  clearLegacyData: async () => {
+    // For database, we don't need to clear legacy data as it's already clean
+    // Just reload the data
+    await get().loadSampleData();
+  },
+  
+  setScenarios: (scenarios: Scenario[]) => {
+    set({ scenarios });
   },
   
   // Reset

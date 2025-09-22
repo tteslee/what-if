@@ -58,6 +58,7 @@ Get a structured analysis including:
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
+- **Database**: Supabase (PostgreSQL)
 - **AI Integration**: OpenAI GPT-4 for scenario generation
 - **Data Validation**: Zod schemas
 
@@ -65,12 +66,29 @@ Get a structured analysis including:
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Set up environment variables:
+3. Set up Supabase database:
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Run the SQL schema from `database-setup.sql` in your Supabase SQL editor
+   - Note your project URL and anon key
+4. Set up environment variables:
    ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    OPENAI_API_KEY=your_openai_api_key
    ```
-4. Run the development server: `npm run dev`
-5. Open [http://localhost:3000](http://localhost:3000)
+5. Run the development server: `npm run dev`
+6. Open [http://localhost:3000](http://localhost:3000)
+
+## Database Setup
+
+The app now uses Supabase for data persistence, allowing users to share cities, interventions, and scenarios across the platform. The database includes:
+
+- **Cities**: City profiles with demographics, challenges, and context
+- **Interventions**: Policy and infrastructure interventions
+- **Scenarios**: What-if questions with city and intervention combinations
+- **Results**: AI-generated scenario analysis results
+
+All data is publicly readable, so users can benefit from the community's shared knowledge base.
 
 ## Project Structure
 

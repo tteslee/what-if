@@ -1,7 +1,9 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
+import UserMenu from '../src/components/UserMenu';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -9,6 +11,7 @@ export const metadata: Metadata = {
   title: 'What-if: A digital testbed for urban innovation',
   description: 'Simulate urban interventions before real-world pilots or workshops. Ask "What if we..." and explore the possibilities.',
 };
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -37,11 +40,18 @@ export default function RootLayout({
                   New Scenario
                 </Link>
                 <Link 
-                  href="/scenarios/compare" 
+                  href="/scenarios/public" 
                   className="text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Compare
+                  Public Scenarios
                 </Link>
+                <Link 
+                  href="/scenarios/my" 
+                  className="text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  My Scenarios
+                </Link>
+                <UserMenu />
               </div>
             </div>
           </div>
@@ -49,6 +59,7 @@ export default function RootLayout({
 
         {/* Main Content */}
         <main>{children}</main>
+        <Analytics />
       </body>
     </html>
   );

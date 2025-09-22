@@ -46,6 +46,26 @@ export default function NewScenarioPage() {
   const [selectedInterventionDetails, setSelectedInterventionDetails] = useState<string | null>(null);
   const [selectedCityDetails, setSelectedCityDetails] = useState<string | null>(null);
   const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+
+  // Reset form when component mounts to ensure clean slate
+  // But preserve the whatIfQuestion if it was set from the front page
+  useEffect(() => {
+    const currentQuestion = whatIfQuestion;
+    reset();
+    // Restore the question if it was set from the front page
+    if (currentQuestion) {
+      setWhatIfQuestion(currentQuestion);
+    }
+    // Reset local state as well
+    setAssumptionInput('');
+    setShowCityForm(false);
+    setShowInterventionForm(false);
+    setSelectedInterventionDetails(null);
+    setSelectedCityDetails(null);
+    setIsGeneratingScenario(false);
+    setIsPublic(false);
+  }, [reset, whatIfQuestion, setWhatIfQuestion]);
 
   useEffect(() => {
     if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
@@ -66,7 +86,7 @@ export default function NewScenarioPage() {
   };
 
   const handleCreateAndGenerate = async () => {
-    const scenario = createScenario();
+    const scenario = await createScenario(isPublic);
     if (scenario) {
       setIsGeneratingScenario(true);
       try {
@@ -83,14 +103,14 @@ export default function NewScenarioPage() {
     }
   };
 
-  const handleCityFormSubmit = (cityData: CityProfile) => {
-    addCustomCity(cityData);
+  const handleCityFormSubmit = async (cityData: CityProfile) => {
+    await addCustomCity(cityData);
     setSelectedCity(cityData.id);
     setShowCityForm(false);
   };
 
-  const handleInterventionFormSubmit = (interventionData: Intervention) => {
-    addCustomIntervention(interventionData);
+  const handleInterventionFormSubmit = async (interventionData: Intervention) => {
+    await addCustomIntervention(interventionData);
     addSelectedIntervention(interventionData.id);
     setShowInterventionForm(false);
   };
@@ -175,7 +195,7 @@ export default function NewScenarioPage() {
               </div>
 
               <div className="grid gap-4">
-                {cities.map((city) => (
+                {cities?.map((city) => (
                   <div
                     key={city.id}
                     className={`p-6 text-left border-2 rounded-lg transition-all ${
@@ -283,7 +303,7 @@ export default function NewScenarioPage() {
                 <div className="mb-6">
                   <h4 className="text-sm font-medium text-slate-700 mb-3">Selected Interventions ({selectedInterventionIds.length})</h4>
                   <div className="space-y-2">
-                    {selectedInterventionIds.map((id) => {
+                    {selectedInterventionIds?.map((id) => {
                       const intervention = interventions.find(i => i.id === id);
                       return intervention ? (
                         <div key={id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -309,8 +329,8 @@ export default function NewScenarioPage() {
               {/* Available Interventions */}
               <div className="grid gap-4">
                 {interventions
-                  .filter(i => !selectedInterventionIds.includes(i.id))
-                  .map((intervention) => (
+                  ?.filter(i => !selectedInterventionIds.includes(i.id))
+                  ?.map((intervention) => (
                     <div key={intervention.id} className="p-6 border-2 border-slate-200 rounded-lg hover:border-slate-300 transition-all">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -393,7 +413,7 @@ export default function NewScenarioPage() {
                 <div>
                   <h3 className="font-semibold text-slate-900">Interventions ({selectedInterventions.length}):</h3>
                   <div className="space-y-2">
-                    {selectedInterventions.map((intervention) => (
+                    {selectedInterventions?.map((intervention) => (
                       <div key={intervention.id} className="text-slate-700">
                         • {intervention.title} ({intervention.category})
                       </div>
@@ -439,7 +459,7 @@ export default function NewScenarioPage() {
                 </div>
                 {assumptions.length > 0 && (
                   <div className="space-y-2">
-                    {assumptions.map((assumption, index) => (
+                    {assumptions?.map((assumption, index) => (
                       <div key={index} className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded">
                         <span className="text-sm text-slate-700 flex-1">{assumption}</span>
                         <button
@@ -452,6 +472,31 @@ export default function NewScenarioPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Privacy Toggle */}
+            <div>
+              <label className="block text-lg font-medium text-slate-700 mb-3">
+                Privacy Settings
+              </label>
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={isPublic}
+                    onChange={(e) => setIsPublic(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-slate-900">
+                      Make this scenario public
+                    </span>
+                    <p className="text-xs text-slate-600">
+                      Public scenarios can be viewed by anyone, even without an account
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
@@ -628,7 +673,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Stakeholder Focus</h3>
                         <div className="flex flex-wrap gap-2">
-                          {intervention.stakeholderFocus.map((stakeholder, index) => (
+                          {intervention.stakeholderFocus?.map((stakeholder, index) => (
                             <span key={index} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
                               {stakeholder}
                             </span>
@@ -641,7 +686,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Intended Outcomes</h3>
                         <ul className="list-disc list-inside space-y-1 text-slate-700">
-                          {intervention.intendedOutcomes.map((outcome, index) => (
+                          {intervention.intendedOutcomes?.map((outcome, index) => (
                             <li key={index}>{outcome}</li>
                           ))}
                         </ul>
@@ -652,7 +697,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Synergies</h3>
                         <ul className="list-disc list-inside space-y-1 text-slate-700">
-                          {intervention.synergies.map((synergy, index) => (
+                          {intervention.synergies?.map((synergy, index) => (
                             <li key={index}>{synergy}</li>
                           ))}
                         </ul>
@@ -663,7 +708,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Risks</h3>
                         <ul className="list-disc list-inside space-y-1 text-slate-700">
-                          {intervention.risks.map((risk, index) => (
+                          {intervention.risks?.map((risk, index) => (
                             <li key={index}>{risk}</li>
                           ))}
                         </ul>
@@ -721,7 +766,7 @@ export default function NewScenarioPage() {
                     <div>
                       <h3 className="font-semibold text-slate-900 mb-2">Main Challenges</h3>
                       <div className="flex flex-wrap gap-2">
-                        {city.mainChallenges.map((challenge, index) => (
+                        {city.mainChallenges?.map((challenge, index) => (
                           <span key={index} className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
                             {challenge}
                           </span>
@@ -758,7 +803,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Vulnerable Groups</h3>
                         <div className="flex flex-wrap gap-2">
-                          {city.vulnerableGroups.map((group, index) => (
+                          {city.vulnerableGroups?.map((group, index) => (
                             <span key={index} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm">
                               {group}
                             </span>
@@ -792,7 +837,7 @@ export default function NewScenarioPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 mb-2">Existing Assets</h3>
                         <div className="flex flex-wrap gap-2">
-                          {city.existingAssets.map((asset, index) => (
+                          {city.existingAssets?.map((asset, index) => (
                             <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
                               {asset}
                             </span>

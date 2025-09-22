@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario } from '../../../src/lib/schemas';
@@ -10,17 +10,13 @@ import { useTranslation } from '../../../src/contexts/TranslationContext';
 export default function PublicScenariosPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { cities, interventions, loadSampleData } = useWhatIfStore();
+  const { loadSampleData } = useWhatIfStore();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'ko'>('all');
+  const [scenarioDetails, setScenarioDetails] = useState<Record<string, { cityName: string; interventionNames: string }>>({});
 
-  useEffect(() => {
-    loadSampleData();
-    loadPublicScenarios();
-  }, [loadSampleData]);
-
-  const loadPublicScenarios = async () => {
+  const loadPublicScenarios = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('scenarios')
@@ -51,26 +47,79 @@ export default function PublicScenariosPage() {
 
       console.log('Transformed public scenarios:', transformedScenarios);
       setScenarios(transformedScenarios);
+      
+      // Load city and intervention names for each scenario
+      const details: Record<string, { cityName: string; interventionNames: string }> = {};
+      for (const scenario of transformedScenarios) {
+        const cityName = await getCityName(scenario.cityId, scenario.lang);
+        const interventionNames = await getInterventionNames(scenario.interventionIds, scenario.lang);
+        details[scenario.id] = { cityName, interventionNames };
+      }
+      setScenarioDetails(details);
+      
       setLoading(false);
     } catch (error) {
       console.error('Error loading public scenarios:', error);
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    loadSampleData();
+    loadPublicScenarios();
+  }, [loadSampleData, loadPublicScenarios]);
+
+  const getCityName = async (cityId: string, lang: 'en' | 'ko' = 'en'): Promise<string> => {
+    try {
+      const { data, error } = await supabase
+        .from('cities')
+        .select('name')
+        .eq('id', cityId)
+        .eq('lang', lang)
+        .single();
+      
+      if (error || !data) {
+        // Fallback to any language if not found in specific language
+        const { data: fallbackData } = await supabase
+          .from('cities')
+          .select('name')
+          .eq('id', cityId)
+          .single();
+        return fallbackData?.name || 'Unknown City';
+      }
+      
+      return data.name || 'Unknown City';
+    } catch (error) {
+      console.error('Error fetching city name:', error);
+      return 'Unknown City';
+    }
   };
 
-  const getCityName = (cityId: string) => {
-    const city = cities.find(c => c.id === cityId);
-    return city?.name || 'Unknown City';
-  };
-
-  const getInterventionNames = (interventionIds: string[]) => {
-    const interventionNames = interventionIds
-      .map(id => {
-        const intervention = interventions.find(i => i.id === id);
-        return intervention?.title || 'Unknown Intervention';
-      })
-      .join(', ');
-    return interventionNames || 'No interventions';
+  const getInterventionNames = async (interventionIds: string[], lang: 'en' | 'ko' = 'en'): Promise<string> => {
+    try {
+      const { data, error } = await supabase
+        .from('interventions')
+        .select('title')
+        .in('id', interventionIds)
+        .eq('lang', lang);
+      
+      if (error || !data || data.length === 0) {
+        // Fallback to any language if not found in specific language
+        const { data: fallbackData } = await supabase
+          .from('interventions')
+          .select('title')
+          .in('id', interventionIds);
+        
+        const names = fallbackData?.map(i => i.title).join(', ') || 'Unknown Intervention';
+        return names || 'No interventions';
+      }
+      
+      const names = data.map(i => i.title).join(', ');
+      return names || 'No interventions';
+    } catch (error) {
+      console.error('Error fetching intervention names:', error);
+      return 'No interventions';
+    }
   };
 
   const handleViewScenario = (scenarioId: string) => {
@@ -163,10 +212,10 @@ export default function PublicScenariosPage() {
                     </div>
                     <div className="text-sm text-slate-600 mb-3">
                       <div className="mb-1">
-                        <span className="font-medium">{t.publicScenarios.city}:</span> {getCityName(scenario.cityId)}
+                        <span className="font-medium">{t.publicScenarios.city}:</span> {scenarioDetails[scenario.id]?.cityName || 'Loading...'}
                       </div>
                       <div className="mb-1">
-                        <span className="font-medium">{t.publicScenarios.interventions}:</span> {getInterventionNames(scenario.interventionIds)}
+                        <span className="font-medium">{t.publicScenarios.interventions}:</span> {scenarioDetails[scenario.id]?.interventionNames || 'Loading...'}
                       </div>
                       {scenario.notes && (
                         <div>

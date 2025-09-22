@@ -111,7 +111,7 @@ export default function ScenarioResultPage() {
         // Load city and interventions in the scenario's language
         const [cityData, interventionData] = await Promise.all([
           databaseService.getCities(scenario.lang),
-          databaseService.getInterventions(scenario.lang)
+          databaseService.getInterventionsByIds(scenario.interventionIds)
         ]);
         
         console.log('Loaded city data:', cityData.length, 'cities');

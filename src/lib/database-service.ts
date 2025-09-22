@@ -107,6 +107,27 @@ export class DatabaseService {
     }
   }
 
+  async getInterventionsByIds(interventionIds: string[]): Promise<Intervention[]> {
+    try {
+      const { data, error } = await supabase
+        .from('interventions')
+        .select('*')
+        .in('id', interventionIds);
+
+      if (error) {
+        console.error('Error fetching interventions by IDs:', error);
+        return [];
+      }
+
+      const interventions = data?.map(this.transformInterventionFromDB) || [];
+      console.log(`Fetched ${interventions.length} interventions by IDs:`, interventionIds);
+      return interventions;
+    } catch (error) {
+      console.error('Error fetching interventions by IDs:', error);
+      return [];
+    }
+  }
+
   async saveIntervention(intervention: Intervention): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();

@@ -55,7 +55,7 @@ export const ko = {
   // Warning Message
   warning: {
     title: '⚠️ 중요:',
-    message: '이는 탐색적 시뮬레이션 도구로, 예측이 아닙니다. 의사결정 지원과 의미 파악에 사용하세요.',
+    message: '이 도구는 의사결정을 돕는 시나리오 생성을 위해 만들어졌으며, 정확한 예측이 아닙니다.',
   },
 
   // Scenario creation

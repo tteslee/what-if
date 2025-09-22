@@ -99,6 +99,7 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
       cityId: state.selectedCityId,
       interventionIds: state.selectedInterventionIds,
       notes: `Assumptions: ${state.assumptions.join(', ')}`,
+      isPublic: isPublic,
     };
 
     const success = await databaseService.saveScenario(scenario, isPublic);

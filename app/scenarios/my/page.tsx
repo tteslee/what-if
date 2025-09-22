@@ -108,6 +108,7 @@ export default function MyScenariosPage() {
     if (!user) return;
 
     try {
+      console.log('Toggling privacy for scenario:', scenarioId, 'from', currentIsPublic, 'to', !currentIsPublic);
       const { error } = await supabase
         .from('scenarios')
         .update({ is_public: !currentIsPublic })
@@ -119,11 +120,13 @@ export default function MyScenariosPage() {
         return;
       }
 
+      console.log('Privacy toggle successful, updating local state');
       // Update local state
       const updatedScenarios = scenarios.map((s: Scenario) => 
         s.id === scenarioId ? { ...s, isPublic: !currentIsPublic } : s
       );
       setScenarios(updatedScenarios);
+      console.log('Local state updated:', updatedScenarios);
     } catch (error) {
       console.error('Error toggling scenario privacy:', error);
     }

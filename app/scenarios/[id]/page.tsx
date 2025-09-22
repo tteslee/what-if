@@ -34,6 +34,7 @@ export default function ScenarioResultPage() {
       
       // If not found in store, load from database
       try {
+        console.log('Loading scenario from database:', scenarioId);
         const { data, error } = await supabase
           .from('scenarios')
           .select('*')
@@ -47,6 +48,7 @@ export default function ScenarioResultPage() {
         }
 
         if (data) {
+          console.log('Scenario data from database:', data);
           const dbScenario: Scenario = {
             id: data.id as string,
             whatIfQuestion: data.what_if_question as string,
@@ -59,10 +61,16 @@ export default function ScenarioResultPage() {
           setScenario(dbScenario);
           
           // Try to load the result as well
+          console.log('Loading scenario result for:', scenarioId);
           const resultData = await databaseService.getScenarioResult(scenarioId);
           if (resultData) {
+            console.log('Scenario result loaded:', resultData);
             setResult(resultData);
+          } else {
+            console.log('No scenario result found');
           }
+        } else {
+          console.log('No scenario data found');
         }
       } catch (error) {
         console.error('Error loading scenario from database:', error);

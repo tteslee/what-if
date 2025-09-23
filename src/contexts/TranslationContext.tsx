@@ -24,9 +24,18 @@ interface TranslationProviderProps {
 }
 
 export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  // Initialize with saved language or default to 'en'
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language') as Language;
+      if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ko')) {
+        return savedLanguage;
+      }
+    }
+    return 'en';
+  });
 
-  // Load language preference from localStorage on mount
+  // Load language preference from localStorage on mount (for SSR compatibility)
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ko')) {

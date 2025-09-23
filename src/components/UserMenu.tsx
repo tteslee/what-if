@@ -52,7 +52,7 @@ export default function UserMenu() {
       <>
         <button
           onClick={() => setShowAuthModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition-colors"
         >
           {t.auth.signIn}
         </button>
@@ -69,16 +69,16 @@ export default function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 transition-colors"
+        className="flex items-center space-x-1 text-slate-600 hover:text-slate-900 transition-colors"
       >
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-          <span className="text-white font-medium text-sm">
+        <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center">
+          <span className="text-white font-medium text-xs">
             {user.email?.charAt(0).toUpperCase()}
           </span>
         </div>
-        <span className="hidden sm:block">{user.email}</span>
+        <span className="hidden lg:block text-sm">{user.email}</span>
         <svg
-          className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

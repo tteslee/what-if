@@ -124,23 +124,24 @@ export default function ScenarioResultPage() {
         console.log('Found interventions:', foundInterventions.length, foundInterventions.map(i => i.title));
         console.log('Intervention IDs from scenario:', scenario.interventionIds);
         
-        // If not found in specific language, try fallback to any language
-        if (!foundCity || foundInterventions.length === 0) {
-          console.log('Data not found in specific language, trying fallback...');
+        // If city not found, try fallback to both languages for city only
+        if (!foundCity) {
+          console.log('City not found in specific language, trying fallback...');
           
-          const [fallbackCityData, fallbackInterventionData] = await Promise.all([
-            databaseService.getCities('en'), // Try English as fallback
-            databaseService.getInterventions('en')
+          // Try both English and Korean as fallback for city
+          const [enCityData, koCityData] = await Promise.all([
+            databaseService.getCities('en'),
+            databaseService.getCities('ko')
           ]);
           
-          const fallbackCity = fallbackCityData.find(c => c.id === scenario.cityId);
-          const fallbackInterventions = fallbackInterventionData.filter(i => scenario.interventionIds.includes(i.id));
+          // Try to find city in either language
+          const fallbackCity = enCityData.find(c => c.id === scenario.cityId) || 
+                              koCityData.find(c => c.id === scenario.cityId);
           
           console.log('Fallback city:', fallbackCity?.name || 'NOT FOUND');
-          console.log('Fallback interventions:', fallbackInterventions.length, fallbackInterventions.map(i => i.title));
           
           setCity(fallbackCity || null);
-          setSelectedInterventions(fallbackInterventions);
+          setSelectedInterventions(foundInterventions); // Use the interventions we already found
         } else {
           setCity(foundCity);
           setSelectedInterventions(foundInterventions);
@@ -185,21 +186,21 @@ export default function ScenarioResultPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.result.title}</h1>
-              <p className="text-slate-600">What if we {scenario.whatIfQuestion}</p>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.scenario.result.title}</h1>
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">What if we {scenario.whatIfQuestion}</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 sm:ml-6">
               <button
                 onClick={() => router.push('/scenarios/new')}
-                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50"
+                className="w-full sm:w-auto px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Create New
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Export PDF
               </button>

@@ -109,6 +109,8 @@ export class DatabaseService {
 
   async getInterventionsByIds(interventionIds: string[]): Promise<Intervention[]> {
     try {
+      console.log('Fetching interventions by IDs:', interventionIds);
+      
       const { data, error } = await supabase
         .from('interventions')
         .select('*')
@@ -119,8 +121,10 @@ export class DatabaseService {
         return [];
       }
 
+      console.log('Raw database response for interventions:', data);
       const interventions = data?.map(this.transformInterventionFromDB) || [];
       console.log(`Fetched ${interventions.length} interventions by IDs:`, interventionIds);
+      console.log('Transformed interventions:', interventions.map(i => ({ id: i.id, title: i.title })));
       return interventions;
     } catch (error) {
       console.error('Error fetching interventions by IDs:', error);

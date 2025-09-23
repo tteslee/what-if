@@ -148,24 +148,24 @@ export default function PublicScenariosPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.publicScenarios.title}</h1>
-              <p className="text-slate-600">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.publicScenarios.title}</h1>
+              <p className="text-sm sm:text-base text-slate-600">
                 {t.publicScenarios.subtitle}
                 {scenarios.length > 0 && (
-                  <span className="ml-2 text-slate-500">
+                  <span className="block sm:inline sm:ml-2 text-slate-500 mt-1 sm:mt-0">
                     ({filteredScenarios.length} of {scenarios.length} scenarios)
                   </span>
                 )}
               </p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
               <label className="text-sm font-medium text-slate-700">Filter by language:</label>
               <select
                 value={languageFilter}
                 onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'ko')}
-                className="px-3 py-1 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
               >
                 <option value="all">All Languages</option>
                 <option value="en">English</option>
@@ -193,29 +193,31 @@ export default function PublicScenariosPage() {
             </button>
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-4 sm:gap-6">
             {filteredScenarios.map((scenario) => (
-              <div key={scenario.id} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <div className="flex items-start justify-between">
+              <div key={scenario.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-slate-900">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-900 flex-1">
                         What if we {scenario.whatIfQuestion}
                       </h3>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {t.publicScenarios.public}
-                      </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        scenario.lang === 'ko' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {scenario.lang === 'ko' ? '한국어' : 'English'}
-                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {t.publicScenarios.public}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          scenario.lang === 'ko' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {scenario.lang === 'ko' ? '한국어' : 'English'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-sm text-slate-600 mb-3">
-                      <div className="mb-1">
+                    <div className="text-sm text-slate-600 space-y-1">
+                      <div>
                         <span className="font-medium">{t.publicScenarios.city}:</span> {scenarioDetails[scenario.id]?.cityName || 'Loading...'}
                       </div>
-                      <div className="mb-1">
+                      <div>
                         <span className="font-medium">{t.publicScenarios.interventions}:</span> {scenarioDetails[scenario.id]?.interventionNames || 'Loading...'}
                       </div>
                       {scenario.notes && (
@@ -225,10 +227,10 @@ export default function PublicScenariosPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
+                  <div className="flex justify-end sm:justify-start">
                     <button
                       onClick={() => handleViewScenario(scenario.id)}
-                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                     >
                       {t.publicScenarios.view}
                     </button>

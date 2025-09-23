@@ -10,13 +10,14 @@ import { useTranslation } from '../src/contexts/TranslationContext';
 export default function HomePage() {
   const router = useRouter();
   const { loadSampleData, setWhatIfQuestion } = useWhatIfStore();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [showExamples, setShowExamples] = useState(false);
 
   useEffect(() => {
-    loadSampleData();
-  }, [loadSampleData]);
+    // Load sample data with current language
+    loadSampleData(language);
+  }, [loadSampleData, language]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,14 +51,14 @@ export default function HomePage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
+                    <span className="text-sm sm:text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
                   </div>
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder={t.main.inputPlaceholder}
-                    className="block w-full pl-36 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-900 placeholder-slate-500"
+                    placeholder=""
+                    className="block w-full pl-24 sm:pl-40 pr-4 py-3 sm:py-4 text-base sm:text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-900"
                     autoFocus
                   />
                 </div>

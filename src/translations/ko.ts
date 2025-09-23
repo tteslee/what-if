@@ -75,6 +75,7 @@ export const ko = {
 
   // Scenario creation
   scenario: {
+    subtitle: '시나리오 생성을 위한 단계를 따라가세요',
     steps: {
       question: {
         title: '당신의 아이디어',

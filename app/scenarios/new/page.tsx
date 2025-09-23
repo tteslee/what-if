@@ -82,7 +82,11 @@ export default function NewScenarioPage() {
       interventions: interventions?.map(i => ({ title: i.title, lang: i.lang })) || []
     });
     
-    if ((currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0))) {
+    // Only load data if we have the correct language data or no data at all
+    const needsData = (currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0));
+    const hasWrongLanguageData = cities?.length > 0 && !cities.every(c => c.lang === language);
+    
+    if (needsData || hasWrongLanguageData) {
       console.log('Calling loadSampleData with language:', language);
       loadSampleData(language);
     }
@@ -156,14 +160,14 @@ export default function NewScenarioPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
+                  <span className="text-sm sm:text-xl font-medium text-slate-500">{t.scenario.steps.question.label}</span>
                 </div>
                 <input
                   type="text"
                   value={whatIfQuestion}
                   onChange={(e) => setWhatIfQuestion(e.target.value)}
-                  placeholder={t.scenario.steps.question.placeholder}
-                  className="block w-full pl-32 pr-4 py-4 text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 placeholder-slate-500"
+                  placeholder=""
+                  className="block w-full pl-24 sm:pl-36 pr-4 py-3 sm:py-4 text-base sm:text-lg border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900"
                   autoFocus
                 />
               </div>
@@ -321,16 +325,16 @@ export default function NewScenarioPage() {
                     {selectedInterventionIds?.map((id) => {
                       const intervention = interventions.find(i => i.id === id);
                       return intervention ? (
-                        <div key={id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div>
-                            <div className="font-medium text-slate-900">{intervention.title}</div>
-                            <div className="text-sm text-slate-600">{intervention.summary}</div>
+                        <div key={id} className="flex items-start justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex-1 pr-2">
+                            <div className="font-medium text-slate-900 text-sm sm:text-base">{intervention.title}</div>
+                            <div className="text-xs sm:text-sm text-slate-600 mt-1">{intervention.summary}</div>
                           </div>
                           <button
                             onClick={() => removeSelectedIntervention(id)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 flex-shrink-0 p-1"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
@@ -349,46 +353,46 @@ export default function NewScenarioPage() {
                 {interventions
                   ?.filter(i => !selectedInterventionIds.includes(i.id))
                   ?.map((intervention) => (
-                    <div key={intervention.id} className="p-6 border-2 border-slate-200 rounded-lg hover:border-slate-300 transition-all">
-                      <div className="flex items-start justify-between">
+                    <div key={intervention.id} className="p-4 sm:p-6 border-2 border-slate-200 rounded-lg hover:border-slate-300 transition-all">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-slate-900 mb-2">{intervention.title}</h3>
-                          <p className="text-slate-600 mb-3">{intervention.summary}</p>
+                          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">{intervention.title}</h3>
+                          <p className="text-sm sm:text-base text-slate-600 mb-3">{intervention.summary}</p>
                           
                           {/* Required fields */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            <span className="px-2 sm:px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs sm:text-sm">
                               {intervention.category}
                             </span>
-                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                            <span className="px-2 sm:px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs sm:text-sm">
                               {intervention.scopeOfApplication}
                             </span>
                           </div>
 
                           {/* Optional fields (progressive disclosure) */}
                           {intervention.stakeholderFocus && intervention.stakeholderFocus.length > 0 && (
-                            <div className="text-sm text-slate-600 mb-2">
+                            <div className="text-xs sm:text-sm text-slate-600 mb-2">
                               <strong>Focus:</strong> {intervention.stakeholderFocus.join(', ')}
                             </div>
                           )}
 
                           {intervention.synergies && intervention.synergies.length > 0 && (
-                            <div className="text-sm text-slate-600">
+                            <div className="text-xs sm:text-sm text-slate-600">
                               <strong>Synergies:</strong> {intervention.synergies.join(', ')}
                             </div>
                           )}
                         </div>
 
-                        <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex flex-row sm:flex-col gap-2 sm:ml-4">
                           <button
                             onClick={() => addSelectedIntervention(intervention.id)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                            className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                           >
                             Add
                           </button>
                           <button
                             onClick={() => setSelectedInterventionDetails(intervention.id)}
-                            className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 text-sm"
+                            className="flex-1 sm:flex-none px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 text-sm"
                           >
                             Details
                           </button>
@@ -396,7 +400,7 @@ export default function NewScenarioPage() {
                       </div>
 
                       {intervention.id && intervention.id.startsWith('custom-') && (
-                        <div className="mt-2">
+                        <div className="mt-3 sm:mt-2">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             User Generated
                           </span>
@@ -446,7 +450,7 @@ export default function NewScenarioPage() {
                 {t.scenario.steps.review.assumptions}
               </label>
               <div className="space-y-3">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={assumptionInput}
@@ -470,7 +474,7 @@ export default function NewScenarioPage() {
                         setAssumptionInput('');
                       }
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
                     {t.scenario.steps.review.addAssumption}
                   </button>
@@ -527,65 +531,91 @@ export default function NewScenarioPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.buttons.create}</h1>
-            <p className="text-slate-600">Walk through the steps to set up your urban intervention analysis</p>
-          </div>
-          <button
-            onClick={() => {
-              reset();
-              setCurrentStep(0);
-            }}
-            className="px-4 py-2 text-sm border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50"
-          >
-{t.scenario.buttons.startOver || 'Start Over'}
-          </button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">{t.scenario.buttons.create}</h1>
+          <p className="text-slate-600">{t.scenario.subtitle}</p>
         </div>
 
         {/* Progress Steps */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {STEPS.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                    currentStep >= step.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-200 text-slate-600'
-                  }`}
-                >
-                  {step.id + 1}
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-slate-900">{step.title}</h3>
-                  <p className="text-xs text-slate-500">{step.description}</p>
-                </div>
-                {index < STEPS.length - 1 && (
-                  <div
-                    className={`w-16 h-0.5 mx-4 ${
-                      currentStep > step.id ? 'bg-blue-600' : 'bg-slate-200'
-                    }`}
-                  />
-                )}
+          {/* Desktop Progress Steps */}
+          <div className="hidden md:block">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center space-x-4">
+                {STEPS.map((step, index) => (
+                  <div key={step.id} className="flex items-center">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
+                        currentStep >= step.id
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {step.id + 1}
+                    </div>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`w-16 h-0.5 mx-4 ${
+                          currentStep > step.id ? 'bg-blue-600' : 'bg-slate-200'
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-slate-900">{STEPS[currentStep]?.title}</h3>
+              <p className="text-xs text-slate-500">{STEPS[currentStep]?.description}</p>
+            </div>
+          </div>
+
+          {/* Mobile Progress Steps */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center space-x-2">
+                {STEPS.map((step, index) => (
+                  <div key={step.id} className="flex items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                        currentStep >= step.id
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {step.id + 1}
+                    </div>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`w-8 h-0.5 mx-2 ${
+                          currentStep > step.id ? 'bg-blue-600' : 'bg-slate-200'
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-slate-900">{STEPS[currentStep]?.title}</h3>
+              <p className="text-xs text-slate-500">{STEPS[currentStep]?.description}</p>
+            </div>
           </div>
         </div>
 
         {/* Step Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 sm:p-8">
           {renderStepContent()}
         </div>
 
         {/* Navigation */}
-        <div className="mt-8 flex justify-between">
+        <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
-            className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
 {t.scenario.buttons.previous}
           </button>
@@ -595,7 +625,7 @@ export default function NewScenarioPage() {
               <button
                 onClick={handleCreateAndGenerate}
                 disabled={isGeneratingScenario}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isGeneratingScenario ? (
                   <>
@@ -613,7 +643,7 @@ export default function NewScenarioPage() {
               <button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
 {t.scenario.buttons.next}
               </button>
@@ -624,8 +654,8 @@ export default function NewScenarioPage() {
 
       {/* City Form Modal */}
       {showCityForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
             <CityForm onSubmit={handleCityFormSubmit} onCancel={() => setShowCityForm(false)} />
           </div>
         </div>
@@ -633,8 +663,8 @@ export default function NewScenarioPage() {
 
       {/* Intervention Form Modal */}
       {showInterventionForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
             <InterventionForm onSubmit={handleInterventionFormSubmit} onCancel={() => setShowInterventionForm(false)} />
           </div>
         </div>
@@ -642,9 +672,9 @@ export default function NewScenarioPage() {
 
       {/* Intervention Details Modal */}
       {selectedInterventionDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-2xl font-bold text-slate-900">
                   {interventions.find(i => i.id === selectedInterventionDetails)?.title}
@@ -749,9 +779,9 @@ export default function NewScenarioPage() {
 
       {/* City Details Modal */}
       {selectedCityDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-2xl font-bold text-slate-900">
                   {cities.find(c => c.id === selectedCityDetails)?.name}

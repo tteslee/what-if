@@ -460,17 +460,17 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
       )}
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-4 pt-8 border-t border-slate-200">
+      <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-slate-200">
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
+          className="w-full sm:w-auto px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
 {t.interventionForm.cancel}
         </button>
         <button
           type="submit"
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
+          className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
           {t.interventionForm.submit}
         </button>

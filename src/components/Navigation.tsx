@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useTranslation } from '../contexts/TranslationContext';
 import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation() {
   const { t } = useTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <nav className="bg-white border-b border-slate-200">
@@ -19,29 +21,81 @@ export default function Navigation() {
             <span className="text-xl font-bold text-slate-900">{t.main.title}</span>
           </Link>
           
-          <div className="flex items-center space-x-6">
-            <Link 
-              href="/scenarios/new" 
-              className="text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              {t.nav.newScenario}
-            </Link>
-            <Link 
-              href="/scenarios/public" 
-              className="text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              {t.nav.publicScenarios}
-            </Link>
-            <Link 
-              href="/scenarios/my" 
-              className="text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              {t.nav.myScenarios}
-            </Link>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/scenarios/new" 
+                className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                {t.nav.newScenario}
+              </Link>
+              <Link 
+                href="/scenarios/public" 
+                className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                {t.nav.publicScenarios}
+              </Link>
+              <Link 
+                href="/scenarios/my" 
+                className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                {t.nav.myScenarios}
+              </Link>
+            </div>
+            <div className="flex items-center space-x-3">
+              <LanguageSwitcher />
+              <UserMenu />
+            </div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-3">
             <LanguageSwitcher />
             <UserMenu />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-200 py-4 bg-slate-50">
+            <div className="flex flex-col space-y-2">
+              <Link 
+                href="/scenarios/new" 
+                className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t.nav.newScenario}
+              </Link>
+              <Link 
+                href="/scenarios/public" 
+                className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t.nav.publicScenarios}
+              </Link>
+              <Link 
+                href="/scenarios/my" 
+                className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t.nav.myScenarios}
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

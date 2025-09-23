@@ -75,6 +75,7 @@ export const en = {
 
   // Scenario creation
   scenario: {
+    subtitle: 'Walk through the steps to set up your urban intervention analysis',
     steps: {
       question: {
         title: 'Your Question',

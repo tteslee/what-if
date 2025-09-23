@@ -60,6 +60,7 @@ This is an experimental tool for urban innovation. Contributions are welcome, pa
 - Improved AI prompts for scenario generation
 - Enhanced stakeholder analysis frameworks
 
-## License
+## License and attribution
 
 MIT License - see LICENSE file for details.
+Made by Eunsoo Lee with help from Cursor. This is currently a hobby-project.

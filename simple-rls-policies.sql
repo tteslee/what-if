@@ -30,6 +30,11 @@ CREATE POLICY "Allow authenticated insert" ON cities
 FOR INSERT 
 WITH CHECK (auth.uid() IS NOT NULL);
 
+-- Allow users to update their own cities
+CREATE POLICY "Allow users to update own cities" ON cities 
+FOR UPDATE 
+USING (auth.uid()::text = created_by);
+
 -- ========================================
 -- INTERVENTIONS TABLE
 -- ========================================
@@ -58,6 +63,11 @@ USING (auth.uid()::text = created_by OR is_public = true);
 CREATE POLICY "Allow authenticated insert" ON interventions 
 FOR INSERT 
 WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Allow users to update their own interventions
+CREATE POLICY "Allow users to update own interventions" ON interventions 
+FOR UPDATE 
+USING (auth.uid()::text = created_by);
 
 -- ========================================
 -- SCENARIOS TABLE
@@ -92,6 +102,11 @@ USING (auth.uid()::text = created_by OR is_public = true);
 CREATE POLICY "Allow authenticated insert" ON scenarios 
 FOR INSERT 
 WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Allow users to update their own scenarios (for privacy toggle)
+CREATE POLICY "Allow users to update own scenarios" ON scenarios 
+FOR UPDATE 
+USING (auth.uid()::text = created_by);
 
 -- ========================================
 -- SCENARIO_RESULTS TABLE

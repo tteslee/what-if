@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Intervention } from '../lib/schemas';
 import { z } from 'zod';
 import { useTranslation } from '../contexts/TranslationContext';
+import AuthGuard from './AuthGuard';
 
 const InterventionCategory = z.enum([
   "BehaviourChange",
@@ -170,7 +171,8 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 p-6">
+    <AuthGuard onDismiss={onCancel}>
+      <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">{t.interventionForm.createCustomIntervention}</h2>
         <p className="text-slate-600 text-base">{t.interventionForm.fillRequiredFields}</p>
@@ -475,6 +477,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
           {t.interventionForm.submit}
         </button>
       </div>
-    </form>
+      </form>
+    </AuthGuard>
   );
 }

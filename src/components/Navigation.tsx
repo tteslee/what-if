@@ -7,7 +7,7 @@ import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation() {
-  const { t } = useTranslation();
+  const { t, isClient } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -28,19 +28,19 @@ export default function Navigation() {
                 href="/scenarios/new" 
                 className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
               >
-                {t.nav.newScenario}
+                {isClient ? t.nav.newScenario : 'New Scenario'}
               </Link>
               <Link 
                 href="/scenarios/public" 
                 className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
               >
-                {t.nav.publicScenarios}
+                {isClient ? t.nav.publicScenarios : 'Public Scenarios'}
               </Link>
               <Link 
                 href="/scenarios/my" 
                 className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
               >
-                {t.nav.myScenarios}
+                {isClient ? t.nav.myScenarios : 'My Scenarios'}
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -77,21 +77,21 @@ export default function Navigation() {
                 className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t.nav.newScenario}
+                {isClient ? t.nav.newScenario : 'New Scenario'}
               </Link>
               <Link 
                 href="/scenarios/public" 
                 className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t.nav.publicScenarios}
+                {isClient ? t.nav.publicScenarios : 'Public Scenarios'}
               </Link>
               <Link 
                 href="/scenarios/my" 
                 className="text-slate-600 hover:text-slate-900 transition-colors px-4 py-3 rounded-md hover:bg-white"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t.nav.myScenarios}
+                {isClient ? t.nav.myScenarios : 'My Scenarios'}
               </Link>
             </div>
           </div>

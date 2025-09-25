@@ -29,8 +29,8 @@ interface WhatIfState {
   generateScenario: (scenarioId: string) => Promise<ScenarioResult | null>;
   loadSampleData: (lang?: 'en' | 'ko') => Promise<void>;
   clearData: () => void;
-  addCustomCity: (city: CityProfile) => Promise<void>;
-  addCustomIntervention: (intervention: Intervention) => Promise<void>;
+  addCustomCity: (city: CityProfile) => Promise<{ success: boolean; error?: string }>;
+  addCustomIntervention: (intervention: Intervention) => Promise<{ success: boolean; error?: string }>;
   deleteCustomCity: (cityId: string) => Promise<void>;
   deleteCustomIntervention: (interventionId: string) => Promise<void>;
   clearLegacyData: () => Promise<void>;
@@ -237,20 +237,38 @@ export const useWhatIfStore = create<WhatIfState>((set, get) => ({
   
   // Custom Profile Management
   addCustomCity: async (city: CityProfile) => {
-    const success = await databaseService.saveCity(city);
-    if (success) {
-      set((state) => ({
-        cities: [...state.cities, city]
-      }));
+    try {
+      const success = await databaseService.saveCity(city);
+      if (success) {
+        set((state) => ({
+          cities: [...state.cities, city]
+        }));
+        return { success: true };
+      } else {
+        console.error('Failed to save city - user may not be authenticated');
+        return { success: false, error: 'Authentication required' };
+      }
+    } catch (error) {
+      console.error('Error in addCustomCity:', error);
+      return { success: false, error: 'Failed to save city' };
     }
   },
   
   addCustomIntervention: async (intervention: Intervention) => {
-    const success = await databaseService.saveIntervention(intervention);
-    if (success) {
-      set((state) => ({
-        interventions: [...state.interventions, intervention]
-      }));
+    try {
+      const success = await databaseService.saveIntervention(intervention);
+      if (success) {
+        set((state) => ({
+          interventions: [...state.interventions, intervention]
+        }));
+        return { success: true };
+      } else {
+        console.error('Failed to save intervention - user may not be authenticated');
+        return { success: false, error: 'Authentication required' };
+      }
+    } catch (error) {
+      console.error('Error in addCustomIntervention:', error);
+      return { success: false, error: 'Failed to save intervention' };
     }
   },
   

@@ -7,6 +7,7 @@ import { CityProfile, Intervention } from '../../../src/lib/schemas';
 import CityForm from '../../../src/components/CityForm';
 import InterventionForm from '../../../src/components/InterventionForm';
 import { useTranslation } from '../../../src/contexts/TranslationContext';
+import { supabase } from '../../../src/lib/supabase';
 
 // STEPS will be defined inside the component to use translations
 
@@ -44,6 +45,8 @@ export default function NewScenarioPage() {
   const [selectedCityDetails, setSelectedCityDetails] = useState<string | null>(null);
   const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Define STEPS with translations
   const STEPS = [
@@ -72,6 +75,27 @@ export default function NewScenarioPage() {
     setIsPublic(false);
   }, [reset, whatIfQuestion, setWhatIfQuestion]);
 
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('New scenario page auth check:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        isAuthenticated: !!user,
+        authLoading: false
+      });
+      setIsAuthenticated(!!user);
+      setAuthLoading(false);
+      
+      // If not authenticated, default to public
+      if (!user) {
+        setIsPublic(true);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+
   useEffect(() => {
     console.log('New scenario page useEffect:', {
       currentStep,
@@ -82,6 +106,9 @@ export default function NewScenarioPage() {
       interventions: interventions?.map(i => ({ title: i.title, lang: i.lang })) || []
     });
     
+    // Debug privacy toggle state
+    console.log('Privacy toggle state:', { isAuthenticated, authLoading, isPublic });
+    
     // Only load data if we have the correct language data or no data at all
     const needsData = (currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0));
     const hasWrongLanguageData = cities?.length > 0 && !cities.every(c => c.lang === language);
@@ -90,7 +117,7 @@ export default function NewScenarioPage() {
       console.log('Calling loadSampleData with language:', language);
       loadSampleData(language);
     }
-  }, [currentStep, cities, interventions, loadSampleData, language]);
+  }, [currentStep, cities, interventions, loadSampleData, language, isAuthenticated, authLoading, isPublic]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -123,15 +150,27 @@ export default function NewScenarioPage() {
   };
 
   const handleCityFormSubmit = async (cityData: CityProfile) => {
-    await addCustomCity(cityData);
-    setSelectedCity(cityData.id);
-    setShowCityForm(false);
+    const result = await addCustomCity(cityData);
+    if (result.success) {
+      setSelectedCity(cityData.id);
+      setShowCityForm(false);
+    } else {
+      console.error('Failed to save city:', result.error);
+      // The AuthGuard should prevent this from happening, but just in case
+      alert('Failed to save city. Please make sure you are logged in.');
+    }
   };
 
   const handleInterventionFormSubmit = async (interventionData: Intervention) => {
-    await addCustomIntervention(interventionData);
-    addSelectedIntervention(interventionData.id);
-    setShowInterventionForm(false);
+    const result = await addCustomIntervention(interventionData);
+    if (result.success) {
+      addSelectedIntervention(interventionData.id);
+      setShowInterventionForm(false);
+    } else {
+      console.error('Failed to save intervention:', result.error);
+      // The AuthGuard should prevent this from happening, but just in case
+      alert('Failed to save intervention. Please make sure you are logged in.');
+    }
   };
 
   const canProceed = () => {
@@ -508,7 +547,10 @@ export default function NewScenarioPage() {
                     type="checkbox"
                     checked={isPublic}
                     onChange={(e) => setIsPublic(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    disabled={!isAuthenticated}
+                    className={`w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 ${
+                      !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   />
                   <div>
                     <span className="text-sm font-medium text-slate-900">
@@ -517,6 +559,11 @@ export default function NewScenarioPage() {
                     <p className="text-xs text-slate-600">
                       {t.scenario.steps.review.publicDescription}
                     </p>
+                    {!isAuthenticated && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        {t.scenario.steps.review.anonymousPublicNote}
+                      </p>
+                    )}
                   </div>
                 </label>
               </div>

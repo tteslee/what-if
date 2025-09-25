@@ -16,12 +16,26 @@ export class DatabaseService {
   // City methods
   async getCities(lang: 'en' | 'ko' = 'en'): Promise<CityProfile[]> {
     try {
-      const { data, error } = await supabase
+      // Get current user to check if they can see private cities
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let query = supabase
         .from('cities')
         .select('*')
-        .eq('is_public', true)
         .eq('lang', lang)
         .order('name');
+      
+      // If user is authenticated, they can see public cities + their own private cities
+      // If not authenticated, they can only see public cities
+      if (user) {
+        // Authenticated users can see public cities OR their own private cities
+        query = query.or(`is_public.eq.true,created_by.eq.${user.id}`);
+      } else {
+        // Anonymous users can only see public cities
+        query = query.eq('is_public', true);
+      }
+      
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching cities:', error);
@@ -39,25 +53,59 @@ export class DatabaseService {
 
   async saveCity(city: CityProfile): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const cityData = this.transformCityToDB(city);
+      let user = null;
+      let authError = null;
       
-      // Add user info if logged in
-      if (user) {
-        cityData.created_by = user.id;
-        cityData.is_public = false; // User-created cities are private by default
+      try {
+        const authResult = await supabase.auth.getUser();
+        user = authResult.data.user;
+        authError = authResult.error;
+      } catch (authException) {
+        console.error('Exception during auth check:', authException);
+        authError = authException;
       }
-
-      const { error } = await supabase
-        .from('cities')
-        .upsert(cityData);
-
-      if (error) {
-        console.error('Error saving city:', error);
+      
+      console.log('Authentication check:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        authError,
+        hasUser: !!user,
+        isDevelopment: process.env.NODE_ENV === 'development'
+      });
+      
+      console.log('Original city data:', city);
+      const cityData = this.transformCityToDB(city);
+      console.log('Transformed city data:', cityData);
+      
+      if (user) {
+        // Authenticated user - create private city
+        cityData.created_by = user.id;
+        cityData.is_public = false;
+        console.log('Saving as authenticated user:', user.id || 'unknown');
+      } else {
+        // No authenticated user - cannot create cities
+        console.error('User must be authenticated to create cities');
         return false;
       }
 
-      return true;
+      console.log('Final city data being saved:', cityData);
+
+      try {
+        const { error } = await supabase
+          .from('cities')
+          .upsert(cityData);
+
+        if (error) {
+          console.error('Error saving city:', error);
+          console.error('Full error details:', JSON.stringify(error, null, 2));
+          return false;
+        }
+
+        console.log('City saved successfully');
+        return true;
+      } catch (dbError) {
+        console.error('Database operation failed:', dbError);
+        return false;
+      }
     } catch (error) {
       console.error('Error saving city:', error);
       return false;
@@ -86,12 +134,26 @@ export class DatabaseService {
   // Intervention methods
   async getInterventions(lang: 'en' | 'ko' = 'en'): Promise<Intervention[]> {
     try {
-      const { data, error } = await supabase
+      // Get current user to check if they can see private interventions
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let query = supabase
         .from('interventions')
         .select('*')
-        .eq('is_public', true)
         .eq('lang', lang)
         .order('title');
+      
+      // If user is authenticated, they can see public interventions + their own private interventions
+      // If not authenticated, they can only see public interventions
+      if (user) {
+        // Authenticated users can see public interventions OR their own private interventions
+        query = query.or(`is_public.eq.true,created_by.eq.${user.id}`);
+      } else {
+        // Anonymous users can only see public interventions
+        query = query.eq('is_public', true);
+      }
+      
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching interventions:', error);
@@ -135,13 +197,23 @@ export class DatabaseService {
   async saveIntervention(intervention: Intervention): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const interventionData = this.transformInterventionToDB(intervention);
       
-      // Add user info if logged in
+      console.log('Original intervention data:', intervention);
+      const interventionData = this.transformInterventionToDB(intervention);
+      console.log('Transformed intervention data:', interventionData);
+      
       if (user) {
+        // Authenticated user - create private intervention
         interventionData.created_by = user.id;
-        interventionData.is_public = false; // User-created interventions are private by default
+        interventionData.is_public = false;
+        console.log('Saving intervention as authenticated user:', user.id);
+      } else {
+        // No authenticated user - cannot create interventions
+        console.error('User must be authenticated to create interventions');
+        return false;
       }
+
+      console.log('Final intervention data being saved:', interventionData);
 
       const { error } = await supabase
         .from('interventions')
@@ -374,6 +446,7 @@ export class DatabaseService {
     return {
       id: city.id,
       name: city.name,
+      lang: city.lang || 'en',
       scale: city.scale,
       main_challenges: city.mainChallenges,
       population_context: city.populationContext,
@@ -394,7 +467,7 @@ export class DatabaseService {
       data_quality: city.dataQuality,
       implementation_readiness: city.implementationReadiness,
       custom_indicators: city.customIndicators,
-      is_public: true,
+      is_public: true, // This will be overridden in saveCity method based on auth status
     };
   }
 
@@ -426,6 +499,7 @@ export class DatabaseService {
   private transformInterventionToDB(intervention: Intervention): Record<string, unknown> {
     return {
       id: intervention.id,
+      lang: intervention.lang || 'en',
       title: intervention.title,
       summary: intervention.summary,
       category: intervention.category,
@@ -444,7 +518,7 @@ export class DatabaseService {
       implementation: intervention.implementation,
       assumptions: intervention.assumptions,
       sub_interventions: intervention.subInterventions,
-      is_public: true,
+      is_public: true, // This will be overridden in saveIntervention method based on auth status
     };
   }
 

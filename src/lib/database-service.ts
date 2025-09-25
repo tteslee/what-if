@@ -196,7 +196,7 @@ export class DatabaseService {
 
   async saveIntervention(intervention: Intervention): Promise<boolean> {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       
       console.log('Original intervention data:', intervention);
       const interventionData = this.transformInterventionToDB(intervention);

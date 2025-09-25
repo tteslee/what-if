@@ -10,7 +10,7 @@ import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 export default function MyScenariosPage() {
   const router = useRouter();
-  const { cities, interventions, scenarios, setScenarios } = useWhatIfStore();
+  const { cities, interventions } = useWhatIfStore();
   const { language } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);

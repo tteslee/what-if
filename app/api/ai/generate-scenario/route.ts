@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       language,
       whatIfQuestion,
       city: city ? { id: city.id, name: city.name, scale: city.scale } : null,
-      interventions: interventions ? interventions.map(i => ({ id: i.id, title: i.title })) : null
+      interventions: interventions ? interventions.map((i: Intervention) => ({ id: i.id, title: i.title })) : null
     });
 
     const languageInstruction = language === 'ko' 

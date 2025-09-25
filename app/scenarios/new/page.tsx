@@ -106,6 +106,9 @@ export default function NewScenarioPage() {
       interventions: interventions?.map(i => ({ title: i.title, lang: i.lang })) || []
     });
     
+    // Debug privacy toggle state
+    console.log('Privacy toggle state:', { isAuthenticated, authLoading, isPublic });
+    
     // Only load data if we have the correct language data or no data at all
     const needsData = (currentStep === 1 && (!cities || cities.length === 0)) || (currentStep === 2 && (!interventions || interventions.length === 0));
     const hasWrongLanguageData = cities?.length > 0 && !cities.every(c => c.lang === language);
@@ -114,7 +117,7 @@ export default function NewScenarioPage() {
       console.log('Calling loadSampleData with language:', language);
       loadSampleData(language);
     }
-  }, [currentStep, cities, interventions, loadSampleData, language]);
+  }, [currentStep, cities, interventions, loadSampleData, language, isAuthenticated, authLoading, isPublic]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -539,7 +542,6 @@ export default function NewScenarioPage() {
                 {t.scenario.steps.review.privacy}
               </label>
               <div className="bg-slate-50 p-4 rounded-lg">
-                {console.log('Privacy toggle state:', { isAuthenticated, authLoading, isPublic })}
                 <label className="flex items-center space-x-3">
                   <input
                     type="checkbox"

@@ -12,6 +12,14 @@ export async function POST(request: NextRequest) {
 
     // Use the actual scenario data provided by the user
     const { whatIfQuestion, city, interventions } = scenarioData;
+    
+    console.log('AI Generation Debug:', {
+      scenarioId,
+      language,
+      whatIfQuestion,
+      city: city ? { id: city.id, name: city.name, scale: city.scale } : null,
+      interventions: interventions ? interventions.map(i => ({ id: i.id, title: i.title })) : null
+    });
 
     const languageInstruction = language === 'ko' 
       ? 'IMPORTANT: Generate the entire response in Korean (한국어). All text content should be in Korean, including the narrative summary, stakeholder impacts, system effects, and all other sections.'
@@ -144,13 +152,20 @@ Focus on creating a realistic, nuanced analysis that considers both positive and
         }
       ],
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: 4000,
     });
 
     const responseText = completion.choices[0]?.message?.content;
     if (!responseText) {
       throw new Error('No response from OpenAI');
     }
+    
+    console.log('AI Response Debug:', {
+      responseLength: responseText.length,
+      responsePreview: responseText.substring(0, 200) + '...',
+      hasJsonBlocks: responseText.includes('```'),
+      hasJsonBlocksWithLang: responseText.includes('```json')
+    });
 
     // Parse the JSON response
     let scenarioResult;

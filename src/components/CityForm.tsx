@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CityProfile } from '../lib/schemas';
 import { z } from 'zod';
 import { useTranslation } from '../contexts/TranslationContext';
+import AuthGuard from './AuthGuard';
 
 const CityScale = z.enum([
   "Citywide",
@@ -19,7 +20,7 @@ interface CityFormProps {
 }
 
 export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
-  const { language, t } = useTranslation();
+  const { language, t, isClient } = useTranslation();
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -127,17 +128,18 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 p-6">
+    <AuthGuard>
+      <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">{t.cityForm.createCustomCity}</h2>
-        <p className="text-slate-600 text-base">{t.cityForm.fillRequiredFields}</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">{isClient ? t.cityForm.createCustomCity : 'Create Custom City'}</h2>
+        <p className="text-slate-600 text-base">{isClient ? t.cityForm.fillRequiredFields : 'Fill in the required fields to create a new city profile.'}</p>
       </div>
 
       {/* Required Fields */}
       <div className="space-y-6">
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            {t.cityForm.name} *
+            {isClient ? t.cityForm.name : 'City Name'} *
           </label>
           <input
             type="text"
@@ -151,7 +153,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            {t.cityForm.scale} *
+            {isClient ? t.cityForm.scale : 'City Scale'} *
           </label>
           <select
             value={formData.scale}
@@ -159,16 +161,16 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
             className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-slate-900"
             required
           >
-            <option value="Citywide">{t.cityForm.citywide}</option>
-            <option value="DistrictNeighbourhood">{t.cityForm.districtNeighbourhood}</option>
-            <option value="CorridorStreet">{t.cityForm.corridorStreet}</option>
-            <option value="SpecificSite">{t.cityForm.specificSite}</option>
+            <option value="Citywide">{isClient ? t.cityForm.citywide : 'Citywide'}</option>
+            <option value="DistrictNeighbourhood">{isClient ? t.cityForm.districtNeighbourhood : 'District/Neighbourhood'}</option>
+            <option value="CorridorStreet">{isClient ? t.cityForm.corridorStreet : 'Corridor/Street'}</option>
+            <option value="SpecificSite">{isClient ? t.cityForm.specificSite : 'Specific Site'}</option>
           </select>
         </div>
 
         <div>
           <label className="block text-base font-semibold text-slate-700 mb-3">
-            {t.cityForm.mainChallenges} *
+            {isClient ? t.cityForm.mainChallenges : 'Main Challenges'} *
           </label>
           <div className="space-y-3">
             {formData.mainChallenges.map((challenge, index) => (
@@ -396,15 +398,16 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
           onClick={onCancel}
           className="w-full sm:w-auto px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-base transition-colors"
         >
-{t.cityForm.cancel}
+            {isClient ? t.cityForm.cancel : 'Cancel'}
         </button>
         <button
           type="submit"
           className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base transition-colors"
         >
-          {t.cityForm.submit}
+          {isClient ? t.cityForm.submit : 'Submit'}
         </button>
       </div>
-    </form>
+      </form>
+    </AuthGuard>
   );
 }

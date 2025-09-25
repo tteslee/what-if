@@ -5,13 +5,34 @@ import { useRouter } from 'next/navigation';
 import { useWhatIfStore } from '../../../src/lib/store';
 import { Scenario } from '../../../src/lib/schemas';
 import { supabase } from '../../../src/lib/supabase';
+import { databaseService } from '../../../src/lib/database-service';
+import { useTranslation } from '../../../src/contexts/TranslationContext';
 
 export default function MyScenariosPage() {
   const router = useRouter();
-  const { cities, interventions, loadSampleData, scenarios, setScenarios } = useWhatIfStore();
+  const { cities, interventions, scenarios, setScenarios } = useWhatIfStore();
+  const { language } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [localCities, setLocalCities] = useState(cities);
+  const [localInterventions, setLocalInterventions] = useState(interventions);
+  const [localScenarios, setLocalScenarios] = useState<Scenario[]>([]);
   const isUpdatingPrivacyRef = useRef(false);
+
+  const loadCitiesAndInterventions = useCallback(async () => {
+    console.log('Loading cities and interventions for language:', language);
+    try {
+      const [citiesData, interventionsData] = await Promise.all([
+        databaseService.getCities(language),
+        databaseService.getInterventions(language)
+      ]);
+      console.log('Loaded cities and interventions:', { cities: citiesData.length, interventions: interventionsData.length });
+      setLocalCities(citiesData);
+      setLocalInterventions(interventionsData);
+    } catch (error) {
+      console.error('Error loading cities and interventions:', error);
+    }
+  }, [language]);
 
   const loadUserScenarios = useCallback(async () => {
     if (!user || isUpdatingPrivacyRef.current) return;
@@ -43,19 +64,32 @@ export default function MyScenariosPage() {
       }) || [];
 
       console.log('Transformed scenarios:', transformedScenarios);
-      setScenarios(transformedScenarios);
+      setLocalScenarios(transformedScenarios);
     } catch (error) {
       console.error('Error loading user scenarios:', error);
     }
-  }, [user, setScenarios]);
+  }, [user]);
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('My Scenarios - Getting user...');
+      const { data: { user }, error } = await supabase.auth.getUser();
+      console.log('My Scenarios - User result:', { user: user ? { id: user.id, email: user.email } : null, error });
       setUser(user);
       setLoading(false);
     };
     getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('My Scenarios - Auth state change:', { event, user: session?.user ? { id: session.user.id, email: session.user.email } : null });
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -65,18 +99,20 @@ export default function MyScenariosPage() {
   }, [user, loadUserScenarios]);
 
   useEffect(() => {
-    loadSampleData();
-  }, [loadSampleData]);
+    // Load cities and interventions for the current language
+    // But don't reload scenarios - they should persist across language changes
+    loadCitiesAndInterventions();
+  }, [loadCitiesAndInterventions]);
 
   const getCityName = (cityId: string) => {
-    const city = cities.find(c => c.id === cityId);
+    const city = localCities.find(c => c.id === cityId);
     return city?.name || 'Unknown City';
   };
 
   const getInterventionNames = (interventionIds: string[]) => {
     const interventionNames = interventionIds
       .map(id => {
-        const intervention = interventions.find(i => i.id === id);
+        const intervention = localInterventions.find(i => i.id === id);
         return intervention?.title || 'Unknown Intervention';
       })
       .join(', ');
@@ -104,8 +140,8 @@ export default function MyScenariosPage() {
       }
 
       // Remove from local state
-      const updatedScenarios = scenarios.filter((s: Scenario) => s.id !== scenarioId);
-      setScenarios(updatedScenarios);
+      const updatedScenarios = localScenarios.filter((s: Scenario) => s.id !== scenarioId);
+      setLocalScenarios(updatedScenarios);
     } catch (error) {
       console.error('Error deleting scenario:', error);
     }
@@ -135,10 +171,10 @@ export default function MyScenariosPage() {
 
       console.log('Privacy toggle successful, updating local state');
       // Update local state
-      const updatedScenarios = scenarios.map((s: Scenario) => 
+      const updatedScenarios = localScenarios.map((s: Scenario) => 
         s.id === scenarioId ? { ...s, isPublic: !currentIsPublic } : s
       );
-      setScenarios(updatedScenarios);
+      setLocalScenarios(updatedScenarios);
       console.log('Local state updated:', updatedScenarios);
     } catch (error) {
       console.error('Error toggling scenario privacy:', error);
@@ -157,6 +193,16 @@ export default function MyScenariosPage() {
       </div>
     );
   }
+
+  console.log('My Scenarios - Render state:', { 
+    loading, 
+    user: user ? { id: user.id, email: user.email } : null,
+    userExists: !!user,
+    userType: typeof user,
+    userKeys: user ? Object.keys(user) : null,
+    localScenariosCount: localScenarios.length,
+    localScenarios: localScenarios.map(s => ({ id: s.id, lang: s.lang }))
+  });
 
   if (!user) {
     return (
@@ -185,7 +231,7 @@ export default function MyScenariosPage() {
         </div>
 
         {/* Scenarios List */}
-        {scenarios.length === 0 ? (
+        {localScenarios.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 text-center">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +249,7 @@ export default function MyScenariosPage() {
           </div>
         ) : (
           <div className="grid gap-6">
-            {scenarios?.map((scenario) => (
+            {localScenarios?.map((scenario) => (
               <div key={scenario.id} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -267,7 +313,7 @@ export default function MyScenariosPage() {
         )}
 
         {/* Create New Button */}
-        {scenarios.length > 0 && (
+        {localScenarios.length > 0 && (
           <div className="mt-8 text-center">
             <button
               onClick={() => router.push('/scenarios/new')}

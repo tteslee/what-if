@@ -15,6 +15,8 @@ export const en = {
     signIn: 'Sign In',
     signOut: 'Sign Out',
     loading: 'Loading...',
+    signInRequired: 'Sign In Required',
+    signInToCreateContent: 'You need to sign in to create custom cities and interventions.',
   },
 
   // Main page
@@ -112,6 +114,7 @@ export const en = {
         private: 'Private',
         publicDescription: 'This scenario will be visible to everyone',
         privateDescription: 'This scenario will only be visible to you',
+        anonymousPublicNote: 'Anonymous users can only create public scenarios',
         generate: 'Generate Scenario Analysis',
         generating: 'Generating analysis...',
       },

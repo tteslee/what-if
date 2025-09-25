@@ -7,6 +7,7 @@ interface TranslationContextType {
   language: Language;
   setLanguage: (language: Language) => void;
   t: TranslationKeys;
+  isClient: boolean;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
@@ -24,19 +25,13 @@ interface TranslationProviderProps {
 }
 
 export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-  // Initialize with saved language or default to 'en'
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language;
-      if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ko')) {
-        return savedLanguage;
-      }
-    }
-    return 'en';
-  });
+  // Always start with 'en' to prevent hydration mismatch
+  const [language, setLanguage] = useState<Language>('en');
+  const [isClient, setIsClient] = useState(false);
 
   // Load language preference from localStorage on mount (for SSR compatibility)
   useEffect(() => {
+    setIsClient(true);
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ko')) {
       setLanguage(savedLanguage);
@@ -45,8 +40,10 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
 
   // Save language preference to localStorage when changed
   useEffect(() => {
-    localStorage.setItem('language', language);
-  }, [language]);
+    if (isClient) {
+      localStorage.setItem('language', language);
+    }
+  }, [language, isClient]);
 
   const t = getTranslation(language);
 
@@ -54,6 +51,7 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     language,
     setLanguage,
     t,
+    isClient,
   };
 
   return (

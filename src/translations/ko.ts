@@ -15,6 +15,8 @@ export const ko = {
     signIn: '로그인',
     signOut: '로그아웃',
     loading: '로딩 중...',
+    signInRequired: '로그인 필요',
+    signInToCreateContent: '커스텀 도시와 솔루션을 추가하려면 로그인이 필요합니다.',
   },
 
   // Main page
@@ -112,6 +114,7 @@ export const ko = {
         private: '비공개',
         publicDescription: '이 시나리오는 모든 사람에게 보입니다',
         privateDescription: '이 시나리오는 당신에게만 보입니다',
+        anonymousPublicNote: '비로그인 사용자는 공개 시나리오만 생성할 수 있습니다',
         generate: '시나리오 분석 생성',
         generating: '분석 생성 중...',
       },

@@ -128,7 +128,7 @@ export default function CityForm({ onSubmit, onCancel }: CityFormProps) {
   };
 
   return (
-    <AuthGuard>
+    <AuthGuard onDismiss={onCancel}>
       <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">{isClient ? t.cityForm.createCustomCity : 'Create Custom City'}</h2>

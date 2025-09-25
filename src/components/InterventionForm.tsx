@@ -171,7 +171,7 @@ export default function InterventionForm({ onSubmit, onCancel }: InterventionFor
   };
 
   return (
-    <AuthGuard>
+    <AuthGuard onDismiss={onCancel}>
       <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">{t.interventionForm.createCustomIntervention}</h2>

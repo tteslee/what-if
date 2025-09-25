@@ -45,7 +45,10 @@ ${i + 1}. ${int.title}
    ${int.synergies ? `- Synergies: ${int.synergies.join(', ')}` : ''}
 `).join('\n')}
 
-Please provide a structured analysis in the following JSON format. IMPORTANT: Use ONLY the exact enum values specified below:
+Please provide a structured analysis in the following JSON format. IMPORTANT: 
+1. Return ONLY valid JSON - no markdown formatting, no code blocks, no additional text
+2. Use ONLY the exact enum values specified below
+3. Ensure all required fields are present
 
 {
   "scenarioId": "${scenarioId}",
@@ -133,7 +136,7 @@ Focus on creating a realistic, nuanced analysis that considers both positive and
       messages: [
         {
           role: "system",
-          content: "You are an expert urban planner and systems analyst. Provide realistic, nuanced analysis of urban interventions considering multiple stakeholder perspectives, system effects, and implementation challenges. CRITICAL: Always use the exact enum values specified in the prompt - do not create variations or synonyms. For policy interactions, generate policies that are contextually relevant to the specific interventions and city, not generic examples."
+          content: "You are an expert urban planner and systems analyst. Provide realistic, nuanced analysis of urban interventions considering multiple stakeholder perspectives, system effects, and implementation challenges. CRITICAL: 1) Always use the exact enum values specified in the prompt - do not create variations or synonyms. 2) Return ONLY valid JSON format - no markdown, no code blocks, no additional text. 3) For policy interactions, generate policies that are contextually relevant to the specific interventions and city, not generic examples."
         },
         {
           role: "user",
@@ -151,11 +154,26 @@ Focus on creating a realistic, nuanced analysis that considers both positive and
 
     // Parse the JSON response
     let scenarioResult;
+    let jsonText = responseText;
     try {
-      scenarioResult = JSON.parse(responseText);
+      // Try to extract JSON from the response if it's wrapped in markdown
+      if (responseText.includes('```json')) {
+        const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          jsonText = jsonMatch[1];
+        }
+      } else if (responseText.includes('```')) {
+        const jsonMatch = responseText.match(/```\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          jsonText = jsonMatch[1];
+        }
+      }
+      
+      scenarioResult = JSON.parse(jsonText);
     } catch (parseError) {
       console.error('Failed to parse OpenAI response as JSON:', parseError);
       console.error('Response text:', responseText);
+      console.error('Extracted JSON text:', jsonText);
       throw new Error('Invalid JSON response from AI model');
     }
 

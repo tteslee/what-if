@@ -79,6 +79,11 @@ export default function NewScenarioPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('New scenario page auth check:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        isAuthenticated: !!user,
+        authLoading: false
+      });
       setIsAuthenticated(!!user);
       setAuthLoading(false);
       
@@ -534,6 +539,7 @@ export default function NewScenarioPage() {
                 {t.scenario.steps.review.privacy}
               </label>
               <div className="bg-slate-50 p-4 rounded-lg">
+                {console.log('Privacy toggle state:', { isAuthenticated, authLoading, isPublic })}
                 <label className="flex items-center space-x-3">
                   <input
                     type="checkbox"
